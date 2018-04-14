@@ -83,7 +83,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2017/01/25/use-proxy-in-terminal/1.jpg">
 <meta property="og:image" content="http://yoursite.com/2017/01/25/use-proxy-in-terminal/demo.jpg">
-<meta property="og:updated_time" content="2017-02-01T09:51:59.000Z">
+<meta property="og:updated_time" content="2018-04-14T01:58:28.306Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在Linux终端使用代理">
 <meta name="twitter:description" content="用linux的都能体会到，如果用国外的软件源，更新软件将是极其痛苦的事情————速度慢啊！但是如果使用国内的软件源，如果某些软件国内软件源没有，还是会从国外的软件源下载，于是纠结了一下，使出下面的办法:">
@@ -385,7 +385,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  515
+                  539
                 </span>
               
 
@@ -418,7 +418,7 @@
 <p>有了目标好办事，下面是具体实施步骤。</p>
 <h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><p>劫持apt-get到socks5，我用了这个软件————Proxychains</p>
 <h2 id="安装Proxychains"><a href="#安装Proxychains" class="headerlink" title="安装Proxychains"></a>安装Proxychains</h2><p>使用root权限(其实只有第四个和第五个命令需要root权限)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/rofl0r/proxychains-ng.git</span><br><span class="line">$ <span class="built_in">cd</span> proxychains-ng</span><br><span class="line">$ ./configure</span><br><span class="line">$ make &amp;&amp; make install</span><br><span class="line">$ cp ./src/proxychains.conf /etc/proxychains.conf</span><br><span class="line">$ <span class="built_in">cd</span> .. &amp;&amp; rm -rf proxychains-ng</span><br></pre></td></tr></table></figure></p>
-<p>然后，编辑<code>/etc/proxychains.conf</code>，到最后一行，把<code>socks4 127.0.0.1 9095</code>改成<code>socks5 127.0.0.1 1080</code>(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)</p>
+<p>然后，编辑<code>/etc/proxychains.conf</code>，到最后一行，把<code>socks4 127.0.0.1 9095</code>改成<code>socks5 127.0.0.1 1080</code>(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)<br>去掉49行<code>quiet_mode</code>前面的<code>#</code>号，这样运行的时候proxychains4就不会输出大量log了。</p>
 <p>然后，启动Shadosocks后(它默认会开启一个本地1080的socks5端口)，在任意命令前面加上<code>proxychains4</code>，若有需要联网的操作，就会被自动劫持到socks5代理去，这样下载国外的资源速度会快一些。</p>
 <h2 id="示范"><a href="#示范" class="headerlink" title="示范"></a>示范</h2><p>使用<code>proxychains4</code>更新软件源的一个小示范<br><img src="/2017/01/25/use-proxy-in-terminal/demo.jpg" title="一个小示范"></p>
 <h1 id="一点点说明"><a href="#一点点说明" class="headerlink" title="一点点说明"></a>一点点说明</h1><p>虽然此类文章百度一搜一大把，但是还是要把我参考的原文贴出来<a href="http://www.jianshu.com/p/8e7d7f57bf59" target="_blank" rel="noopener">http://www.jianshu.com/p/8e7d7f57bf59</a>,感谢原博主。</p>
@@ -427,6 +427,7 @@
 <p>悠哉的一天&gt;_&lt;</p>
 <blockquote class="blockquote-center"><p>生命重在折腾</p>
 </blockquote>
+
       
     </div>
     
