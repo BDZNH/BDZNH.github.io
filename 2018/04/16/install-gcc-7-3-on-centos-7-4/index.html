@@ -81,7 +81,7 @@
 <meta property="og:description" content="依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。下面记录一下安装过程。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/04/16/install-gcc-7-3-on-centos-7-4/1.jpg">
-<meta property="og:updated_time" content="2018-04-16T12:56:20.087Z">
+<meta property="og:updated_time" content="2018-04-17T13:50:11.155Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在 Centos 7.4 上安装Gcc 7.3">
 <meta name="twitter:description" content="依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。下面记录一下安装过程。">
@@ -383,7 +383,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1,196
+                  1,357
                 </span>
               
 
@@ -424,7 +424,9 @@
 <p>选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。</p>
 <h2 id="安装gdb"><a href="#安装gdb" class="headerlink" title="安装gdb"></a>安装gdb</h2><p>在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz</span><br><span class="line">tar -zxf gdb-8.1.tar.gz</span><br><span class="line">cd gdb-8.1</span><br><span class="line">mkdir builddir &amp;&amp; cd builddir</span><br><span class="line">../configure</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
-<h2 id="碎碎念"><a href="#碎碎念" class="headerlink" title="碎碎念"></a>碎碎念</h2><p>有可能在执行<code>make install</code>的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）<code>makeinfo</code>找不到之类的，，并且有一个安装错误码是27还是2来着，需要<code>yum install texinfo</code>，然后再执行<code>make install</code>。<br>至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。<br>安装软件的推荐性是这样的<code>官方源&gt;知名第三方源&gt;手动编译&gt;不知名第三方源</code>，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。<br>自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。<br>建立<code>builddir</code>的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。<br>Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。<br><img src="/2018/04/16/install-gcc-7-3-on-centos-7-4/1.jpg" title="来张合影"></p>
+<h2 id="碎碎念"><a href="#碎碎念" class="headerlink" title="碎碎念"></a>碎碎念</h2><p>有可能在执行<code>make install</code>的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">WARNING: <span class="string">'makeinfo'</span> is missing on your system.</span><br><span class="line">         You should only need it <span class="keyword">if</span> you modified a <span class="string">'.texi'</span> file, or</span><br><span class="line">         any other file indirectly affecting the aspect of the manual.</span><br><span class="line">         You might want to install the Texinfo package:</span><br><span class="line">         &lt;http://www.gnu.org/software/texinfo/&gt;</span><br><span class="line">         The spurious makeinfo call might also be the consequence of</span><br><span class="line">         using a buggy <span class="string">'make'</span> (AIX, DU, IRIX), <span class="keyword">in</span> <span class="built_in">which</span> <span class="keyword">case</span> you might</span><br><span class="line">         want to install GNU make:</span><br><span class="line">         &lt;http://www.gnu.org/software/make/&gt;</span><br><span class="line">make[5]: *** [gdb.info] Error 127</span><br><span class="line">make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc<span class="string">'</span></span><br><span class="line"><span class="string">make[4]: *** [subdir_do] Error 1</span></span><br><span class="line"><span class="string">make[4]: Leaving directory `/root/gdb-8.1/build/gdb'</span></span><br><span class="line">make[3]: *** [install-only] Error 2</span><br><span class="line">make[3]: Leaving directory `/root/gdb-8.1/build/gdb<span class="string">'</span></span><br><span class="line"><span class="string">make[2]: *** [install] Error 2</span></span><br><span class="line"><span class="string">make[2]: Leaving directory `/root/gdb-8.1/build/gdb'</span></span><br><span class="line">make[1]: *** [install-gdb] Error 2</span><br><span class="line">make[1]: Leaving directory `/root/gdb-8.1/build<span class="string">'</span></span><br><span class="line"><span class="string">make: *** [install] Error 2</span></span><br></pre></td></tr></table></figure>
+<p>需要<code>yum install texinfo</code>，然后再执行<code>make install</code>。<br>至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。<br>安装软件的推荐性是这样的<code>官方源&gt;知名第三方源&gt;手动编译&gt;不知名第三方源</code>，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。<br>自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。<br>建立<code>builddir</code>的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。<br>Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。<br><img src="/2018/04/16/install-gcc-7-3-on-centos-7-4/1.jpg" title="来张合影"></p>
 
       
     </div>
@@ -636,7 +638,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">76.0k</span>
+    <span title="Site words total count">76.2k</span>
   
 </div>
 
