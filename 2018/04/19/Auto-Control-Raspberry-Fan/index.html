@@ -81,7 +81,8 @@
 <meta property="og:description" content="某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。动手把风扇改成温控的。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png">
-<meta property="og:updated_time" content="2018-04-19T08:10:59.004Z">
+<meta property="og:image" content="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/1.png">
+<meta property="og:updated_time" content="2018-04-19T08:23:02.330Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="树莓派自动温控风扇">
 <meta name="twitter:description" content="某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。动手把风扇改成温控的。">
@@ -418,7 +419,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo proxychains4 apt install wiringpi</span><br><span class="line">sudo apt purge wiringpi</span><br></pre></td></tr></table></figure>
 <p>来完成安装，可以使用</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpio -v</span><br></pre></td></tr></table></figure>
-<p>来验证。<br>目前没有查询到每个脚具体的电气参数，理论上是可以将风扇直接插在引脚上，然后控制引脚的电平来间接控制风扇的开关的，但是不清楚具体哪个脚能承受多大的电流，就没有贸然尝试了。用了比较保险的三极管。<br>将三极管平的一面面向自己，引脚向下，从做到又引脚分别是E（发射机极Emitter）B（基极Basic）C（collector）。<br>连接示意图参考如下<br></p>
+<p>来验证。<br>目前没有查询到每个脚具体的电气参数，理论上是可以将风扇直接插在引脚上，然后控制引脚的电平来间接控制风扇的开关的，但是不清楚具体哪个脚能承受多大的电流，就没有贸然尝试了。用了比较保险的三极管。<br>将三极管平的一面面向自己，引脚向下，从做到又引脚分别是E（发射机极Emitter）B（基极Basic）C（collector）。<br>连接示意图参考如下<br><img src="/2018/04/19/Auto-Control-Raspberry-Fan/1.png"></p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>按图连接好之后，安装控制软件了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/BDZNH/AutoControlRaspberryFan.git</span><br><span class="line"><span class="built_in">cd</span> AutoControlRaspberryFan</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
 <p>可以前往<a href="https://github.com/BDZNH/AutoControlRaspberryFan" target="_blank" rel="noopener">https://github.com/BDZNH/AutoControlRaspberryFan</a>查看帮助。</p>
