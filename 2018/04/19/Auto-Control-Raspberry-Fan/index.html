@@ -62,7 +62,7 @@
 
 
 
-  <meta name="keywords" content="ubuntu touchpad 触控板调节," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -73,18 +73,19 @@
 
 
 
-<meta name="description" content="描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件xSwipe 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。">
-<meta name="keywords" content="ubuntu touchpad 触控板调节">
+<meta name="description" content="某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。动手把风扇改成温控的。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ubuntu 自定义触控板手势">
-<meta property="og:url" content="http://yoursite.com/2016/03/28/ubuntu-touchpad/index.html">
+<meta property="og:title" content="树莓派自动温控风扇">
+<meta property="og:url" content="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:description" content="描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件xSwipe 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。">
+<meta property="og:description" content="某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。动手把风扇改成温控的。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-02-01T09:51:59.000Z">
+<meta property="og:image" content="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png">
+<meta property="og:updated_time" content="2018-04-19T08:10:59.004Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ubuntu 自定义触控板手势">
-<meta name="twitter:description" content="描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件xSwipe 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。">
+<meta name="twitter:title" content="树莓派自动温控风扇">
+<meta name="twitter:description" content="某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。动手把风扇改成温控的。">
+<meta name="twitter:image" content="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png">
 
 
 
@@ -114,13 +115,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/03/28/ubuntu-touchpad/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/"/>
 
 
 
 
 
-  <title>ubuntu 自定义触控板手势 | BDZNH</title>
+  <title>树莓派自动温控风扇 | BDZNH</title>
   
 
 
@@ -310,7 +311,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/28/ubuntu-touchpad/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/19/Auto-Control-Raspberry-Fan/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="SupperMary">
@@ -327,7 +328,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">ubuntu 自定义触控板手势</h1>
+          <h1 class="post-title" itemprop="name headline">树莓派自动温控风扇</h1>
         
 
         <div class="post-meta">
@@ -339,8 +340,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-28T22:01:22+08:00">
-                2016-03-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-19T15:09:42+08:00">
+                2018-04-19
               </time>
             
 
@@ -357,7 +358,7 @@
 
           
           
-             <span id="/2016/03/28/ubuntu-touchpad/" class="leancloud_visitors" data-flag-title="ubuntu 自定义触控板手势">
+             <span id="/2018/04/19/Auto-Control-Raspberry-Fan/" class="leancloud_visitors" data-flag-title="树莓派自动温控风扇">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -382,7 +383,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1,030
+                  926
                 </span>
               
 
@@ -407,62 +408,26 @@
       
 
       
-        <p>描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件<a href="https://github.com/iberianpig/xSwipe" target="_blank" rel="noopener">xSwipe</a> 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。</p>
+        <p>某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！<br>严格来说在温度不高的时候风扇没必要打开，好在树莓派最不怕的就是各种折腾了。<br>动手把风扇改成温控的。</p>
 <a id="more"></a>
-<p>xSwipe在开源项目网站GitHub上可以找到，<a href="https://github.com/iberianpig/xSwipe" target="_blank" rel="noopener">传送门</a>,或访问 <a href="https://github.com/iberianpig/xSwipe" target="_blank" rel="noopener">https://github.com/iberianpig/xSwipe</a> PS:由于服务器在国外，国内访问可能很慢，我将所需文件备份了一份，下载地址放在文章末尾了。</p>
-<p>官网上的说明文档是英文版，虽然推荐读者阅读原版文档，但是为了照顾英语不好的同志，我找了一篇中文博客(<a href="http://loliko.me/zai-linuxzhong-tian-jia-hong-mo-ban-shou-shi/" target="_blank" rel="noopener">点我访问</a>),安装过程这篇博客已经说得很清楚了，这里不再叙述。 下面贴出官方的说明文档：</p>
-<h2 id="xSwipe"><a href="#xSwipe" class="headerlink" title="xSwipe"></a>xSwipe</h2><p>xSwipe is multitouch gesture recognizer. This script make your linux PC able to recognize swipes like a Macbook.</p>
-<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>Before running the script, you must first do some preparations.</p>
-<p>1: Download xSwipe<br>2:Install X11::GUITest<br>3:Enable SHMConfig</p>
-<h3 id="1-Download-xSwipe"><a href="#1-Download-xSwipe" class="headerlink" title="1. Download xSwipe"></a>1. Download xSwipe</h3><p>Type below code, download xSwipe from github</p>
-<pre><code class="bash">$ <span class="built_in">cd</span> ~
-$ wget https://github.com/iberianpig/xSwipe/archive/master.zip
-$ unzip master.zip
-</code></pre>
-<h3 id="2-Install-X11-GUITest"><a href="#2-Install-X11-GUITest" class="headerlink" title="2. Install X11::GUITest"></a>2. Install X11::GUITest</h3><p>To install libx11-guitest-perl from synaptic package manager Or run the script on the terminal run as</p>
-<pre><code class="bash">$ sudo apt-get install libx11-guitest-perl
-NOTE: If using Ubuntu14.04, or later
-Install older version synaptics driver that is compatible with xSwipe.
-$ sudo apt-get install -y git build-essential libevdev-dev autoconf automake libmtdev-dev xorg-dev xutils-dev libtool
-$ sudo apt-get remove -y xserver-xorg-input-synaptics
-$ git <span class="built_in">clone</span> https://github.com/Chosko/xserver-xorg-input-synaptics.git
-$ <span class="built_in">cd</span> xserver-xorg-input-synaptics
-$ ./autogen.sh
-$ ./configure --exec_prefix=/usr
-$ make
-$ sudo make install
-</code></pre>
-<h3 id="3-Enable-SHMConfig"><a href="#3-Enable-SHMConfig" class="headerlink" title="3. Enable SHMConfig"></a>3. Enable SHMConfig</h3><p>Open /etc/X11/xorg.conf.d/50-synaptics.conf with your favorite text editor and edit it to enable SHMConfig</p>
-<pre><code class="bash">$ sudo gedit /etc/X11/xorg.conf.d/50-synaptics.conf  
-</code></pre>
-<p>NOTE:You will need to create the /etc/X11/xorg.conf.d/ directory and create 50-synaptics.conf if it does’nt exist yet. $ sudo mkdir /etc/X11/xorg.conf.d/</p>
-<p>/etc/X11/xorg.conf.d/50-synaptics.conf<br>Section “InputClass”<br>Identifier “evdev touchpad catchall”<br>Driver “synaptics”<br>MatchDevicePath “/dev/input/event*”<br>MatchIsTouchpad “on”<br>Option “Protocol” “event”<br>Option “SHMConfig” “on”<br>EndSection<br>To reflect SHMConfig, restart your session.</p>
-<p>That’s it for preparation.</p>
-<h3 id="Run-xSwipe"><a href="#Run-xSwipe" class="headerlink" title="Run xSwipe"></a>Run xSwipe</h3><p>To run xSwipe, type below code on terminal.</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl
-Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as <span class="string">"eventKey.cfg"</span> .
-</code></pre>
-<p>You can use “swipe” with 3 or 4 fingers, they can call an event. Additionally, some gestures are avilable.</p>
-<p>edge-swipe : swipe with 2 fingers from outside edge(need to enable with option).<br>long-press : hold pressure for 0.5 seconds with 3 or 4 fingers.</p>
-<h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p>-d RATE : RATE is sensitivity to swipe.Default value is 1. Shorten swipe-length by half (e.g.,$ perl xSwipe.pl -d 0.5)<br>-m INTERVAL : INTERVAL is how often synclient monitor changes to the touchpad state. Default value is 10(ms). Set 50ms as monitoring-span. (e.g.,$ perl xSwipe.pl -m 50)<br>-n : Natural scroll like Macbook, use “/nScroll/eventKey.cfg”.<br>-e : Enable edge-swipe</p>
-<h3 id="Customize"><a href="#Customize" class="headerlink" title="Customize"></a>Customize</h3><p>You can customize the settings for gestues to edit eventKey.cfg. Please check this article, “How to customize gesture”.</p>
-<h3 id="Bindable-gestures"><a href="#Bindable-gestures" class="headerlink" title="Bindable gestures"></a>Bindable gestures</h3><p>3/4/5 fingers swipe<br>2/3/4/5 fingers long-press<br>2/3/4 fingers edge-swipe<br>2fingers edge-swipe: only swipe-left/right from right/left edge<br>3fingers edge-swipe: only swipe-down from top egde</p>
-<h3 id="Example-shortcut-keys"><a href="#Example-shortcut-keys" class="headerlink" title="Example shortcut keys"></a>Example shortcut keys</h3><p>go back/forward on browser (Alt+Left, Alt+Right)<br>open/close a tab on browser (Ctrl+t/Ctrl+w)<br>move tabs (Ctrl+Tab, Ctrl+Shift+Tab)<br>move workspaces (Alt+Ctrl+Lert, Alt+Ctrl+Right, Alt+Ctrl+Up, Alt+Ctrl+Down)<br>move a window (Alt+F7)<br>open launcher (Alt+F8)<br>open a terminal (Ctrl+Alt+t)<br>close a window (Alt+F4)<br>Please let me know if you have any questions about this program.</p>
-<p>我按照说明文档安装好所需软件之后，进行到最后一步</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl
-</code></pre>
-<p>遇到错误提示：<br>“Can’t locate Smart/Comments.pm in @INC (you may need to install the Smart::Comments module) (@INC contains: /etc/perl /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18 /usr/share/perl/5.18 /usr/local/lib/site_perl .) at /home/jackson/xSwipe-master/xSwipe.pl line 15.”</p>
-<p>百度无果，最后还是google给了我<a href="https://forum.teksyndicate.com/t/perl-smart-comments/86880" target="_blank" rel="noopener">答案</a> 可以访问原文地址:<a href="https://forum.teksyndicate.com/t/perl-smart-comments/86880" target="_blank" rel="noopener">https://forum.teksyndicate.com/t/perl-smart-comments/86880</a></p>
-<p>做法是，在终端键入下列命令:</p>
-<pre><code class="bash">sudo cpan -i Smart::Comments
-</code></pre>
-<p>等待完成即可，不出意外的话，通过命令：</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl
-</code></pre>
-<p>就可以开启三点以上触控板手势了，可以根据需要自行更改eventKey.cfg的内容来获得自己想要的手势。</p>
-<p><a href="http://pan.baidu.com/s/1gesqHm7" target="_blank" rel="noopener">xSwipe下载</a>：<a href="http://pan.baidu.com/s/1gesqHm7" target="_blank" rel="noopener">http://pan.baidu.com/s/1gesqHm7</a></p>
-<p>此文章仅作参考使用，使用时请仔细阅读说明文档。</p>
-<p>我使用的操作系统为 ubuntu 14.04 LTS</p>
+<h2 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h2><p>raspbian的<code>/sys/class/thermal/thermal_zone0/temp</code>文件内存着CPU的温度，读出来处以1000就得到温度了，省了给它测温的麻烦，大赞👍。<br>另外需要用的一个三极管，我这里用的是S9013，网上很多教程用的是S8085。严格来说不同的三极管实现起来是有不同的，这里不深究哪种三极管更好了。<br>突然想复习一下三极管怎么工作的( ╯□╰ )</p>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>首先要知道的是树莓派的引脚定义，将树莓派有网络接口的一端朝下，有GPIO接口（就是那四十个脚）的一面面向自己，从上到下，从左到有，为物理引脚1~40,像这样</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1 2</span><br><span class="line">3 4</span><br><span class="line">5 6</span><br><span class="line">···</span><br></pre></td></tr></table></figure>
+<p>但是具体到程序内，用的不是物理引脚，不同的库对引脚的定义也不同，这里提供一个<a href="http://shumeipai.nxez.com/raspberry-pi-pins-version-40" target="_blank" rel="noopener">对照图</a><br><img src="/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png" title="http://shumeipai.nxez.com/raspberry-pi-pins-version-40"></p>
+<p>本文将使用<a href="http://wiringpi.com" target="_blank" rel="noopener">winringPi</a>作为控制引脚的库。<br>可以使用命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo proxychains4 apt install wiringpi</span><br><span class="line">sudo apt purge wiringpi</span><br></pre></td></tr></table></figure>
+<p>来完成安装，可以使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpio -v</span><br></pre></td></tr></table></figure>
+<p>来验证。<br>目前没有查询到每个脚具体的电气参数，理论上是可以将风扇直接插在引脚上，然后控制引脚的电平来间接控制风扇的开关的，但是不清楚具体哪个脚能承受多大的电流，就没有贸然尝试了。用了比较保险的三极管。<br>将三极管平的一面面向自己，引脚向下，从做到又引脚分别是E（发射机极Emitter）B（基极Basic）C（collector）。<br>连接示意图参考如下<br></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>按图连接好之后，安装控制软件了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/BDZNH/AutoControlRaspberryFan.git</span><br><span class="line"><span class="built_in">cd</span> AutoControlRaspberryFan</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<p>可以前往<a href="https://github.com/BDZNH/AutoControlRaspberryFan" target="_blank" rel="noopener">https://github.com/BDZNH/AutoControlRaspberryFan</a>查看帮助。</p>
+<h2 id="源代码"><a href="#源代码" class="headerlink" title="源代码"></a>源代码</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;wiringPi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;softPwm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEMP_PATH <span class="meta-string">"/sys/class/thermal/thermal_zone0/temp"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _FANPIN 8</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">GetCpuTempera</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">initWiringPi</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">showInfo</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	showInfo();</span><br><span class="line">	<span class="keyword">double</span> temp = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">bool</span> Fan_is_open = <span class="literal">false</span>;</span><br><span class="line">	<span class="keyword">if</span> (initWiringPi() &lt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		temp = GetCpuTempera();</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"        Cpu temperature is : "</span> &lt;&lt; temp &lt;&lt; flush &lt;&lt; <span class="string">"°C \r"</span>;</span><br><span class="line">		<span class="keyword">if</span> (Fan_is_open)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (temp &lt; <span class="number">40.0</span>)</span><br><span class="line">			&#123;</span><br><span class="line">				Fan_is_open = <span class="literal">false</span>;</span><br><span class="line">				softPwmWrite(_FANPIN, <span class="number">0</span>);</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (temp &gt; <span class="number">45.0</span>)</span><br><span class="line">			&#123;</span><br><span class="line">				Fan_is_open = <span class="literal">true</span>;</span><br><span class="line">				softPwmWrite(_FANPIN, <span class="number">100</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		sleep(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">GetCpuTempera</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">ifstream <span class="title">fin</span><span class="params">(TEMP_PATH, ios_base::in)</span></span>;</span><br><span class="line">	<span class="keyword">if</span> (!fin.is_open())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"Cant open file: "</span> &lt;&lt; TEMP_PATH &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">int</span> temp;</span><br><span class="line">	fin &gt;&gt; temp;</span><br><span class="line">	<span class="keyword">double</span> tem = temp / <span class="number">1000.0</span>;</span><br><span class="line">	fin.clear();</span><br><span class="line">	fin.seekg(<span class="number">0</span>, ios::beg);</span><br><span class="line">	<span class="keyword">return</span> tem;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">initWiringPi</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (wiringPiSetup() != <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"WiringPi setup failed"</span> &lt;&lt; flush &lt;&lt; <span class="string">" \r"</span>;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (softPwmCreate(_FANPIN, <span class="number">0</span>, <span class="number">100</span>) != <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">"WiringPi setup failed"</span> &lt;&lt; flush &lt;&lt; <span class="string">" \r"</span>;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">showInfo</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"-------------------------------------------------------------------------------"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"        Project Name : AutoControlRaspberryfan"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"        Author       : BDZNH"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"        Project URL  : https://github.com/BDZNH/AutoControlRaspberryFan"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"        what is this : Auto control raspberry fan with 5V. Turn the fan"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"                       when the temperaure is high than 45°C, turn off "</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"                       fan when the CPU temperature is lower than 40°C."</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"-------------------------------------------------------------------------------"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; <span class="string">"\n\n\n"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码内设定的是超过45°C时开启风扇，低于40°时关闭风扇。</p>
+<blockquote class="blockquote-center"><p>生命重在折腾</p>
+</blockquote>
+<hr>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://blog.newnius.com/raspberry-control-fan-with-transistor.html" target="_blank" rel="noopener">https://blog.newnius.com/raspberry-control-fan-with-transistor.html</a><br><a href="https://www.cnblogs.com/lulipro/p/5992172.html" target="_blank" rel="noopener">树莓派wiringPi库详解</a><br>PS:链接一内的脚本用Python实现，无奈Python会占用大量CPU，对树莓派来说并不合适。</p>
 
       
     </div>
@@ -478,12 +443,6 @@ Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as 
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/ubuntu-touchpad-触控板调节/" rel="tag"># ubuntu touchpad 触控板调节</a>
-          
-        </div>
-      
 
       
       
@@ -493,8 +452,8 @@ Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as 
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/03/26/First-day/" rel="next" title="First day">
-                <i class="fa fa-chevron-left"></i> First day
+              <a href="/2018/04/16/install-gcc-7-3-on-centos-7-4/" rel="next" title="在 Centos 7.4 上安装Gcc 7.3">
+                <i class="fa fa-chevron-left"></i> 在 Centos 7.4 上安装Gcc 7.3
               </a>
             
           </div>
@@ -502,10 +461,6 @@ Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/04/03/Lake-Counting/" rel="prev" title="Lake Counting">
-                Lake Counting <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -650,7 +605,7 @@ Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as 
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#xSwipe"><span class="nav-number">1.</span> <span class="nav-text">xSwipe</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Usage"><span class="nav-number">1.1.</span> <span class="nav-text">Usage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Download-xSwipe"><span class="nav-number">1.2.</span> <span class="nav-text">1. Download xSwipe</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Install-X11-GUITest"><span class="nav-number">1.3.</span> <span class="nav-text">2. Install X11::GUITest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Enable-SHMConfig"><span class="nav-number">1.4.</span> <span class="nav-text">3. Enable SHMConfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-xSwipe"><span class="nav-number">1.5.</span> <span class="nav-text">Run xSwipe</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Option"><span class="nav-number">1.6.</span> <span class="nav-text">Option</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Customize"><span class="nav-number">1.7.</span> <span class="nav-text">Customize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bindable-gestures"><span class="nav-number">1.8.</span> <span class="nav-text">Bindable gestures</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Example-shortcut-keys"><span class="nav-number">1.9.</span> <span class="nav-text">Example shortcut keys</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#描述"><span class="nav-number">1.</span> <span class="nav-text">描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#预备知识"><span class="nav-number">2.</span> <span class="nav-text">预备知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">3.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源代码"><span class="nav-number">4.</span> <span class="nav-text">源代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
