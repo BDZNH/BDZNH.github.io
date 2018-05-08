@@ -5,12 +5,15 @@
   
 
 
-<html class="theme-next muse use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="en">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
 <meta name="theme-color" content="#222">
+
+
+
 
 
 
@@ -38,10 +41,6 @@
 
 
 
-  
-  
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
-
 
 
 
@@ -50,19 +49,12 @@
 
 <link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
 
 
 
 
-  <link rel="icon" type="image/png" sizes="16x16" href="/fire.png?v=5.1.3">
-
-
-
-
-
-
-  <meta name="keywords" content="Hexo, NexT" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/fire.png?v=6.2.0">
 
 
 
@@ -73,13 +65,41 @@
 
 
 
-<meta name="description" content="mx player就安卓端来说还是很棒的应用的，可是pro版本售价要6$，汇率一换过来就贵了。想了想，手动给它去广告好了，网上的破解版还是不放心。App展示广告，得有一个地方给它下载广告，阻止App连接相应广告站点就可以了，目标则是找出App用的广告站点。找到的mx player广告站点用的是谷歌，把以下内容添加到手机hosts文件就可以了 1127.0.0.1 googleads.g.doubl">
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="mx player就安卓端来说还是很棒的应用的，可是pro版本售价要6$，汇率一换过来就贵了。想了想，手动给它去广告好了，网上的破解版还是不放心。App展示广告，得有一个地方给它下载广告，阻止App连接相应广告站点就可以了，目标则是找出App用的广告站点。找到的mx player广告站点用的是谷歌，把以下内容添加到手机hosts文件就可以了 1127.0.0.1 googleads.g.doubl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="去掉Mx player的广告">
 <meta property="og:url" content="http://yoursite.com/2018/04/01/Remove-the-ads-of-Mx-player/index.html">
 <meta property="og:site_name" content="BDZNH">
 <meta property="og:description" content="mx player就安卓端来说还是很棒的应用的，可是pro版本售价要6$，汇率一换过来就贵了。想了想，手动给它去广告好了，网上的破解版还是不放心。App展示广告，得有一个地方给它下载广告，阻止App连接相应广告站点就可以了，目标则是找出App用的广告站点。找到的mx player广告站点用的是谷歌，把以下内容添加到手机hosts文件就可以了 1127.0.0.1 googleads.g.doubl">
-<meta property="og:locale" content="zh-Hans">
+<meta property="og:locale" content="en">
 <meta property="og:image" content="http://yoursite.com/2018/04/01/Remove-the-ads-of-Mx-player/1.png">
 <meta property="og:image" content="http://yoursite.com/2018/04/01/Remove-the-ads-of-Mx-player/2.png">
 <meta property="og:image" content="http://yoursite.com/2018/04/01/Remove-the-ads-of-Mx-player/3.png">
@@ -93,29 +113,6 @@
 
 
 
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '5.1.3',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
 
 
 
@@ -123,7 +120,11 @@
 
 
 
-
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
 
   <title>去掉Mx player的广告 | BDZNH</title>
   
@@ -131,14 +132,15 @@
 
 
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-90140804-1"></script>
 <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-90140804-1', 'auto');
-  ga('send', 'pageview');
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-90140804-1');
 </script>
+
 
 
   <script type="text/javascript">
@@ -154,9 +156,36 @@
 
 
 
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
 
   
   
@@ -172,7 +201,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">BDZNH</span>
         <span class="logo-line-after"><i></i></span>
@@ -184,7 +213,7 @@
   </div>
 
   <div class="site-nav-toggle">
-    <button>
+    <button aria-label="Toggle navigation bar">
       <span class="btn-bar"></span>
       <span class="btn-bar"></span>
       <span class="btn-bar"></span>
@@ -192,76 +221,70 @@
   </div>
 </div>
 
-<nav class="site-nav">
-  
 
+
+
+<nav class="site-nav">
   
     <ul id="menu" class="menu">
       
         
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
         
-        <li class="menu-item menu-item-about">
-          <a href="/about/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
         
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
         
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
         
-        <li class="menu-item menu-item-minecraft">
-          <a href="/Minecraft/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br />
-            
-            Minecraft
-          </a>
-        </li>
-      
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-minecraft">
+    <a href="/Minecraft/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br />Minecraft</a>
+  </li>
 
+      
       
         <li class="menu-item menu-item-search">
           
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />Search</a>
         </li>
       
     </ul>
+  
+
+  
+    
+
   
 
   
@@ -277,7 +300,7 @@
     </span>
     <div class="local-search-input-wrapper">
       <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
+             placeholder="Searching..." spellcheck="false"
              type="text" id="local-search-input">
     </div>
   </div>
@@ -292,12 +315,20 @@
 
 
 
- </div>
+  
+
+
+
+</div>
     </header>
+
+    
+
 
     <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
+          
           <div id="content" class="content">
             
 
@@ -308,6 +339,8 @@
 
   
   
+  
+
   
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
@@ -332,25 +365,50 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">去掉Mx player的广告</h1>
+          <h1 class="post-title" itemprop="name headline">去掉Mx player的广告
+              
+            
+          </h1>
         
 
         <div class="post-meta">
           <span class="post-time">
+
+            
+            
+            
+
             
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">发表于</span>
+                <span class="post-meta-item-text">Posted on</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T09:33:54+08:00">
-                2018-04-01
-              </time>
+
+              
+                
+              
+
+              <time title="Created: 2018-04-01 09:33:54" itemprop="dateCreated datePublished" datetime="2018-04-01T09:33:54+08:00">2018-04-01</time>
             
 
             
+              
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-04-02 22:18:34" itemprop="dateModified" datetime="2018-04-02T22:18:34+08:00">2018-04-02</time>
+              
             
           </span>
 
@@ -368,7 +426,7 @@
                  <i class="fa fa-eye"></i>
                </span>
                
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
+                 <span class="post-meta-item-text">Views: </span>
                
                  <span class="leancloud-visitors-count"></span>
              </span>
@@ -377,22 +435,31 @@
           
 
           
-            <div class="post-wordcount">
+            <div class="post-symbolscount">
               
-                
+
+              
                 <span class="post-meta-item-icon">
                   <i class="fa fa-file-word-o"></i>
                 </span>
                 
-                  <span class="post-meta-item-text">字数统计&#58;</span>
+                  <span class="post-meta-item-text">Symbols count in article: </span>
                 
-                <span title="字数统计">
-                  3,107
+                <span title="Symbols count in article">9.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
                 </span>
-              
-
-              
-
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">9 mins.</span>
               
             </div>
           
@@ -431,6 +498,9 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#by wenxibuding QQ410154425</span></span><br><span class="line"><span class="comment">#url=http://www.miui.com/thread-11958646-1-1.html</span></span><br><span class="line"></span><br><span class="line">127.0.0.1       localhost</span><br><span class="line">::1             ip6-localhost</span><br><span class="line"></span><br><span class="line"><span class="comment">#xiaomi/miui/qqtv/youku/pptv/letv/sohutv/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#mstat/report</span></span><br><span class="line">127.0.0.1 aeventlog.beacon.qq.com</span><br><span class="line">127.0.0.1 android.rqd.qq.com</span><br><span class="line">127.0.0.1 astrategy.beacon.qq.com</span><br><span class="line">127.0.0.1 eventlog.beacon.qq.com</span><br><span class="line">127.0.0.1 monitor.uu.qq.com</span><br><span class="line">127.0.0.1 omgmta.qq.com</span><br><span class="line">127.0.0.1 omgmta1.qq.com</span><br><span class="line">127.0.0.1 oth.eve.mdt.qq.com</span><br><span class="line">127.0.0.1 oth.str.mdt.qq.com</span><br><span class="line">127.0.0.1 oth.update.mdt.qq.com</span><br><span class="line">127.0.0.1 pingma.qq.com</span><br><span class="line">127.0.0.1 sngmta.qq.com</span><br><span class="line">127.0.0.1 strategy.beacon.qq.com</span><br><span class="line"><span class="comment">#qq-1</span></span><br><span class="line">127.0.0.1 dp3.qq.com</span><br><span class="line">127.0.0.1 imc.l.qq.com</span><br><span class="line"><span class="comment">#qq-ad</span></span><br><span class="line">127.0.0.1 ad.qq.com</span><br><span class="line">127.0.0.1 ad.qun.qq.com</span><br><span class="line">127.0.0.1 adping.qq.com</span><br><span class="line">127.0.0.1 adpm.app.qq.com</span><br><span class="line">127.0.0.1 adrdir.qq.com</span><br><span class="line">127.0.0.1 adsclick.qq.com</span><br><span class="line">127.0.0.1 adsfile.qq.com</span><br><span class="line">127.0.0.1 adsgroup.qq.com</span><br><span class="line">127.0.0.1 adshmct.qq.com</span><br><span class="line">127.0.0.1 adshmmsg.qq.com</span><br><span class="line">127.0.0.1 adslvfile.qq.com</span><br><span class="line">127.0.0.1 adslvseed.qq.com</span><br><span class="line">127.0.0.1 adsqqclick.qq.com</span><br><span class="line">127.0.0.1 adstextview.qq.com</span><br><span class="line">127.0.0.1 adsview.qq.com</span><br><span class="line">127.0.0.1 adsview2.qq.com</span><br><span class="line">127.0.0.1 adv.app.qq.com</span><br><span class="line">127.0.0.1 adver.qq.com</span><br><span class="line">127.0.0.1 analy.qq.com</span><br><span class="line">127.0.0.1 d3g.qq.com</span><br><span class="line">127.0.0.1 j.wit.qq.com</span><br><span class="line">127.0.0.1 jqmt.qq.com</span><br><span class="line">127.0.0.1 jsqmt.qq.com</span><br><span class="line">127.0.0.1 mini2015.qq.com</span><br><span class="line">127.0.0.1 qqshow2-item.qq.com</span><br><span class="line">127.0.0.1 setting.snswin.qq.com</span><br><span class="line">127.0.0.1 tj.video.qq.com</span><br><span class="line">127.0.0.1 updatecenter.qq.com</span><br><span class="line">127.0.0.1 video.ureport.push.qq.com</span><br><span class="line">127.0.0.1 video.wap.mpush.qq.com</span><br><span class="line">127.0.0.1 wap.mpush.qq.com</span><br><span class="line"><span class="comment">#qq-t</span></span><br><span class="line">127.0.0.1 ta.qq.com</span><br><span class="line">127.0.0.1 tajs.qq.com</span><br><span class="line">127.0.0.1 tcss.qq.com</span><br><span class="line">127.0.0.1 p.tencentmind.com</span><br><span class="line"><span class="comment">#qq-e</span></span><br><span class="line">127.0.0.1 e.qq.com</span><br><span class="line">127.0.0.1 cm.e.qq.com</span><br><span class="line">127.0.0.1 sdk.e.qq.com</span><br><span class="line"><span class="comment">#qq-gdt</span></span><br><span class="line">127.0.0.1 c.gdt.qq.com</span><br><span class="line">127.0.0.1 d.gdt.qq.com</span><br><span class="line">127.0.0.1 i.gdt.qq.com</span><br><span class="line">127.0.0.1 mi.gdt.qq.com</span><br><span class="line">127.0.0.1 q.i.gdt.qq.com</span><br><span class="line">127.0.0.1 rm.gdt.qq.com</span><br><span class="line">127.0.0.1 t.gdt.qq.com</span><br><span class="line">127.0.0.1 v.gdt.qq.com</span><br><span class="line">127.0.0.1 win.gdt.qq.com</span><br><span class="line"><span class="comment">#qq-gtimg</span></span><br><span class="line">127.0.0.1 beacon.gtimg.com</span><br><span class="line">127.0.0.1 bla.gtimg.com</span><br><span class="line">127.0.0.1 lb.gtimg.com</span><br><span class="line">127.0.0.1 pgdt.gtimg.cn</span><br><span class="line">127.0.0.1 ra.gtimg.com</span><br><span class="line">127.0.0.1 wa.gtimg.com</span><br><span class="line">127.0.0.1 wb.gtimg.com</span><br><span class="line"><span class="comment">#qq-l</span></span><br><span class="line">127.0.0.1 bs.l.qq.com</span><br><span class="line">127.0.0.1 c2.l.qq.com</span><br><span class="line">127.0.0.1 cb.l.qq.com</span><br><span class="line">127.0.0.1 cm.l.qq.com</span><br><span class="line">127.0.0.1 hm.l.qq.com</span><br><span class="line">127.0.0.1 l.qq.com</span><br><span class="line">127.0.0.1 l2.l.qq.com</span><br><span class="line">127.0.0.1 lb.l.qq.com</span><br><span class="line">127.0.0.1 livec.l.qq.com</span><br><span class="line">127.0.0.1 livem.l.qq.com</span><br><span class="line">127.0.0.1 livep.l.qq.com</span><br><span class="line">127.0.0.1 lives.l.qq.com</span><br><span class="line">127.0.0.1 ls.l.qq.com</span><br><span class="line">127.0.0.1 p2.l.qq.com</span><br><span class="line">127.0.0.1 p3.l.qq.com</span><br><span class="line">127.0.0.1 t.l.qq.com</span><br><span class="line">127.0.0.1 vd.l.qq.com</span><br><span class="line">127.0.0.1 w.l.qq.com</span><br><span class="line"><span class="comment">#down-</span></span><br><span class="line">127.0.0.1 scdown.qq.com</span><br><span class="line">127.0.0.1 download.sj.qq.com</span><br><span class="line">127.0.0.1 c.gj.qq.com</span><br><span class="line">127.0.0.1 t.sj.qq.com</span><br><span class="line">127.0.0.1 ws.sj.qq.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#http://tv.qq.com/</span></span><br><span class="line">127.0.0.1 andrqd.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 otheve.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 othstr.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 omgmta.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 news-l.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 p-l.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 t-l.play.aiseet.atianqi.com</span><br><span class="line"><span class="comment">#v.qq.com</span></span><br><span class="line">127.0.0.1 news-l.play.ott.video.qq.com</span><br><span class="line">127.0.0.1 omgmta.play.ott.video.qq.com</span><br><span class="line">127.0.0.1 livep.l.ott.video.qq.com</span><br><span class="line">127.0.0.1 lives.l.ott.video.qq.com</span><br><span class="line"><span class="comment">#tv.qq.com</span></span><br><span class="line">127.0.0.1 aiseet.aa.atianqi.com</span><br><span class="line">127.0.0.1 dp3.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 livep.l.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 lives.l.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 vmindhls.tc.qq.com</span><br><span class="line">127.0.0.1 monitor-uu.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 sdkconfig.play.aiseet.atianqi.com</span><br><span class="line">127.0.0.1 livew.l.qq.com</span><br><span class="line">127.0.0.1 c.l.qq.com</span><br><span class="line">127.0.0.1 mdevstat.qqlive.qq.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#http://pd.youku.com/CIBN</span></span><br><span class="line">127.0.0.1 g.dtv.cn.miaozhen.com</span><br><span class="line">127.0.0.1 xtrader-mipdx.cn.miaozhen.com</span><br><span class="line">127.0.0.1 ssv.admaster.com.cn</span><br><span class="line">127.0.0.1 vyk.admaster.com.cn</span><br><span class="line">127.0.0.1 ipm.atm.cp31.ott.cibntv.net</span><br><span class="line">127.0.0.1 val.atm.cp31.ott.cibntv.net</span><br><span class="line">127.0.0.1 valf.atm.cp31.ott.cibntv.net</span><br><span class="line"><span class="comment">#http://m.youku.com/</span></span><br><span class="line">127.0.0.1 adp.atm.youku.com</span><br><span class="line">127.0.0.1 iyes.youku.com</span><br><span class="line">127.0.0.1 m.atm.youku.com</span><br><span class="line">127.0.0.1 mf.atm.youku.com</span><br><span class="line">127.0.0.1 mobilemsg.youku.com</span><br><span class="line">127.0.0.1 push.m.youku.com</span><br><span class="line"><span class="comment">#http://www.youku.com/</span></span><br><span class="line">127.0.0.1 bsv.atm.youku.com</span><br><span class="line">127.0.0.1 count.atm.youku.com</span><br><span class="line">127.0.0.1 dmapp.youku.com</span><br><span class="line">127.0.0.1 html.atm.youku.com</span><br><span class="line">127.0.0.1 ipm.atm.youku.com</span><br><span class="line">127.0.0.1 myes.youku.com</span><br><span class="line">127.0.0.1 r.l.youku.com</span><br><span class="line">127.0.0.1 service.danmu.youku.com</span><br><span class="line">127.0.0.1 statis.mobile.youku.com</span><br><span class="line">127.0.0.1 v2html.atm.youku.com</span><br><span class="line">127.0.0.1 val.atm.youku.com</span><br><span class="line">127.0.0.1 valb.atm.youku.com</span><br><span class="line">127.0.0.1 valc.atm.youku.com</span><br><span class="line">127.0.0.1 valf.atm.youku.com</span><br><span class="line">127.0.0.1 valp.atm.youku.com</span><br><span class="line">127.0.0.1 valt.atm.youku.com</span><br><span class="line"><span class="comment">#youku</span></span><br><span class="line">127.0.0.1 ad.api.3g.tudou.com</span><br><span class="line">127.0.0.1 ad.api.3g.youku.com</span><br><span class="line">127.0.0.1 ad.api.mobile.youku.com</span><br><span class="line">127.0.0.1 b.smartvideo.youku.com</span><br><span class="line">127.0.0.1 c.yes.youku.com</span><br><span class="line">127.0.0.1 cm.atm.youku.com</span><br><span class="line">127.0.0.1 cm.miaozhen.atm.youku.com</span><br><span class="line">127.0.0.1 guanggaoad.youku.com</span><br><span class="line">127.0.0.1 lstat.youku.com</span><br><span class="line">127.0.0.1 m.yes.youku.com</span><br><span class="line">127.0.0.1 mb.atm.youku.com</span><br><span class="line">127.0.0.1 mi.atm.youku.com</span><br><span class="line">127.0.0.1 miaozhen.atm.youku.com</span><br><span class="line">127.0.0.1 mo.atm.youku.com</span><br><span class="line">127.0.0.1 mp.atm.youku.com</span><br><span class="line">127.0.0.1 notify.youku.com</span><br><span class="line">127.0.0.1 passport-log.youku.com</span><br><span class="line">127.0.0.1 player.lstat.youku.com</span><br><span class="line">127.0.0.1 s.p.youku.com</span><br><span class="line">127.0.0.1 sdk.api.gamex.mobile.youku.com</span><br><span class="line">127.0.0.1 static.atm.youku.com</span><br><span class="line">127.0.0.1 store.tv.api.3g.youku.com</span><br><span class="line">127.0.0.1 store.xl.api.3g.youku.com</span><br><span class="line">127.0.0.1 urchin.lstat.youku.com</span><br><span class="line">127.0.0.1 valo.atm.youku.com</span><br><span class="line">127.0.0.1 wan.youku.com</span><br><span class="line"><span class="comment">#youku-area</span></span><br><span class="line">127.0.0.1 cms.laifeng.com</span><br><span class="line">127.0.0.1 ld.kuaigames.com</span><br><span class="line">127.0.0.1 rd.kuaigames.com</span><br><span class="line">127.0.0.1 g.x.cn.majorserving.com</span><br><span class="line">127.0.0.1 mon.majorserving.com</span><br><span class="line">127.0.0.1 l.ftx.fancyapi.com</span><br><span class="line">127.0.0.1 w.fancyapi.com</span><br><span class="line">127.0.0.1 l.fancyapi.com</span><br><span class="line">127.0.0.1 api.shuzilm.cn</span><br><span class="line">127.0.0.1 daa.shuzilm.cn</span><br><span class="line">127.0.0.1 www.shuzilm.cn</span><br><span class="line">127.0.0.1 cb.lomark.cn</span><br><span class="line">127.0.0.1 reply.lomark.cn</span><br><span class="line">127.0.0.1 rm.lomark.cn</span><br><span class="line">127.0.0.1 p-cn.acxiom-online.com</span><br><span class="line">127.0.0.1 hp.smiler-ad.com</span><br><span class="line">127.0.0.1 static8.pmadx.com</span><br><span class="line">127.0.0.1 www.bfshan.cn</span><br><span class="line"></span><br><span class="line"><span class="comment">#miui-xiaomi</span></span><br><span class="line">127.0.0.1 api.ad.xiaomi.com</span><br><span class="line">127.0.0.1 cdn.ad.xiaomi.com</span><br><span class="line">127.0.0.1 e.ad.xiaomi.com</span><br><span class="line">127.0.0.1 log.ad.xiaomi.com</span><br><span class="line">127.0.0.1 new.api.ad.xiaomi.com</span><br><span class="line">127.0.0.1 sdkconfig.ad.xiaomi.com</span><br><span class="line">127.0.0.1 ssp.ad.xiaomi.com</span><br><span class="line">127.0.0.1 test.ad.xiaomi.com</span><br><span class="line">127.0.0.1 test.e.ad.xiaomi.com</span><br><span class="line">127.0.0.1 zeus.ad.xiaomi.com</span><br><span class="line">127.0.0.1 test.zeus.ad.xiaomi.com</span><br><span class="line"><span class="comment">#miui-stat</span></span><br><span class="line">127.0.0.1 a.stat.xiaomi.com</span><br><span class="line">127.0.0.1 abtest.mistat.xiaomi.com</span><br><span class="line">127.0.0.1 data.mistat.xiaomi.com</span><br><span class="line">127.0.0.1 storeconfig.mistat.xiaomi.com</span><br><span class="line"><span class="comment">#miui--1</span></span><br><span class="line">127.0.0.1 shenghuo.xiaomi.com</span><br><span class="line"><span class="comment">#miui-download</span></span><br><span class="line">127.0.0.1 etl.xlmc.sandai.net</span><br><span class="line"><span class="comment">#miui-file</span></span><br><span class="line">127.0.0.1 api.tw06.xlmc.sec.miui.com</span><br><span class="line">127.0.0.1 etl.xlmc.sec.miui.com</span><br><span class="line">127.0.0.1 fb.xk.miui.com</span><br><span class="line"><span class="comment">#miui-game</span></span><br><span class="line">127.0.0.1 notice.game.xiaomi.com</span><br><span class="line">127.0.0.1 ppurifier.game.xiaomi.com</span><br><span class="line"><span class="comment">#miui-sec</span></span><br><span class="line">127.0.0.1 adv.sec.miui.com</span><br><span class="line">127.0.0.1 tracking.miui.com</span><br><span class="line">127.0.0.1 beha.ksmobile.com</span><br><span class="line">127.0.0.1 up.cm.ksmobile.com</span><br><span class="line"><span class="comment">#miui-weather</span></span><br><span class="line">127.0.0.1 wtradv.market.xiaomi.com</span><br><span class="line"><span class="comment">#miui-wps</span></span><br><span class="line">127.0.0.1 cloudservice13.kingsoft-office-service.com</span><br><span class="line">127.0.0.1 counter.kingsoft.com</span><br><span class="line">127.0.0.1 event.ksosoft.com</span><br><span class="line">127.0.0.1 uid.ksosoft.com</span><br><span class="line">127.0.0.1 ups.ksmobile.net</span><br><span class="line">127.0.0.1 ws.ksmobile.net</span><br><span class="line"><span class="comment">#mitv</span></span><br><span class="line">127.0.0.1 bss.pandora.xiaomi.com</span><br><span class="line">127.0.0.1 de.pandora.xiaomi.com</span><br><span class="line">127.0.0.1 dvb.pandora.xiaomi.com</span><br><span class="line">127.0.0.1 jellyfish.pandora.xiaomi.com</span><br><span class="line">127.0.0.1 stat.pandora.xiaomi.com</span><br><span class="line">127.0.0.1 irs01.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#http://app.pptv.com/pg_get_tv</span></span><br><span class="line">127.0.0.1 de.as.cp61.ott.cibntv.net</span><br><span class="line">127.0.0.1 clickc.admaster.com.cn</span><br><span class="line">127.0.0.1 vpptv.admaster.com.cn</span><br><span class="line">127.0.0.1 pptv.m.cn.miaozhen.com</span><br><span class="line">127.0.0.1 tpptv.ipdx.cn.miaozhen.com</span><br><span class="line">127.0.0.1 ads.aplus.pptv.com</span><br><span class="line">127.0.0.1 app.aplus.pptv.com</span><br><span class="line">127.0.0.1 as.aplus.pptv.com</span><br><span class="line">127.0.0.1 de.as.pptv.com</span><br><span class="line">127.0.0.1 img1.g.pptv.com</span><br><span class="line">127.0.0.1 img2.g.pptv.com</span><br><span class="line">127.0.0.1 img3.g.pptv.com</span><br><span class="line">127.0.0.1 jp.as.pptv.com</span><br><span class="line">127.0.0.1 static.g.pptv.com</span><br><span class="line">127.0.0.1 tj.g.pptv.com</span><br><span class="line">127.0.0.1 asimgs.pplive.cn</span><br><span class="line">127.0.0.1 ads.data.pplive.com</span><br><span class="line">127.0.0.1 gas.data.pplive.com</span><br><span class="line">127.0.0.1 plt.data.pplive.com</span><br><span class="line">127.0.0.1 web.data.pplive.com</span><br><span class="line">127.0.0.1 apm.suning.cn</span><br><span class="line">127.0.0.1 click.suning.cn</span><br><span class="line">127.0.0.1 dfp.suning.com</span><br><span class="line">127.0.0.1 ssac.suning.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#letv</span></span><br><span class="line">127.0.0.1 api.game.letvstore.com</span><br><span class="line">127.0.0.1 dev.dc.letv.com</span><br><span class="line">127.0.0.1 msg.m.letv.com</span><br><span class="line">127.0.0.1 n.mark.letv.com</span><br><span class="line">127.0.0.1 static.app.m.letv.com</span><br><span class="line">127.0.0.1 test.ark.letv.com</span><br><span class="line"><span class="comment">#sohu-video</span></span><br><span class="line">127.0.0.1 agn.aty.sohu.com</span><br><span class="line">127.0.0.1 f.aty.sohu.com</span><br><span class="line">127.0.0.1 m.aty.sohu.com</span><br><span class="line">127.0.0.1 mmg.aty.sohu.com</span><br><span class="line">127.0.0.1 p.aty.sohu.com</span><br><span class="line">127.0.0.1 pg.aty.sohu.com</span><br><span class="line">127.0.0.1 pm.aty.sohu.com</span><br><span class="line">127.0.0.1 v.aty.sohu.com</span><br><span class="line">127.0.0.1 vg.aty.sohu.com</span><br><span class="line">127.0.0.1 vm.aty.sohu.com</span><br><span class="line">127.0.0.1 api.danmu.tv.sohu.com</span><br><span class="line">127.0.0.1 download.wan.sohu.com</span><br><span class="line">127.0.0.1 da.mmarket.com</span><br><span class="line">127.0.0.1 sohu.irs01.com</span><br><span class="line"></span><br><span class="line"><span class="comment">#google ads</span></span><br><span class="line">127.0.0.1 googleads.g.doubleclick.net</span><br><span class="line">127.0.0.1 ads.nexage.com</span><br></pre></td></tr></table></figure>
       
     </div>
+
+    
+
     
     
     
@@ -490,9 +560,8 @@
           </div>
           
 
-
-          
   
+
 
 
         </div>
@@ -516,10 +585,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
+            Overview
           </li>
         </ul>
       
@@ -536,49 +605,109 @@
               <p class="site-description motion-element" itemprop="description">为何会不甘心？<br>得不到<br>留不住<br>怨己不争<br>恨世残酷</p>
           </div>
 
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
+          
+            <nav class="site-state motion-element">
               
-                <a href="/archives/">
-              
-                  <span class="site-state-item-count">63</span>
-                  <span class="site-state-item-name">日志</span>
-                </a>
-              </div>
-            
-
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">30</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
-
-          </nav>
-
-          
-
-          <div class="links-of-author motion-element">
-            
-          </div>
-
-          
-          
-
-          
-          
-            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
-              <div class="links-of-blogroll-title">
-                <i class="fa  fa-fw fa-globe"></i>
+                <div class="site-state-item site-state-posts">
                 
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
               </div>
               <ul class="links-of-blogroll-list">
                 
@@ -594,6 +723,9 @@
             </div>
           
 
+          
+            
+          
           
 
         </div>
@@ -630,7 +762,7 @@
     <footer id="footer" class="footer">
       <div class="footer-inner">
         <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
-  <span class="with-love">
+  <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
@@ -641,14 +773,23 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-      <span class="post-meta-item-text">Site words total count&#58;</span>
+    <span title="Symbols count total">215k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
     
-    <span title="Site words total count">77.7k</span>
+    <span title="Reading time total">3:false</span>
   
 </div>
 
 
-  <div class="powered-by">火是 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 点的(●ˇ∀ˇ●)  其实我也想点的</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.6.0</div>
 
 
 
@@ -656,7 +797,7 @@
 
 
 
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
 
 
 
@@ -666,21 +807,20 @@
   <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
   
-    <span class="site-uv">
+    <span class="site-uv" title="Total Visitors">
       <i class="fa fa-user"></i>
       <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
-      
     </span>
   
 
   
-    <span class="site-pv">
+    <span class="site-pv" title="Total Views">
       <i class="fa fa-eye"></i>
       <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
-      
     </span>
   
 </div>
+
 
 
 
@@ -698,6 +838,8 @@
         <i class="fa fa-arrow-up"></i>
         
       </div>
+    
+
     
 
   </div>
@@ -718,7 +860,6 @@
 
 
 
-  
 
 
 
@@ -731,55 +872,53 @@
 
 
 
-  
-  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
 
 
 
   
   
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
-
-
-
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
   
 
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
 
 
 
   
 
 
-  
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
 
+
+
+  
 
 
 
@@ -796,6 +935,8 @@
 
 
   
+
+
 
 
 
@@ -855,6 +996,8 @@
         .css('overflow', 'hidden');
       $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
 
+      
+
       $.ajax({
         url: path,
         dataType: isXml ? "xml" : "json",
@@ -888,6 +1031,7 @@
                 var title = data.title.trim();
                 var titleInLowerCase = title.toLowerCase();
                 var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
                 var contentInLowerCase = content.toLowerCase();
                 var articleUrl = decodeURIComponent(data.url);
                 var indexOfTitle = [];
@@ -1187,35 +1331,24 @@
             var counter = results[0];
             counter.fetchWhenSave(true);
             counter.increment("time");
+            
             counter.save(null, {
               success: function(counter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
               },
               error: function(counter, error) {
                 console.log('Failed to save Visitor num, with error message: ' + error.message);
               }
             });
           } else {
-            var newcounter = new Counter();
-            /* Set ACL */
-            var acl = new AV.ACL();
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(true);
-            newcounter.setACL(acl);
-            /* End Set ACL */
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 1);
-            newcounter.save(null, {
-              success: function(newcounter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-              },
-              error: function(newcounter, error) {
-                console.log('Failed to create');
-              }
-            });
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
           }
         },
         error: function(error) {
@@ -1235,6 +1368,15 @@
   </script>
 
 
+
+  
+
+  
+
+  
+
+  
+  
 
   
 
