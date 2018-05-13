@@ -93,18 +93,18 @@
 
 
 
-  <meta name="description" content="之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT&amp;apos;:D:/CodeBlocks/MinGW/i686-w64-min">
+  <meta name="description" content="文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT">
 <meta property="og:type" content="article">
 <meta property="og:title" content="搞定Putty的编译问题">
 <meta property="og:url" content="http://yoursite.com/2017/11/11/Fix-putty-bug/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:description" content="之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT&amp;apos;:D:/CodeBlocks/MinGW/i686-w64-min">
+<meta property="og:description" content="文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="http://yoursite.com/2017/11/11/Fix-putty-bug/1.png">
-<meta property="og:updated_time" content="2017-11-11T04:56:05.000Z">
+<meta property="og:updated_time" content="2018-05-13T08:23:17.649Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="搞定Putty的编译问题">
-<meta name="twitter:description" content="之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT&amp;apos;:D:/CodeBlocks/MinGW/i686-w64-min">
+<meta name="twitter:description" content="文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。之前编译Putty的时候，遇到如下错误：1234567In file included from ../windows/window.c:29:0:D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &amp;apos;IsPlatformNT">
 <meta name="twitter:image" content="http://yoursite.com/2017/11/11/Fix-putty-bug/1.png">
 
 
@@ -394,12 +394,24 @@
                 
               
 
-              <time title="Created: 2017-11-11 12:40:43 / Modified: 12:56:05" itemprop="dateCreated datePublished" datetime="2017-11-11T12:40:43+08:00">2017-11-11</time>
+              <time title="Created: 2017-11-11 12:40:43" itemprop="dateCreated datePublished" datetime="2017-11-11T12:40:43+08:00">2017-11-11</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-05-13 16:23:17" itemprop="dateModified" datetime="2018-05-13T16:23:17+08:00">2018-05-13</time>
               
             
           </span>
@@ -437,7 +449,7 @@
                 
                   <span class="post-meta-item-text">Symbols count in article: </span>
                 
-                <span title="Symbols count in article">812</span>
+                <span title="Symbols count in article">851</span>
               
 
               
@@ -471,7 +483,7 @@
       
 
       
-        <p>之前编译Putty的时候，遇到如下错误：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ../windows/window.c:29:0:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &apos;IsPlatformNT&apos;:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: error: &apos;osvi&apos; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize = sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure></p>
+        <h2 id="文章内的问题已经在Gcc-7-3-0中修复，确定是MinGW-W64的bug。"><a href="#文章内的问题已经在Gcc-7-3-0中修复，确定是MinGW-W64的bug。" class="headerlink" title="文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。"></a>文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。</h2><p>之前编译Putty的时候，遇到如下错误：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ../windows/window.c:29:0:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &apos;IsPlatformNT&apos;:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: error: &apos;osvi&apos; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize = sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
 <p>之前没怎么仔细看过报错信息，而是把Visual Studio的<code>multimon.h</code>替换掉Mingw的来解决报错。<br>现在回头仔细看了看了信息，无非是Mingw的<code>multimon.h</code>里面的<code>IsPlatformNT</code>函数内的<code>osvi</code>未定义，同时打开了Mingw和Visual Studio的<code>multimon.h</code>，显示如下<br><img src="/2017/11/11/Fix-putty-bug/1.png"><br>如图，可以看到Mingw的头文件内定义的变量是<code>oi</code>，但是使用的时候却用了<code>osvi</code>，初步估计是Mingw的问题了，向社区提交，等待回复。</p>
 
@@ -562,8 +574,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -701,6 +722,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#文章内的问题已经在Gcc-7-3-0中修复，确定是MinGW-W64的bug。"><span class="nav-number">1.</span> <span class="nav-text">文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

@@ -2132,12 +2132,24 @@
                 
               
 
-              <time title="Created: 2017-11-11 12:40:43 / Modified: 12:56:05" itemprop="dateCreated datePublished" datetime="2017-11-11T12:40:43+08:00">2017-11-11</time>
+              <time title="Created: 2017-11-11 12:40:43" itemprop="dateCreated datePublished" datetime="2017-11-11T12:40:43+08:00">2017-11-11</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-05-13 16:23:17" itemprop="dateModified" datetime="2018-05-13T16:23:17+08:00">2018-05-13</time>
               
             
           </span>
@@ -2175,7 +2187,7 @@
                 
                   <span class="post-meta-item-text">Symbols count in article: </span>
                 
-                <span title="Symbols count in article">812</span>
+                <span title="Symbols count in article">851</span>
               
 
               
@@ -2210,7 +2222,7 @@
 
       
         
-          <p>之前编译Putty的时候，遇到如下错误：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ../windows/window.c:29:0:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &apos;IsPlatformNT&apos;:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: error: &apos;osvi&apos; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize = sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure></p>
+          <h2 id="文章内的问题已经在Gcc-7-3-0中修复，确定是MinGW-W64的bug。"><a href="#文章内的问题已经在Gcc-7-3-0中修复，确定是MinGW-W64的bug。" class="headerlink" title="文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。"></a>文章内的问题已经在Gcc 7.3.0中修复，确定是MinGW-W64的bug。</h2><p>之前编译Putty的时候，遇到如下错误：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ../windows/window.c:29:0:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &apos;IsPlatformNT&apos;:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: error: &apos;osvi&apos; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize = sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/11/Fix-putty-bug/" rel="contents">
