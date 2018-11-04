@@ -8,7 +8,7 @@
   <entry>
     <title><![CDATA[Minecraft正版服无法登录]]></title>
     <url>%2F2018%2F05%2F26%2Ferror-of-minecraft%2F</url>
-    <content type="text"><![CDATA[问题描述 西电的校园网和翼讯环境均无法成功登录客户端 电脑开启代理之后，客户端能登录成功，游戏内仍然无法连接正版服 手机（联通）开热点之后，能连接正版服，本地开启的服务器（开启了正版验证）也能登录了 排除被mojang ban掉，更换dns无效，推测是西电的网络环境的锅。 经常跨地域更换IP，账号有可能会被Mojang ban掉，所以不想总是开着vps得代理，并且远程的vps很干扰正常使用。 解决办法如下，开启系统代理，客户端成功登录之后，给jvm设置代理参数，让Minecraft运行的时候走代理，这样就不用在电脑上常开代理了。 在启动选项里，填入jvm的代理参数，代理参数有如下几种 http -DhttpProxyHost=x.x.x.x -DhttpProxyPort=xxxhttps -DhttpsProxyHost=x.x.x.x -DhttpsProxyPort=xxxsocks -DsocksProxyHost=x.x.x.x -DsocksProxyPort=xxx]]></content>
+    <content type="text"><![CDATA[问题描述 西电的校园网和翼讯环境均无法成功登录客户端 电脑开启代理之后，客户端能登录成功，游戏内仍然无法连接正版服 手机（联通）开热点之后，能连接正版服，本地开启的服务器（开启了正版验证）也能登录了 排除被mojang ban掉，更换dns无效，推测是西电的网络环境的锅。 经常跨地域更换IP，账号有可能会被Mojang ban掉，所以不想总是开着vps得代理，并且远程的vps很干扰正常使用。 解决办法如下，开启系统代理，客户端成功登录之后，给jvm设置代理参数，让Minecraft运行的时候走代理，这样就不用在电脑上常开代理了。 在启动选项里，填入jvm的代理参数，代理参数有如下几种 http -DhttpProxyHost=x.x.x.x -DhttpProxyPort=xxx https -DhttpsProxyHost=x.x.x.x -DhttpsProxyPort=xxx socks -DsocksProxyHost=x.x.x.x -DsocksProxyPort=xxx]]></content>
   </entry>
   <entry>
     <title><![CDATA[从零开始建立PuTTY工程]]></title>
