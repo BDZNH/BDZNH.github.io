@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css" />
+
+
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/fire.png?v=6.5.0">
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="预备知识 如图，这是一个4位数码管模块，背面由两片74HC595控制，引脚如图，从上到下，分别为VCC(3.3V/5V),SCLK(移位控制端),RCLK(输出控制端),DIO(数据输入端),GND(接地)。 74HC595我们来看一下74HC595是什么样的  看懂这个芯片需要一点点的数字电子技术的知识，看下面这个表格">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用树莓派和四位数码管模块做一个时钟">
+<meta property="og:url" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="预备知识 如图，这是一个4位数码管模块，背面由两片74HC595控制，引脚如图，从上到下，分别为VCC(3.3V/5V),SCLK(移位控制端),RCLK(输出控制端),DIO(数据输入端),GND(接地)。 74HC595我们来看一下74HC595是什么样的  看懂这个芯片需要一点点的数字电子技术的知识，看下面这个表格">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/1.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/74hc595.png">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/3.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/board.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/4.jpg">
+<meta property="og:image" content="http://shumeipai.nxez.com/wp-content/uploads/2015/03/rpi-pins-40-0.png">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/year.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/md.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/hm.jpg">
+<meta property="og:updated_time" content="2019-01-10T07:58:49.831Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用树莓派和四位数码管模块做一个时钟">
+<meta name="twitter:description" content="预备知识 如图，这是一个4位数码管模块，背面由两片74HC595控制，引脚如图，从上到下，分别为VCC(3.3V/5V),SCLK(移位控制端),RCLK(输出控制端),DIO(数据输入端),GND(接地)。 74HC595我们来看一下74HC595是什么样的  看懂这个芯片需要一点点的数字电子技术的知识，看下面这个表格">
+<meta name="twitter:image" content="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/1.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>用树莓派和四位数码管模块做一个时钟 | BDZNH</title>
+  
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-90140804-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-90140804-1');
+</script>
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?0ac08bcdcdc748614bb22878d35b3504";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">BDZNH</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-minecraft">
+    <a href="/Minecraft/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br />Minecraft</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-awesome-project">
+    <a href="/app/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-building-o"></i> <br />Awesome Project</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="当你凝望深渊的时候<br>深渊也在凝望你<br>">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">用树莓派和四位数码管模块做一个时钟
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-10 10:14:22 / Modified: 15:58:49" itemprop="dateCreated datePublished" datetime="2019-01-10T10:14:22+08:00">2019-01-10</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/" class="leancloud_visitors" data-flag-title="用树莓派和四位数码管模块做一个时钟">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Symbols count in article: </span>
+                
+                <span title="Symbols count in article">1.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">2 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/1.jpg">
+<p>如图，这是一个4位数码管模块，背面由两片74HC595控制，引脚如图，从上到下，分别为<code>VCC(3.3V/5V)</code>,<code>SCLK(移位控制端)</code>,<code>RCLK(输出控制端)</code>,<code>DIO(数据输入端)</code>,<code>GND(接地)</code>。</p>
+<h3 id="74HC595"><a href="#74HC595" class="headerlink" title="74HC595"></a>74HC595</h3><p>我们来看一下74HC595是什么样的</p>
+<img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/74hc595.png">
+<p>看懂这个芯片需要一点点的数字电子技术的知识，看下面这个表格</p>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">符号</th>
+<th style="text-align:center">引脚</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Q0~Q7</td>
+<td style="text-align:center">15,1~7</td>
+<td style="text-align:center">8未并行数据输出</td>
+</tr>
+<tr>
+<td style="text-align:center">GND</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">接地</td>
+</tr>
+<tr>
+<td style="text-align:center">QA</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">串行数据输出</td>
+</tr>
+<tr>
+<td style="text-align:center">MR</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">主复位(低电平)</td>
+</tr>
+<tr>
+<td style="text-align:center">SH_CP</td>
+<td style="text-align:center">11</td>
+<td style="text-align:center">数据输入时钟</td>
+</tr>
+<tr>
+<td style="text-align:center">ST_CP</td>
+<td style="text-align:center">12</td>
+<td style="text-align:center">输出存储器锁存时钟线</td>
+</tr>
+<tr>
+<td style="text-align:center">OE</td>
+<td style="text-align:center">13</td>
+<td style="text-align:center">输出有效(低电平)</td>
+</tr>
+<tr>
+<td style="text-align:center">DS</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">串行数据输入</td>
+</tr>
+<tr>
+<td style="text-align:center">VCC</td>
+<td style="text-align:center">16</td>
+<td style="text-align:center">3.3V/3.5V</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>DS(14号脚)</code>是数据输入端，74HC595支持8位数据并行输出，但是数据输入只有DS一个脚，需要分8次输入；</li>
+<li><code>OE(Out Enable)</code>是一个使能端，使用74HC595时需要将这个脚接地，若接高电平，那么Q0~Q7全部为0(低电平);</li>
+<li><code>SH_CP(Shift register ClockPin)</code>是一个重要的引脚，此引脚的电平从低向高变(上升沿)时，芯片从<code>DS</code>脚读入数据(0/1)；</li>
+<li><code>ST_CP</code>，集满8位数据(其实并非严格集满，Q0~Q7本来就有电平)，此引脚的上升沿将8位数据输出。</li>
+</ul>
+<h3 id="74HC595级联"><a href="#74HC595级联" class="headerlink" title="74HC595级联"></a>74HC595级联</h3><p>一个74HC595可以并行输出8位数据，两个级联就可以并行输出16位数据，级联芯片时将第一片的<code>QA</code>脚接到第二片芯片的<code>DS</code>脚，<code>SH_CP</code>和<code>ST_CP</code>也同时接在一起，当第一篇芯片的<code>SH_CP</code>第九次上升沿触发时，第一片芯片的第一个数据将会通过<code>QA</code>脚输送给第二片芯片的<code>DS</code>脚。</p>
+<p>也就是说，芯片的顺序是看<code>QA</code>和<code>DS</code>脚的顺序的。</p>
+<h3 id="电路原理图"><a href="#电路原理图" class="headerlink" title="电路原理图"></a>电路原理图</h3><h4 id="四位数码管原理图"><a href="#四位数码管原理图" class="headerlink" title="四位数码管原理图"></a>四位数码管原理图</h4><p>数码管分位共阳极和共阴极，我拿到的这个数码管是共阴极，也就是说，给相应的脚设为低电平，则数码管点亮。</p>
+<img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/3.jpg">
+<h4 id="四位数码管模块原理图"><a href="#四位数码管模块原理图" class="headerlink" title="四位数码管模块原理图"></a>四位数码管模块原理图</h4><img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/board.jpg">
+<p>4位数码管模块使用两片74HC595级联来控制数码管，观察电路可知，第一片74HC595的低四位用来选中四位数码管，也即DIG.1,DIG.2,DIG.3,DIG.4，高四位留空不用。第二片的八位输出用来控制数码管显示的数字。</p>
+<h4 id="数码管原理"><a href="#数码管原理" class="headerlink" title="数码管原理"></a>数码管原理</h4><img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/4.jpg">
+<p>数码管内部其实是8个发光二极管，8个二极管排列成一个“8”字，控制二极管的明灭就可以控制数码管显示的数字。下面的表给出共阳极数码管的阵脚电平和显示数字对应关系(DP不亮)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">DP GFEDCBA</th>
+<th style="text-align:center">显示(十进制)</th>
+<th style="text-align:center">十六进制值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1 1000000</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0xC0</td>
+</tr>
+<tr>
+<td style="text-align:center">1 1111001</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0xF9</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0100100</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">0xA4</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0110000</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">0xB0</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0011001</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">0x99</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0010010</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">0x92</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0000010</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">0x82</td>
+</tr>
+<tr>
+<td style="text-align:center">1 1111000</td>
+<td style="text-align:center">7</td>
+<td style="text-align:center">0xF8</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0000000</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">0x80</td>
+</tr>
+<tr>
+<td style="text-align:center">1 0010000</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">0x90</td>
+</tr>
+</tbody>
+</table>
+<h3 id="树莓派引脚图"><a href="#树莓派引脚图" class="headerlink" title="树莓派引脚图"></a>树莓派引脚图</h3><p><img src="http://shumeipai.nxez.com/wp-content/uploads/2015/03/rpi-pins-40-0.png" alt="http://shumeipai.nxez.com/wp-content/uploads/2015/03/rpi-pins-40-0.png"></p>
+<p>通过控制树莓派的<code>GPIO.X</code>引脚电平高低即可控制外部扩展设备。<br>看引脚的方式是树莓派有网线接口和 USB 接口的面朝下，GPIO 阵脚的那一面面向自己，左上角位 1 号脚，右下角为 40 号脚。</p>
+<h2 id="编码实现"><a href="#编码实现" class="headerlink" title="编码实现"></a>编码实现</h2><p>代码都在 <a href="https://github.com/BDZNH/4-BIT-LED-Digital-Tube-Moudle" target="_blank" rel="noopener">https://github.com/BDZNH/4-BIT-LED-Digital-Tube-Moudle</a>，下载之后，使用<code>make</code>命令编译，使用<code>sudo ./showtime</code>执行。</p>
+<h3 id="接线"><a href="#接线" class="headerlink" title="接线"></a>接线</h3><table>
+<thead>
+<tr>
+<th style="text-align:center">四位数码管模块</th>
+<th style="text-align:center">Raspeberry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">VCC</td>
+<td style="text-align:center">1 号脚(可改变)</td>
+</tr>
+<tr>
+<td style="text-align:center">GND</td>
+<td style="text-align:center">9 号脚(可改变)</td>
+</tr>
+<tr>
+<td style="text-align:center">DIO</td>
+<td style="text-align:center">12 号脚</td>
+</tr>
+<tr>
+<td style="text-align:center">SCLK</td>
+<td style="text-align:center">13 号脚</td>
+</tr>
+<tr>
+<td style="text-align:center">RCLK</td>
+<td style="text-align:center">15 号脚</td>
+</tr>
+</tbody>
+</table>
+<h2 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h2><p>循环显示年份，日期，时间，只显示到分钟，不显示秒。</p>
+<img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/year.jpg" title="2019年">
+<img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/md.jpg" title="1月10日">
+<img src="/2019/01/10/4-BIT-LED-Digital-Tube-Moudle/hm.jpg" title="15:25">
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>[1] 74HC595的讲解，很详细，推荐观看<a href="https://www.bilibili.com/video/av10007630/?p=14" target="_blank" rel="noopener">https://www.bilibili.com/video/av10007630/?p=14</a><br>[2] wiringPi 库的解说，也很详细，推荐收藏<a href="https://www.cnblogs.com/lulipro/p/5992172.html" target="_blank" rel="noopener">https://www.cnblogs.com/lulipro/p/5992172.html</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/06/tensorflow-for-poets/" rel="next" title="tensorflow 初探 | tensorflow for poets">
+                <i class="fa fa-chevron-left"></i> tensorflow 初探 | tensorflow for poets
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">SupperMary</p>
+              <p class="site-description motion-element" itemprop="description">当你凝望深渊的时候<br>深渊也在凝望你<br></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">69</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.mcbbs.net/" title="MCBBS" target="_blank">MCBBS</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://minecraft-zh.gamepedia.com/Minecraft_Wiki/" title="Minecraft_wiki" target="_blank">Minecraft_wiki</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#预备知识"><span class="nav-number">1.</span> <span class="nav-text">预备知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#74HC595"><span class="nav-number">1.1.</span> <span class="nav-text">74HC595</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#74HC595级联"><span class="nav-number">1.2.</span> <span class="nav-text">74HC595级联</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#电路原理图"><span class="nav-number">1.3.</span> <span class="nav-text">电路原理图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#四位数码管原理图"><span class="nav-number">1.3.1.</span> <span class="nav-text">四位数码管原理图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四位数码管模块原理图"><span class="nav-number">1.3.2.</span> <span class="nav-text">四位数码管模块原理图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数码管原理"><span class="nav-number">1.3.3.</span> <span class="nav-text">数码管原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#树莓派引脚图"><span class="nav-number">1.4.</span> <span class="nav-text">树莓派引脚图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编码实现"><span class="nav-number">2.</span> <span class="nav-text">编码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#接线"><span class="nav-number">2.1.</span> <span class="nav-text">接线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#演示"><span class="nav-number">3.</span> <span class="nav-text">演示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; 2016 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="Symbols count total">232k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="Reading time total">3:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.6.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.5.0</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="Total Visitors">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="Total Views">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "IW8dMnC4CISHVqnjJm5G0LWi-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "IW8dMnC4CISHVqnjJm5G0LWi-gzGzoHsz",
+                'X-LC-Key': "8RAa5l4dePep5eE6WGfo0G6e",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
