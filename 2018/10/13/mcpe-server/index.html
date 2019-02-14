@@ -105,7 +105,7 @@
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2018/10/13/mcpe-server/2.png">
 <meta property="og:image" content="http://yoursite.com/2018/10/13/mcpe-server/3.png">
-<meta property="og:updated_time" content="2019-01-16T10:41:23.000Z">
+<meta property="og:updated_time" content="2019-02-14T12:54:15.490Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MC 基岩版(PE) 服务器来了">
 <meta name="twitter:description" content="好长时间没写了，前段时间登陆上MC官网，发现PE版本的服务端已经放出来了，有 Windows 版本和 Linux 版本，小小的尝试了一下，记录一下遇到的坑。先放链接https://minecraft.net/zh-hans/download/server/bedrock/">
@@ -466,7 +466,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-01-16 18:41:23" itemprop="dateModified" datetime="2019-01-16T18:41:23+08:00">2019-01-16</time>
+                <time title="Modified: 2019-02-14 20:54:15" itemprop="dateModified" datetime="2019-02-14T20:54:15+08:00">2019-02-14</time>
               
             
           </span>
@@ -504,7 +504,7 @@
                 
                   <span class="post-meta-item-text">Symbols count in article: </span>
                 
-                <span title="Symbols count in article">1.5k</span>
+                <span title="Symbols count in article">1.6k</span>
               
 
               
@@ -546,11 +546,12 @@
 <p>出现如下提示的时候</p>
 <img src="/2018/10/13/mcpe-server/3.png">
 <p>然后就可以在 Windows 10 的 UWP 版本在当前机子开黑了。超赞👍。</p>
-<h2 id="Linux-上运行"><a href="#Linux-上运行" class="headerlink" title="Linux 上运行"></a>Linux 上运行</h2><p>Linux上运行就有点麻烦了，如果使用 Ubuntu 的话，倒是很方便(注：我使用的是16.04版本)</p>
+<h2 id="Linux-上运行"><a href="#Linux-上运行" class="headerlink" title="Linux 上运行"></a>Linux 上运行</h2><p>极其不建议在Linux上运行服务端，目前的情况来看，官方的服务端会缺很多动态库，它所需要的动态库安装非常繁琐，有时候还会遇到依赖问题。</p>
+<p><del>Linux上运行就有点麻烦了，如果使用 Ubuntu 的话，倒是很方便(注：我使用的是16.04版本)</del></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install libcurl3 build-essential</span><br></pre></td></tr></table></figure>
-<p>就可以完成依赖包的安装，下载服务端文件之后直接运行就OK。</p>
-<p>对于 Cent OS 就麻烦很多了，官方提供的服务端在 Cent OS 7.5 上会缺东西，首先是 <code>libssl.0.0.so</code> 的缺失，就算自行下载 openssl1.0.0 编译好，它又提示 <code>glibc</code> 版本低，折腾时间增加很多，这里提供一个折中的办法——docker<br>docker真的是一个好东西啊，直接放解决办法吧：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:16.04</span><br><span class="line">docker run -p 19132:19132/tcp -p 19132:19132/udp -it ubuntu:16.04 bash</span><br></pre></td></tr></table></figure></p>
-<p>两个-p参数，分别把tcp和udp协议的主机的19132端口映射到容器实例的19132端口(19132是MCPE服务器的默认端口)，有UDP协议，客户端才能发现服务端，有tcp协议，客户端才能连接到服务端。<br>PS：上面的操作只是做一个示范，启动容器之后需要像在Ubuntu那样安装好依赖，然后再启动MCPE服务端。</p>
+<p><del>就可以完成依赖包的安装，下载服务端文件之后直接运行就OK。</del></p>
+<p><del>对于 Cent OS 就麻烦很多了，官方提供的服务端在 Cent OS 7.5 上会缺东西，首先是 <code>libssl.0.0.so</code> 的缺失，就算自行下载 openssl1.0.0 编译好，它又提示 <code>glibc</code> 版本低，折腾时间增加很多，这里提供一个折中的办法——docker<br>docker真的是一个好东西啊，直接放解决办法吧：</del><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull ubuntu:16.04</span><br><span class="line">docker run -p 19132:19132/tcp -p 19132:19132/udp -it ubuntu:16.04 bash</span><br></pre></td></tr></table></figure></p>
+<p><del>两个-p参数，分别把tcp和udp协议的主机的19132端口映射到容器实例的19132端口(19132是MCPE服务器的默认端口)，有UDP协议，客户端才能发现服务端，有tcp协议，客户端才能连接到服务端。<br>PS：上面的操作只是做一个示范，启动容器之后需要像在Ubuntu那样安装好依赖，然后再启动MCPE服务端。</del></p>
 <h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>一开始不知道docker怎么让容器同时支持tcp和udp，真是翻遍了度娘和404网站啊，最后还是官方的文档给了惊喜 <a href="https://docs.docker.com/config/containers/container-networking/" target="_blank" rel="noopener">https://docs.docker.com/config/containers/container-networking/</a></p>
 
       
