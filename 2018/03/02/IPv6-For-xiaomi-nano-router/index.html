@@ -104,7 +104,7 @@
 <meta property="og:description" content="西电的校园网拨号之后可以获取到IPv6地址，刷了op的路由器也可以获取到IPv6地址，但是后端设备想要获取到IPv6地址还得再折腾一下。手里的设备是小米路由器青春版。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2018/03/02/IPv6-For-xiaomi-nano-router/1.png">
-<meta property="og:updated_time" content="2019-01-16T10:41:23.000Z">
+<meta property="og:updated_time" content="2019-03-07T11:48:54.047Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="小米路由器与IPv6">
 <meta name="twitter:description" content="西电的校园网拨号之后可以获取到IPv6地址，刷了op的路由器也可以获取到IPv6地址，但是后端设备想要获取到IPv6地址还得再折腾一下。手里的设备是小米路由器青春版。">
@@ -465,7 +465,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-01-16 18:41:23" itemprop="dateModified" datetime="2019-01-16T18:41:23+08:00">2019-01-16</time>
+                <time title="Modified: 2019-03-07 19:48:54" itemprop="dateModified" datetime="2019-03-07T19:48:54+08:00">2019-03-07</time>
               
             
           </span>
@@ -544,7 +544,7 @@
 <p>安装nat6模块<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"net.ipv6.conf.default.accept_ra=2"</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"net.ipv6.conf.all.accept_ra=2"</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"></span><br><span class="line">uci <span class="built_in">set</span> network.globals.ula_prefix=<span class="string">"<span class="variable">$(uci get network.globals.ula_prefix | sed 's/^./d/')</span>"</span></span><br><span class="line">uci commit network</span><br><span class="line">uci <span class="built_in">set</span> dhcp.lan.ra_default=<span class="string">'1'</span></span><br><span class="line">uci commit dhcp</span><br></pre></td></tr></table></figure></p>
 <p>配置网络<br>在<code>/etc/init.d/</code>目录下新建一个文件，向文件内写入<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">ip6tables -t nat -I POSTROUTING -s `uci get network.globals.ula_prefix` -j MASQUERADE</span><br><span class="line">route -A inet6 add 2000::/3 `route -A inet6 | grep ::/0 | awk <span class="string">'NR==1&#123;print "gw "$2" dev "$7&#125;'</span>`</span><br></pre></td></tr></table></figure></p>
 <p>应用文件并重启，通过WiFi和网线连接到路由器的设备可以获取IPv6地址。<br><img src="/2018/03/02/IPv6-For-xiaomi-nano-router/1.png" title="只能通过IPv6连接的六维空间"></p>
-<h2 id="乱七八糟"><a href="#乱七八糟" class="headerlink" title="乱七八糟"></a>乱七八糟</h2><h3 id="查看lede固件完整的支持列表："><a href="#查看lede固件完整的支持列表：" class="headerlink" title="查看lede固件完整的支持列表："></a>查看lede固件完整的支持列表：</h3><p><a href="https://wiki.openwrt.org/toh/views/toh_extended_all" target="_blank" rel="noopener">https://wiki.openwrt.org/toh/views/toh_extended_all</a></p>
+<h2 id="乱七八糟"><a href="#乱七八糟" class="headerlink" title="乱七八糟"></a>乱七八糟</h2><h3 id="查看lede固件完整的支持列表："><a href="#查看lede固件完整的支持列表：" class="headerlink" title="查看lede固件完整的支持列表："></a>查看lede固件完整的支持列表：</h3><p><a href="https://openwrt.org/toh/views/toh_fwdownload" target="_blank" rel="noopener">https://openwrt.org/toh/views/toh_fwdownload</a></p>
 <h3 id="bootloader"><a href="#bootloader" class="headerlink" title="bootloader"></a>bootloader</h3><p>换bootloader的原因是，路由器本身的bootloader不支持安装lede固件，就像给手机刷机需要更换recovery一样</p>
 <h3 id="失败的例子"><a href="#失败的例子" class="headerlink" title="失败的例子"></a>失败的例子</h3><p>从大一就开始尝试，一开始刷的的原版的openwrt，刷完之后根本无法开机，后来尝试了pandorabox，路由器能获取到IPv6地址，但是安装好nat6模块，执行命令转发时失败，内核不支持，辗转到了lede固件，貌似现在lede固件已经是openwrt的官方固件了，官网合并了。</p>
 
