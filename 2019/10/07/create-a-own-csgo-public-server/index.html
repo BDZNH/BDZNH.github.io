@@ -14,8 +14,8 @@
   
 
 
-<html class="theme-next muse use-motion" lang="">
-<head><meta name="generator" content="Hexo 3.8.0">
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="BDZNH">
 <meta property="og:description" content="CS:GO 联机的那些事儿CS也是一款相当经典的枪战游戏了，这几天琢磨了一些联机的事情，这里汇总一下。 局域网联机搜到的资料大都不太全，并且是很老很老版本的CSGO，甚至是CS1.6版本，若是硬件条件满足的话，CSGO的体验会好一些。 局域网联机需要一个人打开“机器人练习赛”，然后打开任意地图，另外一个人在控制台输入 “connect x.x.x.x”，x.x.x.x 为先打开地图的人电脑的IP。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-10-07T10:01:19.049Z">
+<meta property="og:updated_time" content="2019-11-10T11:29:47.948Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CSGO联机的小事儿">
 <meta name="twitter:description" content="CS:GO 联机的那些事儿CS也是一款相当经典的枪战游戏了，这几天琢磨了一些联机的事情，这里汇总一下。 局域网联机搜到的资料大都不太全，并且是很老很老版本的CSGO，甚至是CS1.6版本，若是硬件条件满足的话，CSGO的体验会好一些。 局域网联机需要一个人打开“机器人练习赛”，然后打开任意地图，另外一个人在控制台输入 “connect x.x.x.x”，x.x.x.x 为先打开地图的人电脑的IP。">
@@ -182,7 +182,7 @@
 
 </head>
 
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="default">
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
 
   
   
@@ -192,7 +192,7 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta">
     
@@ -398,20 +398,20 @@
 
   
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/07/create-a-own-csgo-public-server/">
 
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg">
     </span>
 
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="BDZNH">
     </span>
 
@@ -446,12 +446,24 @@
                 
               
 
-              <time title="Created: 2019-10-07 17:53:35 / Modified: 18:01:19" itemprop="dateCreated datePublished" datetime="2019-10-07T17:53:35+08:00">2019-10-07</time>
+              <time title="Created: 2019-10-07 17:53:35" itemprop="dateCreated datePublished" datetime="2019-10-07T17:53:35+08:00">2019-10-07</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-11-10 19:29:47" itemprop="dateModified" datetime="2019-11-10T19:29:47+08:00">2019-11-10</time>
               
             
           </span>
@@ -463,17 +475,6 @@
           
 
           
-          
-             <span id="/2019/10/07/create-a-own-csgo-public-server/" class="leancloud_visitors" data-flag-title="CSGO联机的小事儿">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
           
 
           
@@ -489,7 +490,7 @@
                 
                   <span class="post-meta-item-text">Symbols count in article: </span>
                 
-                <span title="Symbols count in article">1.9k</span>
+                <span title="Symbols count in article">2.1k</span>
               
 
               
@@ -539,7 +540,8 @@
 <p>这里我们需要前往<a href="https://steamcommunity.com/dev/managegameservers" target="_blank" rel="noopener">https://steamcommunity.com/dev/managegameservers</a>申请一个用于验证的密钥，或者token，或者令牌，指的都是那一长串字母。</p>
 <p>拿到令牌之后，输入<code>./srcds_run -game csgo -console -usercon +game_type 0 +game_mode 0 +mapgroup mg_active +map de_dust2 +sv_setsteamaccount XXXXXXXXXXXXXXXXXXXXXXXXXXXX -net_port_try 1 -nomaster -port 1234</code>，这里的 XXXXXXXXXXXXXX就是你申请到的令牌。这个时候在游戏内通过控制台输入<code>connect x.x.x.x:1234</code>就可以连接了。</p>
 <p>需要留意的是，使用Windows时，开服务器的电脑不能启动CSGO游戏实例，原因自然也是服务端实际上只是特殊形式的客户端，或者说客户端只是特殊形式的服务端，V社应该没有做双开。</p>
-<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>Linux 相对 Windows 来说，可能是更多人会面临的搭建公网服务器的选择。<br>对于Ubuntu，未完……</p>
+<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>Linux 相对 Windows 来说，可能是更多人会面临的搭建公网服务器的选择。<br>对于 Linux 系统，个人更加推荐首先阅读官方的教程。这里仅仅说一下大概的流程，先安装steamcmd，然后登陆steamcmd之后安装csgo的客户端（实际上也就是服户端，服务端的文件在steam里面直接安装的csgo的文件绝大部分是相同的，启动方式不太一样）。在启动的时候输入相应的启动参数，比如服务端的地图，难度，限制人数之类的快就可以启动了。</p>
+<p>如果你有一个公网上运行的电脑倒是相当方便，和Windows几乎一样，如果没有的话，你需要弄一些端口转发之类的操作。</p>
 
       
     </div>
@@ -635,7 +637,7 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image" src="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg" alt="SupperMary">
             
@@ -793,7 +795,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="Symbols count total">238k</span>
+    <span title="Symbols count total">239k</span>
   
 
   
@@ -807,7 +809,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
 
 
 
@@ -1276,67 +1278,6 @@
 
 
   
-
-  
-  <script>
-    
-    function addCount(Counter) {
-      var $visitors = $(".leancloud_visitors");
-      var url = $visitors.attr('id').trim();
-      var title = $visitors.attr('data-flag-title').trim();
-
-      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
-        .done(function ({ results }) {
-          if (results.length > 0) {
-            var counter = results[0];
-            
-            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
-            
-            .done(function () {
-                  var $element = $(document.getElementById(url));
-                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
-            })
-            
-            .fail(function ({ responseJSON }) {
-                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
-            })
-          } else {
-            
-              var $element = $(document.getElementById(url));
-              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
-              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
-            
-          }
-        })
-      .fail(function ({ responseJSON }) {
-        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
-      });
-    }
-    
-
-    $(function() {
-      $.get('https://app-router.leancloud.cn/2/route?appId=' + "IW8dMnC4CISHVqnjJm5G0LWi-gzGzoHsz")
-        .done(function ({ api_server }) {
-          var Counter = function (method, url, data) {
-            return $.ajax({
-              method: method,
-              url: `https://${api_server}/1.1${url}`,
-              headers: {
-                'X-LC-Id': "IW8dMnC4CISHVqnjJm5G0LWi-gzGzoHsz",
-                'X-LC-Key': "8RAa5l4dePep5eE6WGfo0G6e",
-                'Content-Type': 'application/json',
-              },
-              data: data,
-            });
-          };
-          
-          addCount(Counter);
-          
-        })
-    });
-  </script>
-
-
 
   
 
