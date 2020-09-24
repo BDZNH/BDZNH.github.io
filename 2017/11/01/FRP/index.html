@@ -1,130 +1,52 @@
 <!DOCTYPE html>
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<html class="theme-next muse use-motion" lang>
-<head><meta name="generator" content="Hexo 3.9.0">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
-
-<link rel="stylesheet" href="/css/main.css?v=6.7.0">
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico?v=6.7.0">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
-
-
-
-
-
-
-
-<script id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '6.7.0',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: false,
-    fastclick: false,
-    lazyload: false,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-  
-
-
-
-
-  <meta name="description" content="这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。于是，我把作者的文档完整的扣过来了，希望不会被打o(￣▽￣)o项目位于https://github.com/fatedier/frp frp 的作用 利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。 对于 http, https 服务支持基于域名">
+  <meta name="description" content="这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。于是，我把作者的文档完整的扣过来了，希望不会被打o(￣▽￣)o项目位于https:&#x2F;&#x2F;github.com&#x2F;fatedier&#x2F;frp frp 的作用 利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。 对于 http, https 服务支持基于域名">
 <meta property="og:type" content="article">
 <meta property="og:title" content="FRP">
-<meta property="og:url" content="http://yoursite.com/2017/11/01/FRP/index.html">
+<meta property="og:url" content="http://example.com/2017/11/01/FRP/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:description" content="这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。于是，我把作者的文档完整的扣过来了，希望不会被打o(￣▽￣)o项目位于https://github.com/fatedier/frp frp 的作用 利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。 对于 http, https 服务支持基于域名">
-<meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/2017/11/01/FRP/architecture.png">
-<meta property="og:image" content="http://yoursite.com/2017/11/01/FRP/dashboard.png">
-<meta property="og:image" content="http://yoursite.com/2017/11/01/FRP/donate-alipay.png">
-<meta property="og:image" content="http://yoursite.com/2017/11/01/FRP/donate-wechatpay.png">
-<meta property="og:updated_time" content="2019-01-16T10:41:17.000Z">
+<meta property="og:description" content="这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。于是，我把作者的文档完整的扣过来了，希望不会被打o(￣▽￣)o项目位于https:&#x2F;&#x2F;github.com&#x2F;fatedier&#x2F;frp frp 的作用 利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。 对于 http, https 服务支持基于域名">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2017/11/01/FRP/architecture.png">
+<meta property="og:image" content="http://example.com/2017/11/01/FRP/dashboard.png">
+<meta property="og:image" content="http://example.com/2017/11/01/FRP/donate-alipay.png">
+<meta property="og:image" content="http://example.com/2017/11/01/FRP/donate-wechatpay.png">
+<meta property="article:published_time" content="2017-11-01T08:01:13.000Z">
+<meta property="article:modified_time" content="2019-01-16T10:41:17.000Z">
+<meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FRP">
-<meta name="twitter:description" content="这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。于是，我把作者的文档完整的扣过来了，希望不会被打o(￣▽￣)o项目位于https://github.com/fatedier/frp frp 的作用 利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。 对于 http, https 服务支持基于域名">
-<meta name="twitter:image" content="http://yoursite.com/2017/11/01/FRP/architecture.png">
+<meta name="twitter:image" content="http://example.com/2017/11/01/FRP/architecture.png">
+
+<link rel="canonical" href="http://example.com/2017/11/01/FRP/">
 
 
-
-
-
-
-  <link rel="canonical" href="http://yoursite.com/2017/11/01/FRP/">
-
-
-
-<script id="page.configurations">
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -134,35 +56,10 @@
 
 
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=90140804-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '90140804-1');
-  </script>
-
-
-
-  <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?0ac08bcdcdc748614bb22878d35b3504";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-
-
-
 
 
   <noscript>
   <style>
-  .use-motion .motion-element,
   .use-motion .brand,
   .use-motion .menu-item,
   .sidebar-inner,
@@ -171,9 +68,8 @@
   .use-motion .comments,
   .use-motion .post-header,
   .use-motion .post-body,
-  .use-motion .collection-title { opacity: initial; }
+  .use-motion .collection-header { opacity: initial; }
 
-  .use-motion .logo,
   .use-motion .site-title,
   .use-motion .site-subtitle {
     opacity: initial;
@@ -187,338 +83,184 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="default">
-
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">BDZNH</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-    
-    
   </div>
 
-  <div class="site-nav-toggle">
-    <button aria-label="Toggle navigation bar">
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
   </div>
 </div>
+
 
 
 
 <nav class="site-nav">
-  
-    <ul id="menu" class="menu">
-      
-        
-        
-        
-          
-          <li class="menu-item menu-item-home">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-about">
+        <li class="menu-item menu-item-about">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-tags">
+        <li class="menu-item menu-item-tags">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-archives">
+        <li class="menu-item menu-item-archives">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-minecraft">
+        <li class="menu-item menu-item-minecraft">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/Minecraft/" rel="section"><i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-projects">
+        <li class="menu-item menu-item-projects">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/app/" rel="section"><i class="menu-item-icon fa fa-fw fa-building-o"></i> <br>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
 
   </li>
-
-      
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
-        </li>
-      
-    </ul>
-  
-
-  
-    
-
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
 </nav>
 
 
 
-  
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
 
-
+    </div>
+  </div>
 
 </div>
     </header>
 
     
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
 
 
-    <main id="main" class="main">
+    <main class="main">
       <div class="main-inner">
         <div class="content-wrap">
           
-          <div id="content" class="content">
+
+          <div class="content post posts-expand">
             
 
-  <div id="posts" class="posts-expand">
     
-
-  
-
   
   
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/01/FRP/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2017/11/01/FRP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
       <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg">
+      <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="BDZNH">
     </span>
-
-    
       <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">FRP
-
-              
-            
-          </h1>
-        
+        <h1 class="post-title" itemprop="name headline">
+          FRP
+        </h1>
 
         <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
+            <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
+              <span class="post-meta-item-text">Posted on</span>
 
               <time title="Created: 2017-11-01 16:01:13" itemprop="dateCreated datePublished" datetime="2017-11-01T16:01:13+08:00">2017-11-01</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
+            </span>
+              <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
+                <span class="post-meta-item-text">Edited on</span>
                 <time title="Modified: 2019-01-16 18:41:17" itemprop="dateModified" datetime="2019-01-16T18:41:17+08:00">2019-01-16</time>
-              
-            
-          </span>
+              </span>
 
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Symbols count in article: </span>
-                
-                <span title="Symbols count in article">9.5k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">9 mins.</span>
-              
-            </div>
-          
-
-          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
 
         </div>
       </header>
-    
 
     
     
@@ -526,10 +268,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-      
-
-      
-        <p>这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。<br>于是，我把作者的文档完整的扣过来了，希望不会被打o(<em>￣▽￣</em>)o<br>项目位于<a href="https://github.com/fatedier/frp" target="_blank" rel="noopener">https://github.com/fatedier/frp</a></p>
+        <p>这里应该@大老板一下的，这是一个很有意思的小工具，其实也不小，这里仅作推广，作者的文档已经足够详细，使用得当的话，非常方便。<br>于是，我把作者的文档完整的扣过来了，希望不会被打o(<em>￣▽￣</em>)o<br>项目位于<a target="_blank" rel="noopener" href="https://github.com/fatedier/frp">https://github.com/fatedier/frp</a></p>
 <h2 id="frp-的作用"><a href="#frp-的作用" class="headerlink" title="frp 的作用"></a>frp 的作用</h2><ul>
 <li>利用处于内网或防火墙后的机器，对外网环境提供 http 或 https 服务。</li>
 <li>对于 http, https 服务支持基于域名的虚拟主机，支持自定义域名绑定，使多个域名可以共用一个80端口。</li>
@@ -540,7 +279,7 @@
 <p>master 分支用于发布稳定版本，dev 分支用于开发，您可以尝试下载最新的 release 版本进行测试。</p>
 <p><strong>目前的交互协议可能随时改变，不保证向后兼容，升级新版本时需要注意公告说明同时升级服务端和客户端。</strong></p>
 <h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="architecture.png" alt="architecture"></p>
-<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>根据对应的操作系统及架构，从 <a href="https://github.com/fatedier/frp/releases" target="_blank" rel="noopener">Release</a> 页面下载最新版本的程序。</p>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>根据对应的操作系统及架构，从 <a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">Release</a> 页面下载最新版本的程序。</p>
 <p>将 <strong>frps</strong> 及 <strong>frps.ini</strong> 放到具有公网 IP 的机器上。</p>
 <p>将 <strong>frpc</strong> 及 <strong>frpc.ini</strong> 放到处于内网环境的机器上。</p>
 <h3 id="通过-ssh-访问公司内网机器"><a href="#通过-ssh-访问公司内网机器" class="headerlink" title="通过 ssh 访问公司内网机器"></a>通过 ssh 访问公司内网机器</h3><ol>
@@ -637,6 +376,7 @@
 <h3 id="Dashboard"><a href="#Dashboard" class="headerlink" title="Dashboard"></a>Dashboard</h3><p>通过浏览器查看 frp 的状态以及代理统计信息展示。</p>
 <p>需要在 frps.ini 中指定 dashboard 服务使用的端口，即可开启此功能：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">dashboard_port</span> = <span class="number">7500</span></span><br><span class="line"><span class="comment"># dashboard 用户名密码，默认都为 admin</span></span><br><span class="line"><span class="attr">dashboard_user</span> = admin</span><br><span class="line"><span class="attr">dashboard_pwd</span> = admin</span><br></pre></td></tr></table></figure>
+
 <p>打开浏览器通过 <code>http://[server_addr]:7500</code> 访问 dashboard 界面，用户名密码默认为 <code>admin</code>。</p>
 <p><img src="dashboard.png" alt="dashboard"></p>
 <h3 id="身份验证"><a href="#身份验证" class="headerlink" title="身份验证"></a>身份验证</h3><p>从 v0.10.0 版本开始，所有 proxy 配置全部放在客户端(也就是之前版本的特权模式)，服务端和客户端的 common 配置中的 <code>privilege_token</code> 参数一致则身份验证通过。</p>
@@ -644,11 +384,13 @@
 <p>这个超时时间可以在配置文件中通过 <code>authentication_timeout</code> 这个参数来修改，单位为秒，默认值为 900，即 15 分钟。如果修改为 0，则 frps 将不对身份验证报文的时间戳进行超时校验。</p>
 <h3 id="加密与压缩"><a href="#加密与压缩" class="headerlink" title="加密与压缩"></a>加密与压缩</h3><p>这两个功能默认是不开启的，需要在 frpc.ini 中通过配置来为指定的代理启用加密与压缩的功能，压缩算法使用 snappy：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[ssh]</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">22</span></span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">6000</span></span><br><span class="line"><span class="attr">use_encryption</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">use_compression</span> = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
 <p>如果公司内网防火墙对外网访问进行了流量识别与屏蔽，例如禁止了 ssh 协议等，通过设置 <code>use_encryption = true</code>，将 frpc 与 frps 之间的通信内容加密传输，将会有效防止流量被拦截。</p>
 <p>如果传输的报文长度较长，通过设置 <code>use_compression = true</code> 对传输内容进行压缩，可以有效减小 frpc 与 frps 之间的网络流量，加快流量转发速度，但是会额外消耗一些 cpu 资源。</p>
 <h3 id="客户端热加载配置文件"><a href="#客户端热加载配置文件" class="headerlink" title="客户端热加载配置文件"></a>客户端热加载配置文件</h3><p>当修改了 frpc 中的代理配置，可以通过 <code>frpc --reload</code> 命令来动态加载配置文件，通常会在 10 秒内完成代理的更新。</p>
 <p>启用此功能需要在 frpc 中启用 admin 端口，用于提供 API 服务。配置如下：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">admin_addr</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">admin_port</span> = <span class="number">7400</span></span><br></pre></td></tr></table></figure>
+
 <p>之后执行重启命令：</p>
 <p><code>frpc -c ./frpc.ini --reload</code></p>
 <p>等待一段时间后客户端会根据新的配置文件创建、更新、删除代理。</p>
@@ -656,10 +398,12 @@
 <h3 id="特权模式"><a href="#特权模式" class="headerlink" title="特权模式"></a>特权模式</h3><p>由于从 v0.10.0 版本开始，所有 proxy 都在客户端配置，原先的特权模式是目前唯一支持的模式。</p>
 <h4 id="端口白名单"><a href="#端口白名单" class="headerlink" title="端口白名单"></a>端口白名单</h4><p>为了防止端口被滥用，可以手动指定允许哪些端口被使用，在 frps.ini 中通过 privilege_allow_ports 来指定：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frps.ini</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">privilege_allow_ports</span> = <span class="number">2000</span>-<span class="number">3000</span>,<span class="number">3001</span>,<span class="number">3003</span>,<span class="number">4000</span>-<span class="number">50000</span></span><br></pre></td></tr></table></figure>
+
 <p>privilege_allow_ports 可以配置允许使用的某个指定端口或者是一个范围内的所有端口，以 <code>,</code> 分隔，指定的范围以 <code>-</code> 分隔。</p>
 <h3 id="TCP-多路复用"><a href="#TCP-多路复用" class="headerlink" title="TCP 多路复用"></a>TCP 多路复用</h3><p>从 v0.10.0 版本开始，客户端和服务器端之间的连接支持多路复用，不再需要为每一个用户请求创建一个连接，使连接建立的延迟降低，并且避免了大量文件描述符的占用，使 frp 可以承载更高的并发数。</p>
 <p>该功能默认启用，如需关闭，可以在 frps.ini 和 frpc.ini 中配置，该配置项在服务端和客户端必须一致：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frps.ini 和 frpc.ini 中</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">tcp_mux</span> = <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
 <h3 id="底层通信可选-kcp-协议"><a href="#底层通信可选-kcp-协议" class="headerlink" title="底层通信可选 kcp 协议"></a>底层通信可选 kcp 协议</h3><p>从 v0.12.0 版本开始，底层通信协议支持选择 kcp 协议，在弱网环境下传输效率提升明显，但是会有一些额外的流量消耗。</p>
 <p>开启 kcp 协议支持：</p>
 <ol>
@@ -680,10 +424,12 @@
 </li>
 <li><p>在 frpc.ini 中为客户端启用连接池，指定预创建连接的数量：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">pool_count</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
 </li>
 </ol>
 <h3 id="修改-Host-Header"><a href="#修改-Host-Header" class="headerlink" title="修改 Host Header"></a>修改 Host Header</h3><p>通常情况下 frp 不会修改转发的任何数据。但有一些后端服务会根据 http 请求 header 中的 host 字段来展现不同的网站，例如 nginx 的虚拟主机服务，启用 host-header 的修改功能可以动态修改 http 请求中的 host 字段。该功能仅限于 http 类型的代理。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[web]</span></span><br><span class="line"><span class="attr">type</span> = http</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">80</span></span><br><span class="line"><span class="attr">custom_domains</span> = test.yourdomain.com</span><br><span class="line"><span class="attr">host_header_rewrite</span> = dev.yourdomain.com</span><br></pre></td></tr></table></figure>
+
 <p>原来 http 请求中的 host 字段 <code>test.yourdomain.com</code> 转发到后端服务时会被替换为 <code>dev.yourdomain.com</code>。</p>
 <h3 id="获取用户真实-IP"><a href="#获取用户真实-IP" class="headerlink" title="获取用户真实 IP"></a>获取用户真实 IP</h3><p>目前只有 <strong>http</strong> 类型的代理支持这一功能，可以通过用户请求的 header 中的 <code>X-Forwarded-For</code> 和 <code>X-Real-IP</code> 来获取用户真实 IP。</p>
 <p><strong>需要注意的是，目前只在每一个用户连接的第一个 HTTP 请求中添加了这两个 header。</strong></p>
@@ -691,31 +437,37 @@
 <p>frp 支持通过 HTTP Basic Auth 来保护你的 web 服务，使用户需要通过用户名和密码才能访问到你的服务。</p>
 <p>该功能目前仅限于 http 类型的代理，需要在 frpc 的代理配置中添加用户名和密码的设置。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[web]</span></span><br><span class="line"><span class="attr">type</span> = http</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">80</span></span><br><span class="line"><span class="attr">custom_domains</span> = test.yourdomain.com</span><br><span class="line"><span class="attr">http_user</span> = abc</span><br><span class="line"><span class="attr">http_pwd</span> = abc</span><br></pre></td></tr></table></figure>
+
 <p>通过浏览器访问 <code>http://test.yourdomain.com</code>，需要输入配置的用户名和密码才能访问。</p>
 <h3 id="自定义二级域名"><a href="#自定义二级域名" class="headerlink" title="自定义二级域名"></a>自定义二级域名</h3><p>在多人同时使用一个 frps 时，通过自定义二级域名的方式来使用会更加方便。</p>
 <p>通过在 frps 的配置文件中配置 <code>subdomain_host</code>，就可以启用该特性。之后在 frpc 的 http、https 类型的代理中可以不配置 <code>custom_domains</code>，而是配置一个 <code>subdomain</code> 参数。</p>
-<p>只需要将 <code>*.{subdomain_host}</code> 解析到 frps 所在服务器。之后用户可以通过 <code>subdomain</code> 自行指定自己的 web 服务所需要使用的二级域名，通过 <code>{subdomain}.{subdomain_host}</code> 来访问自己的 web 服务。</p>
+<p>只需要将 <code>*.&#123;subdomain_host&#125;</code> 解析到 frps 所在服务器。之后用户可以通过 <code>subdomain</code> 自行指定自己的 web 服务所需要使用的二级域名，通过 <code>&#123;subdomain&#125;.&#123;subdomain_host&#125;</code> 来访问自己的 web 服务。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frps.ini</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">subdomain_host</span> = frps.com</span><br></pre></td></tr></table></figure>
+
 <p>将泛域名 <code>*.frps.com</code> 解析到 frps 所在服务器的 IP 地址。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[web]</span></span><br><span class="line"><span class="attr">type</span> = http</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">80</span></span><br><span class="line"><span class="attr">subdomain</span> = test</span><br></pre></td></tr></table></figure>
+
 <p>frps 和 fprc 都启动成功后，通过 <code>test.frps.com</code> 就可以访问到内网的 web 服务。</p>
 <p>需要注意的是如果 frps 配置了 <code>subdomain_host</code>，则 <code>custom_domains</code> 中不能是属于 <code>subdomain_host</code> 的子域名或者泛域名。</p>
 <p>同一个 http 或 https 类型的代理中 <code>custom_domains</code>  和 <code>subdomain</code> 可以同时配置。</p>
 <h3 id="URL-路由"><a href="#URL-路由" class="headerlink" title="URL 路由"></a>URL 路由</h3><p>frp 支持根据请求的 URL 路径路由转发到不同的后端服务。</p>
 <p>通过配置文件中的 <code>locations</code> 字段指定一个或多个 proxy 能够匹配的 URL 前缀(目前仅支持最大前缀匹配，之后会考虑正则匹配)。例如指定 <code>locations = /news</code>，则所有 URL 以 <code>/news</code> 开头的请求都会被转发到这个服务。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[web01]</span></span><br><span class="line"><span class="attr">type</span> = http</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">80</span></span><br><span class="line"><span class="attr">custom_domains</span> = web.yourdomain.com</span><br><span class="line"><span class="attr">locations</span> = /</span><br><span class="line"></span><br><span class="line"><span class="section">[web02]</span></span><br><span class="line"><span class="attr">type</span> = http</span><br><span class="line"><span class="attr">local_port</span> = <span class="number">81</span></span><br><span class="line"><span class="attr">custom_domains</span> = web.yourdomain.com</span><br><span class="line"><span class="attr">locations</span> = /news,/about</span><br></pre></td></tr></table></figure>
+
 <p>按照上述的示例配置后，<code>web.yourdomain.com</code> 这个域名下所有以 <code>/news</code> 以及 <code>/about</code> 作为前缀的 URL 请求都会被转发到 web02，其余的请求会被转发到 web01。</p>
 <h3 id="通过代理连接-frps"><a href="#通过代理连接-frps" class="headerlink" title="通过代理连接 frps"></a>通过代理连接 frps</h3><p>在只能通过代理访问外网的环境内，frpc 支持通过 HTTP PROXY 和 frps 进行通信。</p>
 <p>可以通过设置 <code>HTTP_PROXY</code> 系统环境变量或者通过在 frpc 的配置文件中设置 <code>http_proxy</code> 参数来使用此功能。</p>
 <p>仅在 <code>protocol = tcp</code> 时生效。</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">server_addr</span> = x.x.x.x</span><br><span class="line"><span class="attr">server_port</span> = <span class="number">7000</span></span><br><span class="line"><span class="attr">http_proxy</span> = http://user:pwd@<span class="number">192.168</span>.<span class="number">1.128</span>:<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+
 <h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><p>默认情况下，frpc 只会转发请求到本地 tcp 或 udp 端口。</p>
-<p>插件模式是为了在客户端提供更加丰富的功能，目前内置的插件有 <strong>unix_domain_socket</strong>、<strong>http_proxy</strong>、<strong>socks5</strong>。具体使用方式请查看<a href="#使用示例">使用示例</a>。</p>
+<p>插件模式是为了在客户端提供更加丰富的功能，目前内置的插件有 <strong>unix_domain_socket</strong>、<strong>http_proxy</strong>、<strong>socks5</strong>。具体使用方式请查看<a href="#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B">使用示例</a>。</p>
 <p>通过 <code>plugin</code> 指定需要使用的插件，插件的配置参数都以 <code>plugin_</code> 开头。使用插件后 <code>local_ip</code> 和 <code>local_port</code> 不再需要配置。</p>
 <p>使用 <strong>http_proxy</strong> 插件的示例:</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frpc.ini</span></span><br><span class="line"><span class="section">[http_proxy]</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">6000</span></span><br><span class="line"><span class="attr">plugin</span> = http_proxy</span><br><span class="line"><span class="attr">plugin_http_user</span> = abc</span><br><span class="line"><span class="attr">plugin_http_passwd</span> = abc</span><br></pre></td></tr></table></figure>
+
 <p><code>plugin_http_user</code> 和 <code>plugin_http_passwd</code> 即为 <code>http_proxy</code> 插件可选的配置参数。</p>
-<h2 id="开发计划"><a href="#开发计划" class="headerlink" title="开发计划"></a>开发计划</h2><p>计划在后续版本中加入的功能与优化，排名不分先后，如果有其他功能建议欢迎在 <a href="https://github.com/fatedier/frp/issues" target="_blank" rel="noopener">issues</a> 中反馈。</p>
+<h2 id="开发计划"><a href="#开发计划" class="headerlink" title="开发计划"></a>开发计划</h2><p>计划在后续版本中加入的功能与优化，排名不分先后，如果有其他功能建议欢迎在 <a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/issues">issues</a> 中反馈。</p>
 <ul>
 <li>frps 记录 http 请求日志。</li>
 <li>frps 支持直接反向代理，类似 haproxy。</li>
@@ -726,320 +478,188 @@
 </ul>
 <h2 id="为-frp-做贡献"><a href="#为-frp-做贡献" class="headerlink" title="为 frp 做贡献"></a>为 frp 做贡献</h2><p>frp 是一个免费且开源的项目，我们欢迎任何人为其开发和进步贡献力量。</p>
 <ul>
-<li>在使用过程中出现任何问题，可以通过 <a href="https://github.com/fatedier/frp/issues" target="_blank" rel="noopener">issues</a> 来反馈。</li>
+<li>在使用过程中出现任何问题，可以通过 <a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/issues">issues</a> 来反馈。</li>
 <li>Bug 的修复可以直接提交 Pull Request 到 dev 分支。</li>
 <li>如果是增加新的功能特性，请先创建一个 issue 并做简单描述以及大致的实现方法，提议被采纳后，就可以创建一个实现新特性的 Pull Request。</li>
 <li>欢迎对说明文档做出改善，帮助更多的人使用 frp，特别是英文文档。</li>
 <li>贡献代码请提交 PR 至 dev 分支，master 分支仅用于发布稳定可用版本。</li>
-<li>如果你有任何其他方面的问题，欢迎反馈至 <a href="mailto:fatedier@gmail.com" target="_blank" rel="noopener">fatedier@gmail.com</a> 共同交流。</li>
+<li>如果你有任何其他方面的问题，欢迎反馈至 <a href="mailto:&#102;&#x61;&#x74;&#101;&#100;&#105;&#x65;&#x72;&#64;&#103;&#109;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#102;&#x61;&#x74;&#101;&#100;&#105;&#x65;&#x72;&#64;&#103;&#109;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#111;&#x6d;</a> 共同交流。</li>
 </ul>
-<p><strong>提醒：和项目相关的问题最好在 <a href="https://github.com/fatedier/frp/issues" target="_blank" rel="noopener">issues</a> 中反馈，这样方便其他有类似问题的人可以快速查找解决方法，并且也避免了我们重复回答一些问题。</strong></p>
+<p><strong>提醒：和项目相关的问题最好在 <a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/issues">issues</a> 中反馈，这样方便其他有类似问题的人可以快速查找解决方法，并且也避免了我们重复回答一些问题。</strong></p>
 <h2 id="捐助"><a href="#捐助" class="headerlink" title="捐助"></a>捐助</h2><p>如果您觉得 frp 对你有帮助，欢迎给予我们一定的捐助来维持项目的长期发展。</p>
 <p>frp 交流群：606194980 (QQ 群号)</p>
 <h3 id="支付宝扫码捐赠"><a href="#支付宝扫码捐赠" class="headerlink" title="支付宝扫码捐赠"></a>支付宝扫码捐赠</h3><p><img src="donate-alipay.png" alt="donate-alipay"></p>
 <h3 id="微信支付捐赠"><a href="#微信支付捐赠" class="headerlink" title="微信支付捐赠"></a>微信支付捐赠</h3><p><img src="donate-wechatpay.png" alt="donate-wechatpay"></p>
-<h3 id="Paypal-捐赠"><a href="#Paypal-捐赠" class="headerlink" title="Paypal 捐赠"></a>Paypal 捐赠</h3><p>海外用户推荐通过 <a href="https://www.paypal.me/fatedier" target="_blank" rel="noopener">Paypal</a> 向作者的账户 <a href="mailto:**fatedier@gmail.com" target="_blank" rel="noopener">**fatedier@gmail.com</a>** 进行捐赠。</p>
+<h3 id="Paypal-捐赠"><a href="#Paypal-捐赠" class="headerlink" title="Paypal 捐赠"></a>Paypal 捐赠</h3><p>海外用户推荐通过 <a target="_blank" rel="noopener" href="https://www.paypal.me/fatedier">Paypal</a> 向作者的账户 <strong><a href="mailto:&#x66;&#97;&#116;&#101;&#x64;&#105;&#101;&#x72;&#x40;&#103;&#109;&#97;&#x69;&#108;&#x2e;&#x63;&#x6f;&#x6d;">&#x66;&#97;&#116;&#101;&#x64;&#105;&#101;&#x72;&#x40;&#103;&#109;&#97;&#x69;&#108;&#x2e;&#x63;&#x6f;&#x6d;</a></strong> 进行捐赠。</p>
 
-      
     </div>
 
     
-
-    
-    
-    
-
-    
-
-    
-      
     
     
 
-    
+      <footer class="post-footer">
 
-    <footer class="post-footer">
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/10/13/Set-proxy-for-git/" rel="next" title="Configure Git to use a proxy">
-                <i class="fa fa-chevron-left"></i> Configure Git to use a proxy
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/11/Fix-putty-bug/" rel="prev" title="搞定Putty的编译问题">
-                搞定Putty的编译问题 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-  </div>
-
-
-          </div>
-          
-
-  
-
-
-
-        </div>
         
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/10/13/Set-proxy-for-git/" rel="prev" title="Configure Git to use a proxy">
+      <i class="fa fa-chevron-left"></i> Configure Git to use a proxy
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/11/Fix-putty-bug/" rel="next" title="搞定Putty的编译问题">
+      搞定Putty的编译问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
           
   
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
   </div>
 
-  <aside id="sidebar" class="sidebar">
-    
+  <aside class="sidebar">
     <div class="sidebar-inner">
 
-      
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
 
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#frp-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">frp 的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E7%8A%B6%E6%80%81"><span class="nav-number">2.</span> <span class="nav-text">开发状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">使用示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87-ssh-%E8%AE%BF%E9%97%AE%E5%85%AC%E5%8F%B8%E5%86%85%E7%BD%91%E6%9C%BA%E5%99%A8"><span class="nav-number">4.1.</span> <span class="nav-text">通过 ssh 访问公司内网机器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9F%9F%E5%90%8D%E8%AE%BF%E9%97%AE%E9%83%A8%E7%BD%B2%E4%BA%8E%E5%86%85%E7%BD%91%E7%9A%84-web-%E6%9C%8D%E5%8A%A1"><span class="nav-number">4.2.</span> <span class="nav-text">通过自定义域名访问部署于内网的 web 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E5%8F%91-DNS-%E6%9F%A5%E8%AF%A2%E8%AF%B7%E6%B1%82"><span class="nav-number">4.3.</span> <span class="nav-text">转发 DNS 查询请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E5%8F%91-Unix%E5%9F%9F%E5%A5%97%E6%8E%A5%E5%AD%97"><span class="nav-number">4.4.</span> <span class="nav-text">转发 Unix域套接字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E5%9C%B0%E6%9A%B4%E9%9C%B2%E5%86%85%E7%BD%91%E6%9C%8D%E5%8A%A1"><span class="nav-number">4.5.</span> <span class="nav-text">安全地暴露内网服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87-frpc-%E6%89%80%E5%9C%A8%E6%9C%BA%E5%99%A8%E8%AE%BF%E9%97%AE%E5%A4%96%E7%BD%91"><span class="nav-number">4.6.</span> <span class="nav-text">通过 frpc 所在机器访问外网</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%AF%B4%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text">功能说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">5.1.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dashboard"><span class="nav-number">5.2.</span> <span class="nav-text">Dashboard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="nav-number">5.3.</span> <span class="nav-text">身份验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E4%B8%8E%E5%8E%8B%E7%BC%A9"><span class="nav-number">5.4.</span> <span class="nav-text">加密与压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%83%AD%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">5.5.</span> <span class="nav-text">客户端热加载配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.6.</span> <span class="nav-text">特权模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E7%99%BD%E5%90%8D%E5%8D%95"><span class="nav-number">5.6.1.</span> <span class="nav-text">端口白名单</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="nav-number">5.7.</span> <span class="nav-text">TCP 多路复用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%95%E5%B1%82%E9%80%9A%E4%BF%A1%E5%8F%AF%E9%80%89-kcp-%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.8.</span> <span class="nav-text">底层通信可选 kcp 协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">5.9.</span> <span class="nav-text">连接池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-Host-Header"><span class="nav-number">5.10.</span> <span class="nav-text">修改 Host Header</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9E-IP"><span class="nav-number">5.11.</span> <span class="nav-text">获取用户真实 IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%AF%86%E7%A0%81%E4%BF%9D%E6%8A%A4%E4%BD%A0%E7%9A%84-web-%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.12.</span> <span class="nav-text">通过密码保护你的 web 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BA%8C%E7%BA%A7%E5%9F%9F%E5%90%8D"><span class="nav-number">5.13.</span> <span class="nav-text">自定义二级域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL-%E8%B7%AF%E7%94%B1"><span class="nav-number">5.14.</span> <span class="nav-text">URL 路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E4%BB%A3%E7%90%86%E8%BF%9E%E6%8E%A5-frps"><span class="nav-number">5.15.</span> <span class="nav-text">通过代理连接 frps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6"><span class="nav-number">5.16.</span> <span class="nav-text">插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92"><span class="nav-number">6.</span> <span class="nav-text">开发计划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA-frp-%E5%81%9A%E8%B4%A1%E7%8C%AE"><span class="nav-number">7.</span> <span class="nav-text">为 frp 做贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%90%E5%8A%A9"><span class="nav-number">8.</span> <span class="nav-text">捐助</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E4%BB%98%E5%AE%9D%E6%89%AB%E7%A0%81%E6%8D%90%E8%B5%A0"><span class="nav-number">8.1.</span> <span class="nav-text">支付宝扫码捐赠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E4%BF%A1%E6%94%AF%E4%BB%98%E6%8D%90%E8%B5%A0"><span class="nav-number">8.2.</span> <span class="nav-text">微信支付捐赠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Paypal-%E6%8D%90%E8%B5%A0"><span class="nav-number">8.3.</span> <span class="nav-text">Paypal 捐赠</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
 
       <div class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image" src="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg" alt="SupperMary">
-            
-              <p class="site-author-name" itemprop="name">SupperMary</p>
-              <p class="site-description motion-element" itemprop="description"></p>
-          </div>
-
-          
-            <nav class="site-state motion-element">
-              
-                <div class="site-state-item site-state-posts">
-                
-                  <a href="/archives/">
-                
-                    <span class="site-state-item-count">73</span>
-                    <span class="site-state-item-name">posts</span>
-                  </a>
-                </div>
-              
-
-              
-
-              
-                
-                
-                <div class="site-state-item site-state-tags">
-                  <a href="/tags/index.html">
-                    
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">30</span>
-                    <span class="site-state-item-name">tags</span>
-                  </a>
-                </div>
-              
-            </nav>
-          
-
-          
-
-          
-
-          
-
-          
-          
-
-          
-            
-          
-          
-
-        </div>
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="SupperMary"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
       </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
 
-      
-      <!--noindex-->
-        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
 
-            
-            
-            
-            
 
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#frp-的作用"><span class="nav-number">1.</span> <span class="nav-text">frp 的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开发状态"><span class="nav-number">2.</span> <span class="nav-text">开发状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">3.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用示例"><span class="nav-number">4.</span> <span class="nav-text">使用示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过-ssh-访问公司内网机器"><span class="nav-number">4.1.</span> <span class="nav-text">通过 ssh 访问公司内网机器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过自定义域名访问部署于内网的-web-服务"><span class="nav-number">4.2.</span> <span class="nav-text">通过自定义域名访问部署于内网的 web 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转发-DNS-查询请求"><span class="nav-number">4.3.</span> <span class="nav-text">转发 DNS 查询请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转发-Unix域套接字"><span class="nav-number">4.4.</span> <span class="nav-text">转发 Unix域套接字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全地暴露内网服务"><span class="nav-number">4.5.</span> <span class="nav-text">安全地暴露内网服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过-frpc-所在机器访问外网"><span class="nav-number">4.6.</span> <span class="nav-text">通过 frpc 所在机器访问外网</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#功能说明"><span class="nav-number">5.</span> <span class="nav-text">功能说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件"><span class="nav-number">5.1.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dashboard"><span class="nav-number">5.2.</span> <span class="nav-text">Dashboard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#身份验证"><span class="nav-number">5.3.</span> <span class="nav-text">身份验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加密与压缩"><span class="nav-number">5.4.</span> <span class="nav-text">加密与压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端热加载配置文件"><span class="nav-number">5.5.</span> <span class="nav-text">客户端热加载配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特权模式"><span class="nav-number">5.6.</span> <span class="nav-text">特权模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#端口白名单"><span class="nav-number">5.6.1.</span> <span class="nav-text">端口白名单</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-多路复用"><span class="nav-number">5.7.</span> <span class="nav-text">TCP 多路复用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层通信可选-kcp-协议"><span class="nav-number">5.8.</span> <span class="nav-text">底层通信可选 kcp 协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接池"><span class="nav-number">5.9.</span> <span class="nav-text">连接池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改-Host-Header"><span class="nav-number">5.10.</span> <span class="nav-text">修改 Host Header</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取用户真实-IP"><span class="nav-number">5.11.</span> <span class="nav-text">获取用户真实 IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过密码保护你的-web-服务"><span class="nav-number">5.12.</span> <span class="nav-text">通过密码保护你的 web 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义二级域名"><span class="nav-number">5.13.</span> <span class="nav-text">自定义二级域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL-路由"><span class="nav-number">5.14.</span> <span class="nav-text">URL 路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过代理连接-frps"><span class="nav-number">5.15.</span> <span class="nav-text">通过代理连接 frps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插件"><span class="nav-number">5.16.</span> <span class="nav-text">插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开发计划"><span class="nav-number">6.</span> <span class="nav-text">开发计划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为-frp-做贡献"><span class="nav-number">7.</span> <span class="nav-text">为 frp 做贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#捐助"><span class="nav-number">8.</span> <span class="nav-text">捐助</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#支付宝扫码捐赠"><span class="nav-number">8.1.</span> <span class="nav-text">支付宝扫码捐赠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#微信支付捐赠"><span class="nav-number">8.2.</span> <span class="nav-text">微信支付捐赠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Paypal-捐赠"><span class="nav-number">8.3.</span> <span class="nav-text">Paypal 捐赠</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </div>
-      <!--/noindex-->
-      
-
-      
+      </div>
 
     </div>
   </aside>
+  <div id="sidebar-dimmer"></div>
 
 
-        
       </div>
     </main>
 
-    <footer id="footer" class="footer">
+    <footer class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
-  <span class="with-love" id="animate">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-
-  
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    
-    <span title="Symbols count total">246k</span>
-  
-
-  
+    <span title="Symbols count total">253k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    
-    <span title="Reading time total">3:43</span>
-  
+    <span title="Reading time total">3:50</span>
 </div>
-
-
-  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
-
-
-
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
 
         
 <div class="busuanzi-count">
   <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-  
-    <span class="site-uv" title="Total Visitors">
-      <i class="fa fa-user"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
     </span>
-  
-
-  
-    <span class="site-pv" title="Total Views">
-      <i class="fa fa-eye"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
     </span>
-  
 </div>
 
 
@@ -1049,456 +669,47 @@
 
 
 
-
-        
       </div>
     </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
-    
-
-    
   </div>
 
   
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script>
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
+<script src="/js/utils.js"></script>
 
-
-
+<script src="/js/motion.js"></script>
 
 
+<script src="/js/schemes/muse.js"></script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <script src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-
-  
-
-
-  <script src="/js/src/utils.js?v=6.7.0"></script>
-
-  <script src="/js/src/motion.js?v=6.7.0"></script>
-
-
-
-  
-  
-
-  
-  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
-<script src="/js/src/post-details.js?v=6.7.0"></script>
-
-
-
-  
-
-
-  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
-
-
-
-  
-
-
-
-  
-
-
-
-
-
-
-
+<script src="/js/next-boot.js"></script>
 
 
 
 
   
 
-  <script>
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
-      });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
-  </script>
-
-
 
 
 
   
+<script src="/js/local-search.js"></script>
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
+
+
 
   
 

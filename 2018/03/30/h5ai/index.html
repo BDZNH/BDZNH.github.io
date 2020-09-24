@@ -1,131 +1,53 @@
 <!DOCTYPE html>
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<html class="theme-next muse use-motion" lang>
-<head><meta name="generator" content="Hexo 3.9.0">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
-
-<link rel="stylesheet" href="/css/main.css?v=6.7.0">
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico?v=6.7.0">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
-
-
-
-
-
-
-
-<script id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '6.7.0',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: false,
-    fastclick: false,
-    lazyload: false,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-  
-
-
-
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
   <meta name="description" content="之前租的VPS过期了，折折腾腾，修修补补又换回搬瓦工，用上了久负盛名的CN2路线，表现比之前的digitalocean好多了，digitalocean的优势在于同时支持BBR和IPv6，搬瓦工这边BBR和IPv6只能二选一，虽然已经有在openVz上安装BBR的方法，但是效果并不是很好，今年翼讯升级了一下，比以往好用得多，于是选了有BBR的版本。有这样一个长期开机的东西，自然不会让它吃灰，，目前的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一个在线的文件浏览器">
-<meta property="og:url" content="http://yoursite.com/2018/03/30/h5ai/index.html">
+<meta property="og:url" content="http://example.com/2018/03/30/h5ai/index.html">
 <meta property="og:site_name" content="BDZNH">
 <meta property="og:description" content="之前租的VPS过期了，折折腾腾，修修补补又换回搬瓦工，用上了久负盛名的CN2路线，表现比之前的digitalocean好多了，digitalocean的优势在于同时支持BBR和IPv6，搬瓦工这边BBR和IPv6只能二选一，虽然已经有在openVz上安装BBR的方法，但是效果并不是很好，今年翼讯升级了一下，比以往好用得多，于是选了有BBR的版本。有这样一个长期开机的东西，自然不会让它吃灰，，目前的">
-<meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/2018/03/30/h5ai/1.png">
-<meta property="og:image" content="http://yoursite.com/2018/03/30/h5ai/2.png">
-<meta property="og:image" content="http://yoursite.com/2018/03/30/h5ai/4.jpg">
-<meta property="og:image" content="http://yoursite.com/2018/03/30/h5ai/3.jpg">
-<meta property="og:image" content="http://yoursite.com/2018/03/30/h5ai/5.jpg">
-<meta property="og:updated_time" content="2019-01-16T10:41:18.000Z">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2018/03/30/h5ai/1.png">
+<meta property="og:image" content="http://example.com/2018/03/30/h5ai/2.png">
+<meta property="og:image" content="http://example.com/2018/03/30/h5ai/4.jpg">
+<meta property="og:image" content="http://example.com/2018/03/30/h5ai/3.jpg">
+<meta property="og:image" content="http://example.com/2018/03/30/h5ai/5.jpg">
+<meta property="article:published_time" content="2018-03-30T12:02:38.000Z">
+<meta property="article:modified_time" content="2019-01-16T10:41:18.000Z">
+<meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一个在线的文件浏览器">
-<meta name="twitter:description" content="之前租的VPS过期了，折折腾腾，修修补补又换回搬瓦工，用上了久负盛名的CN2路线，表现比之前的digitalocean好多了，digitalocean的优势在于同时支持BBR和IPv6，搬瓦工这边BBR和IPv6只能二选一，虽然已经有在openVz上安装BBR的方法，但是效果并不是很好，今年翼讯升级了一下，比以往好用得多，于是选了有BBR的版本。有这样一个长期开机的东西，自然不会让它吃灰，，目前的">
-<meta name="twitter:image" content="http://yoursite.com/2018/03/30/h5ai/1.png">
+<meta name="twitter:image" content="http://example.com/2018/03/30/h5ai/1.png">
+
+<link rel="canonical" href="http://example.com/2018/03/30/h5ai/">
 
 
-
-
-
-
-  <link rel="canonical" href="http://yoursite.com/2018/03/30/h5ai/">
-
-
-
-<script id="page.configurations">
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -135,35 +57,10 @@
 
 
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=90140804-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '90140804-1');
-  </script>
-
-
-
-  <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?0ac08bcdcdc748614bb22878d35b3504";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-
-
-
 
 
   <noscript>
   <style>
-  .use-motion .motion-element,
   .use-motion .brand,
   .use-motion .menu-item,
   .sidebar-inner,
@@ -172,9 +69,8 @@
   .use-motion .comments,
   .use-motion .post-header,
   .use-motion .post-body,
-  .use-motion .collection-title { opacity: initial; }
+  .use-motion .collection-header { opacity: initial; }
 
-  .use-motion .logo,
   .use-motion .site-title,
   .use-motion .site-subtitle {
     opacity: initial;
@@ -188,338 +84,184 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="default">
-
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">BDZNH</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-    
-    
   </div>
 
-  <div class="site-nav-toggle">
-    <button aria-label="Toggle navigation bar">
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
   </div>
 </div>
+
 
 
 
 <nav class="site-nav">
-  
-    <ul id="menu" class="menu">
-      
-        
-        
-        
-          
-          <li class="menu-item menu-item-home">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-about">
+        <li class="menu-item menu-item-about">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-tags">
+        <li class="menu-item menu-item-tags">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-archives">
+        <li class="menu-item menu-item-archives">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-minecraft">
+        <li class="menu-item menu-item-minecraft">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/Minecraft/" rel="section"><i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-projects">
+        <li class="menu-item menu-item-projects">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/app/" rel="section"><i class="menu-item-icon fa fa-fw fa-building-o"></i> <br>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
 
   </li>
-
-      
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
-        </li>
-      
-    </ul>
-  
-
-  
-    
-
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
 </nav>
 
 
 
-  
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
 
-
+    </div>
+  </div>
 
 </div>
     </header>
 
     
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
 
 
-    <main id="main" class="main">
+    <main class="main">
       <div class="main-inner">
         <div class="content-wrap">
           
-          <div id="content" class="content">
+
+          <div class="content post posts-expand">
             
 
-  <div id="posts" class="posts-expand">
     
-
-  
-
   
   
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/30/h5ai/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/03/30/h5ai/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
       <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg">
+      <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="BDZNH">
     </span>
-
-    
       <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">一个在线的文件浏览器
-
-              
-            
-          </h1>
-        
+        <h1 class="post-title" itemprop="name headline">
+          一个在线的文件浏览器
+        </h1>
 
         <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
+            <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
+              <span class="post-meta-item-text">Posted on</span>
 
               <time title="Created: 2018-03-30 20:02:38" itemprop="dateCreated datePublished" datetime="2018-03-30T20:02:38+08:00">2018-03-30</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
+            </span>
+              <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
+                <span class="post-meta-item-text">Edited on</span>
                 <time title="Modified: 2019-01-16 18:41:18" itemprop="dateModified" datetime="2019-01-16T18:41:18+08:00">2019-01-16</time>
-              
-            
-          </span>
+              </span>
 
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Symbols count in article: </span>
-                
-                <span title="Symbols count in article">4.6k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">4 mins.</span>
-              
-            </div>
-          
-
-          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
 
         </div>
       </header>
-    
 
     
     
@@ -527,346 +269,228 @@
     <div class="post-body" itemprop="articleBody">
 
       
-      
-
-      
         <p>之前租的VPS过期了，折折腾腾，修修补补又换回搬瓦工，用上了久负盛名的CN2路线，表现比之前的digitalocean好多了，digitalocean的优势在于同时支持BBR和IPv6，搬瓦工这边BBR和IPv6只能二选一，虽然已经有在openVz上安装BBR的方法，但是效果并不是很好，今年翼讯升级了一下，比以往好用得多，于是选了有BBR的版本。<br>有这样一个长期开机的东西，自然不会让它吃灰，，目前的打算是让它作为一个下载中转站，aria2开服下载，h5ai作为在线文件浏览器，抽空可以从VPS上高速把文件弄回来。</p>
-<img src="/2018/03/30/h5ai/1.png" title="h5ai show">
+<img src="/2018/03/30/h5ai/1.png" class="" title="h5ai show">
+
 <a id="more"></a>
-<h2 id="安装h5ai"><a href="#安装h5ai" class="headerlink" title="安装h5ai"></a>安装<a href="https://larsjung.de/h5ai/" target="_blank" rel="noopener">h5ai</a></h2><p><a href="https://larsjung.de/h5ai/" target="_blank" rel="noopener">h5ai</a>是一个非常美观的目录列表程序，如上图，安装h5ai之后，可以实现在线的文件浏览，安装相应的依赖之后，可以在线预览文件，包括图片、视频和压缩包，可以说是相当的方便了，装在树莓派上的话，就可以让树莓派把视频下载好，直接观看了，不用传回电脑来。</p>
+
+<h2 id="安装h5ai"><a href="#安装h5ai" class="headerlink" title="安装h5ai"></a>安装<a target="_blank" rel="noopener" href="https://larsjung.de/h5ai/">h5ai</a></h2><p><a target="_blank" rel="noopener" href="https://larsjung.de/h5ai/">h5ai</a>是一个非常美观的目录列表程序，如上图，安装h5ai之后，可以实现在线的文件浏览，安装相应的依赖之后，可以在线预览文件，包括图片、视频和压缩包，可以说是相当的方便了，装在树莓派上的话，就可以让树莓派把视频下载好，直接观看了，不用传回电脑来。</p>
 <h3 id="安装准备"><a href="#安装准备" class="headerlink" title="安装准备"></a>安装准备</h3><p>提前安装好nginx（其实在装好PHP之后安装也是可以的）</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y <span class="comment">#for CentOS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line"></span><br><span class="line">sudo apt install nginx <span class="comment">#for Ubuntu/debian</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y <span class="comment">#for CentOS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line"></span><br><span class="line">sudo apt install nginx <span class="comment">#for Ubuntu/debian</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
 <h3 id="安装PHP"><a href="#安装PHP" class="headerlink" title="安装PHP"></a>安装PHP</h3><p>h5ai依赖于PHP运行，h5ai本身的安装并不复杂，就整个过程而言，复杂的是安装PHP，CentOS 7.4 所携带的PHP版本最高到 PHP 5.4， h5ai要求的PHP为5.5+，刚好不符合要求，下面先放安装PHP的过程。</p>
 <h4 id="在CentOS上安装PHP"><a href="#在CentOS上安装PHP" class="headerlink" title="在CentOS上安装PHP"></a>在CentOS上安装PHP</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm</span><br><span class="line">rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm</span><br><span class="line">yum --enablerepo=remi,remi-php72 install nginx php-fpm php-common</span><br><span class="line">yum --enablerepo=remi,remi-php72 install php-opcache php-pecl-apcu php-cli php-pear php-pdo php-mysqlnd php-pgsql php-pecl-mongodb php-pecl-redis php-pecl-memcache php-pecl-memcached php-gd php-mbstring php-mcrypt php-xml</span><br><span class="line">service php-fpm start</span><br></pre></td></tr></table></figure>
+
 <p>这里使用了第三方库，自行编译有很多需要配置的地方，很容易出错，尝试了很多次，总是有点毛病，还是回头用了这个办法。</p>
 <h4 id="在Ubuntu-debian上安装PHP"><a href="#在Ubuntu-debian上安装PHP" class="headerlink" title="在Ubuntu/debian上安装PHP"></a>在Ubuntu/debian上安装PHP</h4><p>在Ubuntu/debian上安装PHP相对来说方便得多了</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update </span><br><span class="line">sudo apt install php-fpm -y</span><br></pre></td></tr></table></figure>
+
 <h3 id="配置nginx"><a href="#配置nginx" class="headerlink" title="配置nginx"></a>配置nginx</h3><p>向nginx的配置内的server段写入以下内容</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location ~ \.php$ &#123;</span><br><span class="line">        include /etc/nginx/fastcgi_params;</span><br><span class="line">        fastcgi_pass  127.0.0.1:9000;</span><br><span class="line">        fastcgi_index index.php;</span><br><span class="line">        fastcgi_param SCRIPT_FILENAME <span class="variable">$document_root</span><span class="variable">$fastcgi_script_name</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>并且更改<code>index</code>段内容为<code>index  index.html  index.php  /_h5ai/public/index.php;</code><br>然后</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo nginx -t</span><br><span class="line">sudo nginx -s reload</span><br></pre></td></tr></table></figure>
+
 <p><code>-t</code>提示都OK的话，这个时候nginx已经能识别PHP了。</p>
 <p>如果出现错误<code>nginx: [error] invalid PID number &quot;&quot; in &quot;/usr/local/var/run/nginx/nginx.pid&quot;</code>,那么使用命令</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo nginx -c /etc/nginx/nginx.conf</span><br><span class="line">sudo nginx -s reload</span><br></pre></td></tr></table></figure>
+
 <p>这个时候PHP应该已经安装好并且已经启动了，到nginx的工作目录<code>/var/www/html/</code>或者<code>/usr/share/nginx/html/</code>（一般在这两个位置，），新建一个php文件，比如<code>vim /usr/share/nginx/html/index.php</code>，按<code>I</code>键进入编辑模式，添加以下内容</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    phpinfo();</span><br></pre></td></tr></table></figure>
+
 <p>这个时候，打开如下链接<code>http://x.x.x.x/index.php</code>(x.x.x.x是VPS的公网IP地址)，出现如下画面表示安装成功</p>
-<img src="/2018/03/30/h5ai/2.png" title="PHP is OK.">
-<h3 id="安装h5ai-1"><a href="#安装h5ai-1" class="headerlink" title="安装h5ai"></a>安装h5ai</h3><p>到<a href="https://larsjung.de/h5ai/" target="_blank" rel="noopener">作者的网站</a>下载源码包到nginx的工作目录并解压</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/share/nginx/html #or use: cd /var/www/html/</span><br><span class="line">wget https://release.larsjung.de/h5ai/h5ai-0.29.0.zip</span><br><span class="line">unzip h5ai-0.29.0.zip</span><br></pre></td></tr></table></figure>
+<img src="/2018/03/30/h5ai/2.png" class="" title="PHP is OK.">
+
+<h3 id="安装h5ai-1"><a href="#安装h5ai-1" class="headerlink" title="安装h5ai"></a>安装h5ai</h3><p>到<a target="_blank" rel="noopener" href="https://larsjung.de/h5ai/">作者的网站</a>下载源码包到nginx的工作目录并解压</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html #or use: cd &#x2F;var&#x2F;www&#x2F;html&#x2F;</span><br><span class="line">wget https:&#x2F;&#x2F;release.larsjung.de&#x2F;h5ai&#x2F;h5ai-0.29.0.zip</span><br><span class="line">unzip h5ai-0.29.0.zip</span><br></pre></td></tr></table></figure>
+
 <p>这个时候，访问<code>http://x.x.x.x/_h5ai/public/index.php</code>，出现如下画面表示<code>h5ai</code>安装成功</p>
-<img src="/2018/03/30/h5ai/4.jpg">
-<img src="/2018/03/30/h5ai/3.jpg">
+<img src="/2018/03/30/h5ai/4.jpg" class="">
+
+<img src="/2018/03/30/h5ai/3.jpg" class="">
+
 <p>访问<code>http://x.x.x.x/</code>，可以看到nginx的工作目录里面的文件（PS：不能含有index.html,index.php）</p>
-<img src="/2018/03/30/h5ai/5.jpg">
+<img src="/2018/03/30/h5ai/5.jpg" class="">
+
 <h2 id="安装aria2"><a href="#安装aria2" class="headerlink" title="安装aria2"></a>安装aria2</h2><p>在Debian/Ubuntu上直接执行<code>sudo apt-get install aria2</code>就能安装好了，版本相对来说也较新，在Cent OS上可以执行<code>sudo yum install aria2</code>来安装，然而，一如既往的是老掉牙的版本，虽然说一味追求新版并无实在的意义，但是某些功能旧版本是没有的啊啊啊~~<br>可以自己编译安装aria2</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential libgnutls-dev nettle-dev libgmp-dev libssh2-1-dev libc-ares-dev libxml2-dev zlib1g-dev libsqlite3-dev pkg-config -y <span class="comment"># For Debian/Ubuntu</span></span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line">sudo yum groupinstall <span class="string">"Development Tools"</span> -y &amp;&amp; yum install gettext-devel gnutls-devel nettle-devel gmp-devel libssh2-devel c-ares-devel libxml2-devel zlib-devel sqlite-devel pkgconfig libgcrypt-devel libssl-devel libtool autoconf automake autotools autopoint <span class="comment">#For Centos</span></span><br><span class="line">wget https://github.com/aria2/aria2/releases/download/release-1.33.1/aria2-1.33.1.tar.gz</span><br><span class="line">tar -zxf aria2-1.33.1.tar.gz</span><br><span class="line"><span class="built_in">cd</span> aria2-1.33.1</span><br><span class="line">autoreconf -i</span><br><span class="line">./configure </span><br><span class="line">make </span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential libgnutls-dev nettle-dev libgmp-dev libssh2-1-dev libc-ares-dev libxml2-dev zlib1g-dev libsqlite3-dev pkg-config -y <span class="comment"># For Debian/Ubuntu</span></span><br><span class="line"><span class="comment"># OR</span></span><br><span class="line">sudo yum groupinstall <span class="string">&quot;Development Tools&quot;</span> -y &amp;&amp; yum install gettext-devel gnutls-devel nettle-devel gmp-devel libssh2-devel c-ares-devel libxml2-devel zlib-devel sqlite-devel pkgconfig libgcrypt-devel libssl-devel libtool autoconf automake autotools autopoint <span class="comment">#For Centos</span></span><br><span class="line">wget https://github.com/aria2/aria2/releases/download/release-1.33.1/aria2-1.33.1.tar.gz</span><br><span class="line">tar -zxf aria2-1.33.1.tar.gz</span><br><span class="line"><span class="built_in">cd</span> aria2-1.33.1</span><br><span class="line">autoreconf -i</span><br><span class="line">./configure </span><br><span class="line">make </span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
 <p>在执行<code>./configure</code>的时候报的错误基本上都是缺少依赖，少谁装谁就好。<br>静态编译参数<code>./configure ARIA2_STATIC=yes</code>编译出来的程序体积巨大，动态链接的程序只有2M+，静态编译出来之后达到75M+。</p>
-<h3 id="配置aria2"><a href="#配置aria2" class="headerlink" title="配置aria2"></a>配置aria2</h3><p>可以参考<a href="https://blog.icehoney.me/posts/2015-01-31-Aria2-download" target="_blank" rel="noopener">https://blog.icehoney.me/posts/2015-01-31-Aria2-download</a>，新建配置文件<code>vim aria2c.conf</code>，添加以下内容</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#用户名</span></span><br><span class="line"><span class="comment">#rpc-user=user</span></span><br><span class="line"><span class="comment">#密码</span></span><br><span class="line"><span class="comment">#rpc-passwd=passwd</span></span><br><span class="line"><span class="comment">#上面的认证方式不建议使用,建议使用下面的token方式</span></span><br><span class="line"><span class="comment">#设置加密的密钥</span></span><br><span class="line"><span class="comment">#rpc-secret=token</span></span><br><span class="line"><span class="comment">#允许rpc</span></span><br><span class="line"><span class="built_in">enable</span>-rpc=<span class="literal">true</span></span><br><span class="line"><span class="comment">#允许所有来源, web界面跨域权限需要</span></span><br><span class="line">rpc-allow-origin-all=<span class="literal">true</span></span><br><span class="line"><span class="comment">#允许外部访问，false的话只监听本地端口</span></span><br><span class="line">rpc-listen-all=<span class="literal">true</span></span><br><span class="line"><span class="comment">#RPC端口, 仅当默认端口被占用时修改</span></span><br><span class="line"><span class="comment">#rpc-listen-port=6800</span></span><br><span class="line"><span class="comment">#最大同时下载数(任务数), 路由建议值: 3</span></span><br><span class="line">max-concurrent-downloads=5</span><br><span class="line"><span class="comment">#断点续传</span></span><br><span class="line"><span class="built_in">continue</span>=<span class="literal">true</span></span><br><span class="line"><span class="comment">#同服务器连接数</span></span><br><span class="line">max-connection-per-server=5</span><br><span class="line"><span class="comment">#最小文件分片大小, 下载线程数上限取决于能分出多少片, 对于小文件重要</span></span><br><span class="line">min-split-size=10M</span><br><span class="line"><span class="comment">#单文件最大线程数, 路由建议值: 5</span></span><br><span class="line">split=10</span><br><span class="line"><span class="comment">#下载速度限制</span></span><br><span class="line">max-overall-download-limit=0</span><br><span class="line"><span class="comment">#单文件速度限制</span></span><br><span class="line">max-download-limit=0</span><br><span class="line"><span class="comment">#上传速度限制</span></span><br><span class="line">max-overall-upload-limit=0</span><br><span class="line"><span class="comment">#单文件速度限制</span></span><br><span class="line">max-upload-limit=0</span><br><span class="line"><span class="comment">#断开速度过慢的连接</span></span><br><span class="line"><span class="comment">#lowest-speed-limit=0</span></span><br><span class="line"><span class="comment">#验证用，需要1.16.1之后的release版本</span></span><br><span class="line"><span class="comment">#referer=*</span></span><br><span class="line"><span class="comment">#文件保存路径, 默认为当前启动位置</span></span><br><span class="line">dir=/home/acgotaku/Downloads</span><br><span class="line"><span class="comment">#文件缓存, 使用内置的文件缓存, 如果你不相信Linux内核文件缓存和磁盘内置缓存时使用, 需要1.16及以上版本</span></span><br><span class="line"><span class="comment">#disk-cache=0</span></span><br><span class="line"><span class="comment">#另一种Linux文件缓存方式, 使用前确保您使用的内核支持此选项, 需要1.15及以上版本(?)</span></span><br><span class="line"><span class="comment">#enable-mmap=true</span></span><br><span class="line"><span class="comment">#文件预分配, 能有效降低文件碎片, 提高磁盘性能. 缺点是预分配时间较长</span></span><br><span class="line"><span class="comment">#所需时间 none &lt; falloc ? trunc &lt;&lt; prealloc, falloc和trunc需要文件系统和内核支持</span></span><br><span class="line">file-allocation=prealloc</span><br></pre></td></tr></table></figure>
-<p>使用命令<code>aria2c --conf-path aria2c.conf -D</code>让aria2c后台运行，然后去往<a href="https://github.com/ziahamza/webui-aria2" target="_blank" rel="noopener">https://github.com/ziahamza/webui-aria2</a>下载好整个仓库，双击<code>indel.html</code>，然后将<code>设置/连接设置</code>里面的主机设置为VPS的IP地址。</p>
+<h3 id="配置aria2"><a href="#配置aria2" class="headerlink" title="配置aria2"></a>配置aria2</h3><p>可以参考<a target="_blank" rel="noopener" href="https://blog.icehoney.me/posts/2015-01-31-Aria2-download">https://blog.icehoney.me/posts/2015-01-31-Aria2-download</a>，新建配置文件<code>vim aria2c.conf</code>，添加以下内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#用户名</span></span><br><span class="line"><span class="comment">#rpc-user=user</span></span><br><span class="line"><span class="comment">#密码</span></span><br><span class="line"><span class="comment">#rpc-passwd=passwd</span></span><br><span class="line"><span class="comment">#上面的认证方式不建议使用,建议使用下面的token方式</span></span><br><span class="line"><span class="comment">#设置加密的密钥</span></span><br><span class="line"><span class="comment">#rpc-secret=token</span></span><br><span class="line"><span class="comment">#允许rpc</span></span><br><span class="line">enable-rpc=<span class="literal">true</span></span><br><span class="line"><span class="comment">#允许所有来源, web界面跨域权限需要</span></span><br><span class="line">rpc-allow-origin-all=<span class="literal">true</span></span><br><span class="line"><span class="comment">#允许外部访问，false的话只监听本地端口</span></span><br><span class="line">rpc-listen-all=<span class="literal">true</span></span><br><span class="line"><span class="comment">#RPC端口, 仅当默认端口被占用时修改</span></span><br><span class="line"><span class="comment">#rpc-listen-port=6800</span></span><br><span class="line"><span class="comment">#最大同时下载数(任务数), 路由建议值: 3</span></span><br><span class="line">max-concurrent-downloads=5</span><br><span class="line"><span class="comment">#断点续传</span></span><br><span class="line"><span class="built_in">continue</span>=<span class="literal">true</span></span><br><span class="line"><span class="comment">#同服务器连接数</span></span><br><span class="line">max-connection-per-server=5</span><br><span class="line"><span class="comment">#最小文件分片大小, 下载线程数上限取决于能分出多少片, 对于小文件重要</span></span><br><span class="line">min-split-size=10M</span><br><span class="line"><span class="comment">#单文件最大线程数, 路由建议值: 5</span></span><br><span class="line">split=10</span><br><span class="line"><span class="comment">#下载速度限制</span></span><br><span class="line">max-overall-download-limit=0</span><br><span class="line"><span class="comment">#单文件速度限制</span></span><br><span class="line">max-download-limit=0</span><br><span class="line"><span class="comment">#上传速度限制</span></span><br><span class="line">max-overall-upload-limit=0</span><br><span class="line"><span class="comment">#单文件速度限制</span></span><br><span class="line">max-upload-limit=0</span><br><span class="line"><span class="comment">#断开速度过慢的连接</span></span><br><span class="line"><span class="comment">#lowest-speed-limit=0</span></span><br><span class="line"><span class="comment">#验证用，需要1.16.1之后的release版本</span></span><br><span class="line"><span class="comment">#referer=*</span></span><br><span class="line"><span class="comment">#文件保存路径, 默认为当前启动位置</span></span><br><span class="line">dir=/home/acgotaku/Downloads</span><br><span class="line"><span class="comment">#文件缓存, 使用内置的文件缓存, 如果你不相信Linux内核文件缓存和磁盘内置缓存时使用, 需要1.16及以上版本</span></span><br><span class="line"><span class="comment">#disk-cache=0</span></span><br><span class="line"><span class="comment">#另一种Linux文件缓存方式, 使用前确保您使用的内核支持此选项, 需要1.15及以上版本(?)</span></span><br><span class="line"><span class="comment">#enable-mmap=true</span></span><br><span class="line"><span class="comment">#文件预分配, 能有效降低文件碎片, 提高磁盘性能. 缺点是预分配时间较长</span></span><br><span class="line"><span class="comment">#所需时间 none &lt; falloc ? trunc &lt;&lt; prealloc, falloc和trunc需要文件系统和内核支持</span></span><br><span class="line">file-allocation=prealloc</span><br></pre></td></tr></table></figure>
+
+<p>使用命令<code>aria2c --conf-path aria2c.conf -D</code>让aria2c后台运行，然后去往<a target="_blank" rel="noopener" href="https://github.com/ziahamza/webui-aria2">https://github.com/ziahamza/webui-aria2</a>下载好整个仓库，双击<code>indel.html</code>，然后将<code>设置/连接设置</code>里面的主机设置为VPS的IP地址。</p>
 <p>整个思路就是aria2c后台运行，本地的webui可以直接向VPS发出下载命令，下载好之后，打开h5ai的的页面查看文件，然后再从VPS上下载回本地。</p>
 
-      
     </div>
 
     
-
-    
-    
-    
-
-    
-
-    
-      
     
     
 
-    
+      <footer class="post-footer">
 
-    <footer class="post-footer">
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2018/03/16/build-shadowsocks-libev/" rel="next" title="手动编译shadowsocks-libev">
-                <i class="fa fa-chevron-left"></i> 手动编译shadowsocks-libev
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/04/01/Remove-the-ads-of-Mx-player/" rel="prev" title="去掉Mx player的广告">
-                去掉Mx player的广告 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-  </div>
-
-
-          </div>
-          
-
-  
-
-
-
-        </div>
         
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/03/16/build-shadowsocks-libev/" rel="prev" title="手动编译shadowsocks-libev">
+      <i class="fa fa-chevron-left"></i> 手动编译shadowsocks-libev
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/01/Remove-the-ads-of-Mx-player/" rel="next" title="去掉Mx player的广告">
+      去掉Mx player的广告 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
           
   
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
   </div>
 
-  <aside id="sidebar" class="sidebar">
-    
+  <aside class="sidebar">
     <div class="sidebar-inner">
 
-      
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
 
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85h5ai"><span class="nav-number">1.</span> <span class="nav-text">安装h5ai</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%87%86%E5%A4%87"><span class="nav-number">1.1.</span> <span class="nav-text">安装准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85PHP"><span class="nav-number">1.2.</span> <span class="nav-text">安装PHP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8CentOS%E4%B8%8A%E5%AE%89%E8%A3%85PHP"><span class="nav-number">1.2.1.</span> <span class="nav-text">在CentOS上安装PHP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8Ubuntu-debian%E4%B8%8A%E5%AE%89%E8%A3%85PHP"><span class="nav-number">1.2.2.</span> <span class="nav-text">在Ubuntu&#x2F;debian上安装PHP</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEnginx"><span class="nav-number">1.3.</span> <span class="nav-text">配置nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85h5ai-1"><span class="nav-number">1.4.</span> <span class="nav-text">安装h5ai</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85aria2"><span class="nav-number">2.</span> <span class="nav-text">安装aria2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEaria2"><span class="nav-number">2.1.</span> <span class="nav-text">配置aria2</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
 
       <div class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image" src="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg" alt="SupperMary">
-            
-              <p class="site-author-name" itemprop="name">SupperMary</p>
-              <p class="site-description motion-element" itemprop="description"></p>
-          </div>
-
-          
-            <nav class="site-state motion-element">
-              
-                <div class="site-state-item site-state-posts">
-                
-                  <a href="/archives/">
-                
-                    <span class="site-state-item-count">73</span>
-                    <span class="site-state-item-name">posts</span>
-                  </a>
-                </div>
-              
-
-              
-
-              
-                
-                
-                <div class="site-state-item site-state-tags">
-                  <a href="/tags/index.html">
-                    
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">30</span>
-                    <span class="site-state-item-name">tags</span>
-                  </a>
-                </div>
-              
-            </nav>
-          
-
-          
-
-          
-
-          
-
-          
-          
-
-          
-            
-          
-          
-
-        </div>
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="SupperMary"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
       </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
 
-      
-      <!--noindex-->
-        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
 
-            
-            
-            
-            
 
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装h5ai"><span class="nav-number">1.</span> <span class="nav-text">安装h5ai</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装准备"><span class="nav-number">1.1.</span> <span class="nav-text">安装准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装PHP"><span class="nav-number">1.2.</span> <span class="nav-text">安装PHP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在CentOS上安装PHP"><span class="nav-number">1.2.1.</span> <span class="nav-text">在CentOS上安装PHP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在Ubuntu-debian上安装PHP"><span class="nav-number">1.2.2.</span> <span class="nav-text">在Ubuntu/debian上安装PHP</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置nginx"><span class="nav-number">1.3.</span> <span class="nav-text">配置nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装h5ai-1"><span class="nav-number">1.4.</span> <span class="nav-text">安装h5ai</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装aria2"><span class="nav-number">2.</span> <span class="nav-text">安装aria2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置aria2"><span class="nav-number">2.1.</span> <span class="nav-text">配置aria2</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </div>
-      <!--/noindex-->
-      
-
-      
+      </div>
 
     </div>
   </aside>
+  <div id="sidebar-dimmer"></div>
 
 
-        
       </div>
     </main>
 
-    <footer id="footer" class="footer">
+    <footer class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
-  <span class="with-love" id="animate">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-
-  
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    
-    <span title="Symbols count total">246k</span>
-  
-
-  
+    <span title="Symbols count total">253k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    
-    <span title="Reading time total">3:43</span>
-  
+    <span title="Reading time total">3:50</span>
 </div>
-
-
-  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
-
-
-
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
 
         
 <div class="busuanzi-count">
   <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-  
-    <span class="site-uv" title="Total Visitors">
-      <i class="fa fa-user"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
     </span>
-  
-
-  
-    <span class="site-pv" title="Total Views">
-      <i class="fa fa-eye"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
     </span>
-  
 </div>
 
 
@@ -876,456 +500,47 @@
 
 
 
-
-        
       </div>
     </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
-    
-
-    
   </div>
 
   
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script>
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
+<script src="/js/utils.js"></script>
 
-
-
+<script src="/js/motion.js"></script>
 
 
+<script src="/js/schemes/muse.js"></script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <script src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-
-  
-
-
-  <script src="/js/src/utils.js?v=6.7.0"></script>
-
-  <script src="/js/src/motion.js?v=6.7.0"></script>
-
-
-
-  
-  
-
-  
-  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
-<script src="/js/src/post-details.js?v=6.7.0"></script>
-
-
-
-  
-
-
-  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
-
-
-
-  
-
-
-
-  
-
-
-
-
-
-
-
+<script src="/js/next-boot.js"></script>
 
 
 
 
   
 
-  <script>
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
-      });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
-  </script>
-
-
 
 
 
   
+<script src="/js/local-search.js"></script>
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
+
+
 
   
 

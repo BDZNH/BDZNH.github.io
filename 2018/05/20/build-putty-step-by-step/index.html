@@ -1,151 +1,73 @@
 <!DOCTYPE html>
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-<html class="theme-next muse use-motion" lang>
-<head><meta name="generator" content="Hexo 3.9.0">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
-
-<link rel="stylesheet" href="/css/main.css?v=6.7.0">
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico?v=6.7.0">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico?v=6.7.0">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
-
-
-
-
-
-
-
-<script id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '6.7.0',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: false,
-    fastclick: false,
-    lazyload: false,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-  
-
-
-
-
-  <meta name="description" content="PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考MANIFEST)  所以，从零开始建立putty的Viusal Studio2017解决方案。">
+  <meta name="description" content="PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考MANIFEST)   所以，从零开始建立putty的Viusal Studio2017解决方案。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="从零开始建立PuTTY工程">
-<meta property="og:url" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/index.html">
+<meta property="og:url" content="http://example.com/2018/05/20/build-putty-step-by-step/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:description" content="PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考MANIFEST)  所以，从零开始建立putty的Viusal Studio2017解决方案。">
-<meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/25.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/1.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/2.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/3.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/4.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/5.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/6.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/7.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/8.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/9.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/10.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/11.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/12.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/13.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/14.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/15.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/16.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/17.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/18.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/19.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/20.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/21.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/22.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/23.png">
-<meta property="og:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/24.png">
-<meta property="og:updated_time" content="2019-01-16T10:53:59.000Z">
+<meta property="og:description" content="PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考MANIFEST)   所以，从零开始建立putty的Viusal Studio2017解决方案。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/25.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/1.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/2.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/3.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/4.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/5.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/6.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/7.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/8.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/9.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/10.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/11.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/12.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/13.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/14.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/15.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/16.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/17.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/18.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/19.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/20.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/21.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/22.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/23.png">
+<meta property="og:image" content="http://example.com/2018/05/20/build-putty-step-by-step/24.png">
+<meta property="article:published_time" content="2018-05-20T12:03:24.000Z">
+<meta property="article:modified_time" content="2019-01-16T10:53:59.000Z">
+<meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="从零开始建立PuTTY工程">
-<meta name="twitter:description" content="PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考MANIFEST)  所以，从零开始建立putty的Viusal Studio2017解决方案。">
-<meta name="twitter:image" content="http://yoursite.com/2018/05/20/build-putty-step-by-step/25.png">
+<meta name="twitter:image" content="http://example.com/2018/05/20/build-putty-step-by-step/25.png">
+
+<link rel="canonical" href="http://example.com/2018/05/20/build-putty-step-by-step/">
 
 
-
-
-
-
-  <link rel="canonical" href="http://yoursite.com/2018/05/20/build-putty-step-by-step/">
-
-
-
-<script id="page.configurations">
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -155,35 +77,10 @@
 
 
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=90140804-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '90140804-1');
-  </script>
-
-
-
-  <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?0ac08bcdcdc748614bb22878d35b3504";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-
-
-
 
 
   <noscript>
   <style>
-  .use-motion .motion-element,
   .use-motion .brand,
   .use-motion .menu-item,
   .sidebar-inner,
@@ -192,9 +89,8 @@
   .use-motion .comments,
   .use-motion .post-header,
   .use-motion .post-body,
-  .use-motion .collection-title { opacity: initial; }
+  .use-motion .collection-header { opacity: initial; }
 
-  .use-motion .logo,
   .use-motion .site-title,
   .use-motion .site-subtitle {
     opacity: initial;
@@ -208,338 +104,184 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="default">
-
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left page-post-detail">
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">BDZNH</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-    
-    
   </div>
 
-  <div class="site-nav-toggle">
-    <button aria-label="Toggle navigation bar">
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
   </div>
 </div>
+
 
 
 
 <nav class="site-nav">
-  
-    <ul id="menu" class="menu">
-      
-        
-        
-        
-          
-          <li class="menu-item menu-item-home">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-about">
+        <li class="menu-item menu-item-about">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-tags">
+        <li class="menu-item menu-item-tags">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-archives">
+        <li class="menu-item menu-item-archives">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-minecraft">
+        <li class="menu-item menu-item-minecraft">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/Minecraft/" rel="section"><i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
 
   </li>
-        
-        
-        
-          
-          <li class="menu-item menu-item-projects">
+        <li class="menu-item menu-item-projects">
 
-    
-    
-    
-      
-    
-
-    
-
-    <a href="/app/" rel="section"><i class="menu-item-icon fa fa-fw fa-building-o"></i> <br>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
 
   </li>
-
-      
-      
-        <li class="menu-item menu-item-search">
-          
-            <a href="javascript:;" class="popup-trigger">
-          
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
-        </li>
-      
-    </ul>
-  
-
-  
-    
-
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
-    </div>
-  </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
 </nav>
 
 
 
-  
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
 
-
+    </div>
+  </div>
 
 </div>
     </header>
 
     
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
 
 
-    <main id="main" class="main">
+    <main class="main">
       <div class="main-inner">
         <div class="content-wrap">
           
-          <div id="content" class="content">
+
+          <div class="content post posts-expand">
             
 
-  <div id="posts" class="posts-expand">
     
-
-  
-
   
   
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/20/build-putty-step-by-step/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/05/20/build-putty-step-by-step/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
       <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg">
+      <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="BDZNH">
     </span>
-
-    
       <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">从零开始建立PuTTY工程
-
-              
-            
-          </h1>
-        
+        <h1 class="post-title" itemprop="name headline">
+          从零开始建立PuTTY工程
+        </h1>
 
         <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
+            <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
+              <span class="post-meta-item-text">Posted on</span>
 
               <time title="Created: 2018-05-20 20:03:24" itemprop="dateCreated datePublished" datetime="2018-05-20T20:03:24+08:00">2018-05-20</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
+            </span>
+              <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
+                <span class="post-meta-item-text">Edited on</span>
                 <time title="Modified: 2019-01-16 18:53:59" itemprop="dateModified" datetime="2019-01-16T18:53:59+08:00">2019-01-16</time>
-              
-            
-          </span>
+              </span>
 
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Symbols count in article: </span>
-                
-                <span title="Symbols count in article">5.4k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Reading time &asymp;</span>
-                
-                <span title="Reading time">5 mins.</span>
-              
-            </div>
-          
-
-          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
 
         </div>
       </header>
-    
 
     
     
@@ -547,368 +289,271 @@
     <div class="post-body" itemprop="articleBody">
 
       
-      
-
-      
         <p>PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考<a href="#MANIFEST">MANIFEST</a>)</p>
-<img src="/2018/05/20/build-putty-step-by-step/25.png">
+<img src="/2018/05/20/build-putty-step-by-step/25.png" class="">
+
 <p>所以，从零开始建立putty的Viusal Studio2017解决方案。</p>
 <a id="more"></a>
-<p>首先，建立一个空项目(记得勾选为解决方案创建目录)<br><img src="/2018/05/20/build-putty-step-by-step/1.png"></p>
+
+<p>首先，建立一个空项目(记得勾选为解决方案创建目录)</p>
+<img src="/2018/05/20/build-putty-step-by-step/1.png" class="">
+
 <p>这个时候，在你的putty源码目录的windows文件夹内会有一个putty文件夹，里面会有一个<code>putty.sln</code>和一个<code>putty</code>文件夹，将windows文件夹内的putty文件夹更名为VS2017(仅仅是为了与已有的解决方案统一风格而已，名字随意)，这个时候，你可以对着解决方案的putty项目，点击右键，移动到添加，然后点击添加现有现有项，或者可以直接按下<code>Shift + Alt +A</code>，对着原本就有的PuTTY项目，分别添加源文件、头文件、资源文件:</p>
-<img src="/2018/05/20/build-putty-step-by-step/2.png">
+<img src="/2018/05/20/build-putty-step-by-step/2.png" class="">
 <p>添加完成之后，putty项目看起来应该是这个样子的</p>
-<img src="/2018/05/20/build-putty-step-by-step/3.png">
+<img src="/2018/05/20/build-putty-step-by-step/3.png" class="">
+
 <h2 id="无法打开包括文件-“unix-h”"><a href="#无法打开包括文件-“unix-h”" class="headerlink" title="无法打开包括文件: “unix.h”"></a>无法打开包括文件: “unix.h”</h2><p>按下<code>Ctrl+Shift+B</code>，你就会看到这样的画面：</p>
-<img src="/2018/05/20/build-putty-step-by-step/4.png">
-<p>错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C1083	无法打开包括文件: “unix.h”: No such file or directory	putty	d:\desktop\putty-en\puttyps.h	14</span><br></pre></td></tr></table></figure></p>
+<img src="/2018/05/20/build-putty-step-by-step/4.png" class="">
+<p>错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C1083	无法打开包括文件: “unix.h”: No such file or directory	putty	d:\desktop\putty-en\puttyps.h	14	</span><br></pre></td></tr></table></figure>
 <p>原因很明显，它们找不到头文件在哪儿，右击项目，点击属性，选中C/C++，在附加包含目录内填入<code>..\..\..\./;..\..\..\unix/;..\..\..\charset/;..\..\..\windows/;</code></p>
-<img src="/2018/05/20/build-putty-step-by-step/5.png">
+<img src="/2018/05/20/build-putty-step-by-step/5.png" class="">
 <p>这个是用来指定编译器搜索头文件的目录的，这里用的是相对路径(相对于putty解决方案内putty项目的路径，也就是putty源码的根目录，unix目录，charset目录和windows目录)，这个附加目录也可以在<code>VC++目录</code>的包含目录里面填写，如下图</p>
-<img src="/2018/05/20/build-putty-step-by-step/6.png">
+<img src="/2018/05/20/build-putty-step-by-step/6.png" class="">
 <p>库目录在putty项目的建立过程中不用填写，putty没有用到第三方库，这里不用填写。</p>
-<h2 id="无法打开包括文件-“dlfcn-h”"><a href="#无法打开包括文件-“dlfcn-h”" class="headerlink" title="无法打开包括文件: “dlfcn.h”"></a>无法打开包括文件: “dlfcn.h”</h2><p>再次生成解决方案，你会遇到第二个问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C1083	无法打开包括文件: “dlfcn.h”: No such file or directory	putty	d:\desktop\putty-en\unix\unix.h	11</span><br></pre></td></tr></table></figure></p>
-<img src="/2018/05/20/build-putty-step-by-step/7.png">
+<h2 id="无法打开包括文件-“dlfcn-h”"><a href="#无法打开包括文件-“dlfcn-h”" class="headerlink" title="无法打开包括文件: “dlfcn.h”"></a>无法打开包括文件: “dlfcn.h”</h2><p>再次生成解决方案，你会遇到第二个问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C1083	无法打开包括文件: “dlfcn.h”: No such file or directory	putty	d:\desktop\putty-en\unix\unix.h	11	</span><br></pre></td></tr></table></figure>
+
+<img src="/2018/05/20/build-putty-step-by-step/7.png" class="">
 <p>依旧打开项目属性，点击<code>C/C++</code>，预处理器,预处理器定义</p>
-<img src="/2018/05/20/build-putty-step-by-step/8.png">
-<p>点击右边的下拉箭头，点击编辑，填入以下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WIN32</span><br><span class="line">_WINDOWS</span><br><span class="line">_CRT_SECURE_NO_WARNINGS</span><br></pre></td></tr></table></figure></p>
-<p>这个时候，看起来应该是这个样子的(“dlfcn.h”是Linux系统的头文件，猜测加预处理参数是为了让编译器知道不去试图查找这个文件)<br><img src="/2018/05/20/build-putty-step-by-step/9.png"></p>
-<h2 id="case-表达式不是常量"><a href="#case-表达式不是常量" class="headerlink" title="case 表达式不是常量"></a>case 表达式不是常量</h2><p>再次生成解决方案，你会遇到第三个问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C2051	case 表达式不是常量	putty	d:\desktop\putty-en\ssh.c	1372</span><br></pre></td></tr></table></figure></p>
-<img src="/2018/05/20/build-putty-step-by-step/10.png">
-<p>打开项目属性，选中<code>C/C++</code>，将调试信息格式更改为“程序数据库”，<br><img src="/2018/05/20/build-putty-step-by-step/11.png"></p>
-<h2 id="使用了可能未初始化的本地指针变量"><a href="#使用了可能未初始化的本地指针变量" class="headerlink" title="使用了可能未初始化的本地指针变量"></a>使用了可能未初始化的本地指针变量</h2><p>再次生成解决方案，你会遇到第四个问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C4703	使用了可能未初始化的本地指针变量“oev”	putty	d:\desktop\putty-en\windows\winhandl.c	342</span><br></pre></td></tr></table></figure></p>
-<img src="/2018/05/20/build-putty-step-by-step/12.png">
+<img src="/2018/05/20/build-putty-step-by-step/8.png" class="">
+<p>点击右边的下拉箭头，点击编辑，填入以下内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WIN32</span><br><span class="line">_WINDOWS</span><br><span class="line">_CRT_SECURE_NO_WARNINGS</span><br></pre></td></tr></table></figure>
+<p>这个时候，看起来应该是这个样子的(“dlfcn.h”是Linux系统的头文件，猜测加预处理参数是为了让编译器知道不去试图查找这个文件)</p>
+<img src="/2018/05/20/build-putty-step-by-step/9.png" class="">
+
+<h2 id="case-表达式不是常量"><a href="#case-表达式不是常量" class="headerlink" title="case 表达式不是常量"></a>case 表达式不是常量</h2><p>再次生成解决方案，你会遇到第三个问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C2051	case 表达式不是常量	putty	d:\desktop\putty-en\ssh.c	1372	</span><br></pre></td></tr></table></figure>
+
+<img src="/2018/05/20/build-putty-step-by-step/10.png" class="">
+
+<p>打开项目属性，选中<code>C/C++</code>，将调试信息格式更改为“程序数据库”，</p>
+<img src="/2018/05/20/build-putty-step-by-step/11.png" class="">
+
+<h2 id="使用了可能未初始化的本地指针变量"><a href="#使用了可能未初始化的本地指针变量" class="headerlink" title="使用了可能未初始化的本地指针变量"></a>使用了可能未初始化的本地指针变量</h2><p>再次生成解决方案，你会遇到第四个问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	C4703	使用了可能未初始化的本地指针变量“oev”	putty	d:\desktop\putty-en\windows\winhandl.c	342	</span><br></pre></td></tr></table></figure>
+<img src="/2018/05/20/build-putty-step-by-step/12.png" class="">
 <p>打开项目属性，选中<code>C/C++</code>，将SDL检查改为否</p>
-<img src="/2018/05/20/build-putty-step-by-step/13.png">
-<h2 id="noshare-obj-amp-winshare-obj"><a href="#noshare-obj-amp-winshare-obj" class="headerlink" title="noshare.obj &amp; winshare.obj"></a>noshare.obj &amp; winshare.obj</h2><p>再次生成解决方案，好了，你成功的将错误减少到了四个<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">错误	LNK2005	_platform_ssh_share 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	</span><br><span class="line"></span><br><span class="line">错误	LNK2005	_platform_ssh_share_cleanup 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	</span><br><span class="line"></span><br><span class="line">错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	</span><br><span class="line"></span><br><span class="line">错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1</span><br></pre></td></tr></table></figure></p>
-<img src="/2018/05/20/build-putty-step-by-step/14.png">
-<p>对于错误1和错误2，我只能说，可能原本设计项目的人比较神奇，这两个错误花了我相当长的时间才排查掉，原因说得很清楚了，在连接<code>winshare.obj</code>的时候，发现函数<code>_platform_ssh_share</code>和<code>_platform_ssh_share_cleanup</code>已经在<code>noshare.obj</code>内定义过，<code>noshare.c</code>文件内的内容如下<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Stub implementation of SSH connection-sharing IPC, for any</span></span><br><span class="line"><span class="comment"> * platform which can't support it at all.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tree234.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"putty.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"ssh.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"network.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">platform_ssh_share</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name, Conf *conf,</span></span></span><br><span class="line"><span class="function"><span class="params">                       Plug downplug, Plug upplug, Socket *sock,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="keyword">char</span> **logtext, <span class="keyword">char</span> **ds_err, <span class="keyword">char</span> **us_err,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="keyword">int</span> can_upstream, <span class="keyword">int</span> can_downstream)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SHARE_NONE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">platform_ssh_share_cleanup</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<img src="/2018/05/20/build-putty-step-by-step/13.png" class="">
+
+<h2 id="noshare-obj-amp-winshare-obj"><a href="#noshare-obj-amp-winshare-obj" class="headerlink" title="noshare.obj &amp; winshare.obj"></a>noshare.obj &amp; winshare.obj</h2><p>再次生成解决方案，好了，你成功的将错误减少到了四个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">错误	LNK2005	_platform_ssh_share 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	</span><br><span class="line"></span><br><span class="line">错误	LNK2005	_platform_ssh_share_cleanup 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	</span><br><span class="line"></span><br><span class="line">错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	</span><br><span class="line"></span><br><span class="line">错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	</span><br></pre></td></tr></table></figure>
+
+<img src="/2018/05/20/build-putty-step-by-step/14.png" class="">
+
+<p>对于错误1和错误2，我只能说，可能原本设计项目的人比较神奇，这两个错误花了我相当长的时间才排查掉，原因说得很清楚了，在连接<code>winshare.obj</code>的时候，发现函数<code>_platform_ssh_share</code>和<code>_platform_ssh_share_cleanup</code>已经在<code> noshare.obj</code>内定义过，<code>noshare.c</code>文件内的内容如下 </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Stub implementation of SSH connection-sharing IPC, for any</span></span><br><span class="line"><span class="comment"> * platform which can&#x27;t support it at all.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tree234.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;putty.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ssh.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;network.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">platform_ssh_share</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name, Conf *conf,</span></span></span><br><span class="line"><span class="function"><span class="params">                       Plug downplug, Plug upplug, Socket *sock,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="keyword">char</span> **logtext, <span class="keyword">char</span> **ds_err, <span class="keyword">char</span> **us_err,</span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="keyword">int</span> can_upstream, <span class="keyword">int</span> can_downstream)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SHARE_NONE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">platform_ssh_share_cleanup</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>大致上看起来就是重定义了，BUT，为什么原本有的putty项目可以编译？，尝试将<code>noshare.c</code>从项目中移除之后，再次编译，这两错误不见了，但是，为什么原本的项目可以编译呢，好生奇怪，两天之后，偶然发现，原本项目内的<code>noshare.c</code>文件前面的图标和其他源文件长得不一样，仿佛发现了什么，点开属性一看，原来如此:<br>右击<code>noshare.c</code>点击属性，选中常规，点击“项类型”右边的下拉箭头，改成<code>C/C++标头</code>，</p>
-<img src="/2018/05/20/build-putty-step-by-step/15.png">
-<h2 id="MANIFEST"><a href="#MANIFEST" class="headerlink" title="MANIFEST"></a>MANIFEST</h2><p>再次生成解决方案，好了，这次你只能看到两个问题了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	</span><br><span class="line"></span><br><span class="line">错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1</span><br></pre></td></tr></table></figure></p>
-<p>但是这两个问题都不是源代码的问题(其实用源码内原本就有的解决方案能编译成功，就说明代码没问题了(PS:严格来说也不是没有可能)),对于<code>错误    CVT1100    资源重复。类型: MANIFEST，名称: 1，语言: 0x0409    putty    D:\Desktop\putty-en\windows\VS2017\putty\CVTRES    1</code>，右击项目，点击属性，点击清单工具，选中输入和输出，将嵌入清单改成“否”</p>
-<img src="/2018/05/20/build-putty-step-by-step/16.png">
+<img src="/2018/05/20/build-putty-step-by-step/15.png" class="">
+
+<h2 id="MANIFEST"><a href="#MANIFEST" class="headerlink" title="MANIFEST"></a>MANIFEST</h2><p>再次生成解决方案，好了，这次你只能看到两个问题了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	</span><br><span class="line"></span><br><span class="line">错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	</span><br></pre></td></tr></table></figure>
+
+<p>但是这两个问题都不是源代码的问题(其实用源码内原本就有的解决方案能编译成功，就说明代码没问题了(PS:严格来说也不是没有可能)),对于<code>错误    CVT1100    资源重复。类型: MANIFEST，名称: 1，语言: 0x0409    putty    D:\Desktop\putty-en\windows\VS2017\putty\CVTRES    1    </code>，右击项目，点击属性，点击清单工具，选中输入和输出，将嵌入清单改成“否”</p>
+<img src="/2018/05/20/build-putty-step-by-step/16.png" class="">
+
 <p>再次生成解决方案，错误变成了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmGetContext@4，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmReleaseContext@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmGetCompositionStringW@16，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmSetCompositionFontA@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmSetCompositionWindow@8，该符号在函数 _sys_cursor_update 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK1120	5 个无法解析的外部命令	putty	D:\Desktop\putty-en\windows\VS2017\Debug\putty.exe	1</span><br></pre></td></tr></table></figure>
-<img src="/2018/05/20/build-putty-step-by-step/17.png">
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmGetContext@4，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmReleaseContext@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmGetCompositionStringW@16，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmSetCompositionFontA@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK2019	无法解析的外部符号 _ImmSetCompositionWindow@8，该符号在函数 _sys_cursor_update 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	</span><br><span class="line">错误	LNK1120	5 个无法解析的外部命令	putty	D:\Desktop\putty-en\windows\VS2017\Debug\putty.exe	1	</span><br></pre></td></tr></table></figure>
+
+<img src="/2018/05/20/build-putty-step-by-step/17.png" class="">
+
 <p>熟悉的话，很容易就知道这个是因为缺了静态库<br>右击项目，点击属性，点击链接器，选中输入，点击附加依赖项右边的下拉箭头，点击编辑，</p>
-<img src="/2018/05/20/build-putty-step-by-step/18.png">
+<img src="/2018/05/20/build-putty-step-by-step/18.png" class="">
+
 <p>填入imm32.lib，它看起来就是这样子的</p>
-<img src="/2018/05/20/build-putty-step-by-step/19.png">
+<img src="/2018/05/20/build-putty-step-by-step/19.png" class="">
+
 <p>再次编译，哈哈哈，终于成功了</p>
-<img src="/2018/05/20/build-putty-step-by-step/20.png">
-<img src="/2018/05/20/build-putty-step-by-step/21.png">
-<h2 id="其他可能遇到的问题"><a href="#其他可能遇到的问题" class="headerlink" title="其他可能遇到的问题"></a>其他可能遇到的问题</h2><h3 id="cannot-open-include-file-‘version-h’"><a href="#cannot-open-include-file-‘version-h’" class="headerlink" title="cannot open include file ‘version.h’"></a>cannot open include file ‘version.h’</h3><p>不过你也有可能遇到这个问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	RC1015	cannot open include file &apos;version.h&apos;.	putty	D:\Desktop\putty-en\windows\version.rc2	9</span><br></pre></td></tr></table></figure></p>
-<img src="/2018/05/20/build-putty-step-by-step/22.png">
+<img src="/2018/05/20/build-putty-step-by-step/20.png" class="">
+
+<img src="/2018/05/20/build-putty-step-by-step/21.png" class="">
+
+<h2 id="其他可能遇到的问题"><a href="#其他可能遇到的问题" class="headerlink" title="其他可能遇到的问题"></a>其他可能遇到的问题</h2><h3 id="cannot-open-include-file-‘version-h’"><a href="#cannot-open-include-file-‘version-h’" class="headerlink" title="cannot open include file ‘version.h’"></a>cannot open include file ‘version.h’</h3><p>不过你也有可能遇到这个问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">严重性	代码	说明	项目	文件	行	禁止显示状态</span><br><span class="line">错误	RC1015	cannot open include file &#39;version.h&#39;.	putty	D:\Desktop\putty-en\windows\version.rc2	9	</span><br></pre></td></tr></table></figure>
+<img src="/2018/05/20/build-putty-step-by-step/22.png" class="">
 <p>如果你在<a href="#%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E5%8C%85%E6%8B%AC%E6%96%87%E4%BB%B6-%E2%80%9Cunix-h%E2%80%9D">第一步</a>中，填写附加包含目录的时候，填在了<code>VC++目录</code>里面，则不会遇到此问题，若是填到了<code>C/C++</code>则会遇到，一个办法是更改到<code>VC++</code>目录去，另外一个办法是在项目属性的资源选项下面，附加目录里面填上<code>..\..\..\./;</code></p>
-<img src="/2018/05/20/build-putty-step-by-step/23.png">
+<img src="/2018/05/20/build-putty-step-by-step/23.png" class="">
+
 <h3 id="关于依赖库"><a href="#关于依赖库" class="headerlink" title="关于依赖库"></a>关于依赖库</h3><p>在putty原本带的解决方案内的附加依赖项是下面这些</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">advapi32.lib</span><br><span class="line">comdlg32.lib</span><br><span class="line">gdi32.lib</span><br><span class="line">imm32.lib</span><br><span class="line">ole32.lib</span><br><span class="line">shell32.lib</span><br><span class="line">user32.lib</span><br></pre></td></tr></table></figure>
+
 <p>在Windows 10 1803上，Visual Studio 2017 的预先包含的静态库里面已经包含了除去<code>imm32.lib</code>之外的所有今天库，所以我只添加了它。有关Visual Studio的各种报错，查看巨硬(微软)的文档是一个好办法，百度得到的办法虽说更为简洁明了一些，但是因为复现环境不一样，有时候并没有效果。</p>
-<h3 id="调整项目属性之后不生效"><a href="#调整项目属性之后不生效" class="headerlink" title="调整项目属性之后不生效"></a>调整项目属性之后不生效</h3><p>PS：若是调整项目属性之后不生效，请留意调整的项目和生成解决方案的是否是同一个编译选项<br><img src="/2018/05/20/build-putty-step-by-step/24.png"></p>
-<h3 id="让其他项目用同样的属性"><a href="#让其他项目用同样的属性" class="headerlink" title="让其他项目用同样的属性"></a>让其他项目用同样的属性</h3><p>按照上一个描述的问题，对于一个工程，在win32和x86的Release和Debug模式都需要调整属性，就整整四个了，整个PuTTY解决方案其实包括了 <code>pageant plink pscp psftp putty puttygen puttytel testbn</code>,其它七个再来一次，简直爽歪歪，这个时候项目属性表就有用了，可以参考<a href="https://www.cnblogs.com/haomiao/p/5812860.html" target="_blank" rel="noopener">https://www.cnblogs.com/haomiao/p/5812860.html</a>，若是找不到属性管理器，可以点击视图下的其他窗口的“属性管理器”。</p>
-<h3 id="懒人包"><a href="#懒人包" class="headerlink" title="懒人包"></a>懒人包</h3><p>GitHub上有已经汉化完成的版本——<a href="https://github.com/larryli/PuTTY" target="_blank" rel="noopener">https://github.com/larryli/PuTTY</a><br>下载搭建好的PuTTY的Visual Studio 2017解决方案，可以前往<a href="https://github.com/BDZNH/PuTTY" target="_blank" rel="noopener">https://github.com/BDZNH/PuTTY</a></p>
+<h3 id="调整项目属性之后不生效"><a href="#调整项目属性之后不生效" class="headerlink" title="调整项目属性之后不生效"></a>调整项目属性之后不生效</h3><p>PS：若是调整项目属性之后不生效，请留意调整的项目和生成解决方案的是否是同一个编译选项</p>
+<img src="/2018/05/20/build-putty-step-by-step/24.png" class="">
 
-      
+<h3 id="让其他项目用同样的属性"><a href="#让其他项目用同样的属性" class="headerlink" title="让其他项目用同样的属性"></a>让其他项目用同样的属性</h3><p>按照上一个描述的问题，对于一个工程，在win32和x86的Release和Debug模式都需要调整属性，就整整四个了，整个PuTTY解决方案其实包括了 <code>pageant plink pscp psftp putty puttygen puttytel testbn</code>,其它七个再来一次，简直爽歪歪，这个时候项目属性表就有用了，可以参考<a target="_blank" rel="noopener" href="https://www.cnblogs.com/haomiao/p/5812860.html">https://www.cnblogs.com/haomiao/p/5812860.html</a>，若是找不到属性管理器，可以点击视图下的其他窗口的“属性管理器”。</p>
+<h3 id="懒人包"><a href="#懒人包" class="headerlink" title="懒人包"></a>懒人包</h3><p>GitHub上有已经汉化完成的版本——<a target="_blank" rel="noopener" href="https://github.com/larryli/PuTTY">https://github.com/larryli/PuTTY</a><br>下载搭建好的PuTTY的Visual Studio 2017解决方案，可以前往<a target="_blank" rel="noopener" href="https://github.com/BDZNH/PuTTY">https://github.com/BDZNH/PuTTY</a></p>
+
     </div>
 
     
-
-    
-    
-    
-
-    
-
-    
-      
     
     
 
-    
+      <footer class="post-footer">
 
-    <footer class="post-footer">
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2018/05/18/undefined-reference-to/" rel="next" title="关于“undefined reference to”">
-                <i class="fa fa-chevron-left"></i> 关于“undefined reference to”
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/26/error-of-minecraft/" rel="prev" title="Minecraft正版服无法登录">
-                Minecraft正版服无法登录 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-  </div>
-
-
-          </div>
-          
-
-  
-
-
-
-        </div>
         
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/18/undefined-reference-to/" rel="prev" title="关于“undefined reference to”">
+      <i class="fa fa-chevron-left"></i> 关于“undefined reference to”
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/26/error-of-minecraft/" rel="next" title="Minecraft正版服无法登录">
+      Minecraft正版服无法登录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
           
   
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
   </div>
 
-  <aside id="sidebar" class="sidebar">
-    
+  <aside class="sidebar">
     <div class="sidebar-inner">
 
-      
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
 
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E5%8C%85%E6%8B%AC%E6%96%87%E4%BB%B6-%E2%80%9Cunix-h%E2%80%9D"><span class="nav-number">1.</span> <span class="nav-text">无法打开包括文件: “unix.h”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E5%8C%85%E6%8B%AC%E6%96%87%E4%BB%B6-%E2%80%9Cdlfcn-h%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">无法打开包括文件: “dlfcn.h”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#case-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%8D%E6%98%AF%E5%B8%B8%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">case 表达式不是常量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BA%86%E5%8F%AF%E8%83%BD%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E7%9A%84%E6%9C%AC%E5%9C%B0%E6%8C%87%E9%92%88%E5%8F%98%E9%87%8F"><span class="nav-number">4.</span> <span class="nav-text">使用了可能未初始化的本地指针变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#noshare-obj-amp-winshare-obj"><span class="nav-number">5.</span> <span class="nav-text">noshare.obj &amp; winshare.obj</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MANIFEST"><span class="nav-number">6.</span> <span class="nav-text">MANIFEST</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%8F%AF%E8%83%BD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">7.</span> <span class="nav-text">其他可能遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cannot-open-include-file-%E2%80%98version-h%E2%80%99"><span class="nav-number">7.1.</span> <span class="nav-text">cannot open include file ‘version.h’</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E4%BE%9D%E8%B5%96%E5%BA%93"><span class="nav-number">7.2.</span> <span class="nav-text">关于依赖库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E6%95%B4%E9%A1%B9%E7%9B%AE%E5%B1%9E%E6%80%A7%E4%B9%8B%E5%90%8E%E4%B8%8D%E7%94%9F%E6%95%88"><span class="nav-number">7.3.</span> <span class="nav-text">调整项目属性之后不生效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A9%E5%85%B6%E4%BB%96%E9%A1%B9%E7%9B%AE%E7%94%A8%E5%90%8C%E6%A0%B7%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="nav-number">7.4.</span> <span class="nav-text">让其他项目用同样的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%87%92%E4%BA%BA%E5%8C%85"><span class="nav-number">7.5.</span> <span class="nav-text">懒人包</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
 
       <div class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <img class="site-author-image" itemprop="image" src="https://i.loli.net/2019/05/01/5cc8effdc5e4d.jpg" alt="SupperMary">
-            
-              <p class="site-author-name" itemprop="name">SupperMary</p>
-              <p class="site-description motion-element" itemprop="description"></p>
-          </div>
-
-          
-            <nav class="site-state motion-element">
-              
-                <div class="site-state-item site-state-posts">
-                
-                  <a href="/archives/">
-                
-                    <span class="site-state-item-count">73</span>
-                    <span class="site-state-item-name">posts</span>
-                  </a>
-                </div>
-              
-
-              
-
-              
-                
-                
-                <div class="site-state-item site-state-tags">
-                  <a href="/tags/index.html">
-                    
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">30</span>
-                    <span class="site-state-item-name">tags</span>
-                  </a>
-                </div>
-              
-            </nav>
-          
-
-          
-
-          
-
-          
-
-          
-          
-
-          
-            
-          
-          
-
-        </div>
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="SupperMary"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">73</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
       </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
 
-      
-      <!--noindex-->
-        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
 
-            
-            
-            
-            
 
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#无法打开包括文件-“unix-h”"><span class="nav-number">1.</span> <span class="nav-text">无法打开包括文件: “unix.h”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无法打开包括文件-“dlfcn-h”"><span class="nav-number">2.</span> <span class="nav-text">无法打开包括文件: “dlfcn.h”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#case-表达式不是常量"><span class="nav-number">3.</span> <span class="nav-text">case 表达式不是常量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用了可能未初始化的本地指针变量"><span class="nav-number">4.</span> <span class="nav-text">使用了可能未初始化的本地指针变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#noshare-obj-amp-winshare-obj"><span class="nav-number">5.</span> <span class="nav-text">noshare.obj &amp; winshare.obj</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MANIFEST"><span class="nav-number">6.</span> <span class="nav-text">MANIFEST</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他可能遇到的问题"><span class="nav-number">7.</span> <span class="nav-text">其他可能遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cannot-open-include-file-‘version-h’"><span class="nav-number">7.1.</span> <span class="nav-text">cannot open include file ‘version.h’</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于依赖库"><span class="nav-number">7.2.</span> <span class="nav-text">关于依赖库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调整项目属性之后不生效"><span class="nav-number">7.3.</span> <span class="nav-text">调整项目属性之后不生效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#让其他项目用同样的属性"><span class="nav-number">7.4.</span> <span class="nav-text">让其他项目用同样的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒人包"><span class="nav-number">7.5.</span> <span class="nav-text">懒人包</span></a></li></ol></li></ol></div>
-            
-
-          </div>
-        </div>
-      <!--/noindex-->
-      
-
-      
+      </div>
 
     </div>
   </aside>
+  <div id="sidebar-dimmer"></div>
 
 
-        
       </div>
     </main>
 
-    <footer id="footer" class="footer">
+    <footer class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
-  <span class="with-love" id="animate">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-
-  
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    
-    <span title="Symbols count total">246k</span>
-  
-
-  
+    <span title="Symbols count total">253k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    
-    <span title="Reading time total">3:43</span>
-  
+    <span title="Reading time total">3:50</span>
 </div>
-
-
-  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
-
-
-
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
-
-
-
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
 
         
 <div class="busuanzi-count">
   <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-  
-    <span class="site-uv" title="Total Visitors">
-      <i class="fa fa-user"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
     </span>
-  
-
-  
-    <span class="site-pv" title="Total Views">
-      <i class="fa fa-eye"></i>
-      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
     </span>
-  
 </div>
 
 
@@ -918,456 +563,47 @@
 
 
 
-
-        
       </div>
     </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-    
-
-    
-
-    
   </div>
 
   
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script>
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
+<script src="/js/utils.js"></script>
 
-
-
+<script src="/js/motion.js"></script>
 
 
+<script src="/js/schemes/muse.js"></script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <script src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-
-  
-
-
-  <script src="/js/src/utils.js?v=6.7.0"></script>
-
-  <script src="/js/src/motion.js?v=6.7.0"></script>
-
-
-
-  
-  
-
-  
-  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
-<script src="/js/src/post-details.js?v=6.7.0"></script>
-
-
-
-  
-
-
-  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
-
-
-
-  
-
-
-
-  
-
-
-
-
-
-
-
+<script src="/js/next-boot.js"></script>
 
 
 
 
   
 
-  <script>
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
-      });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
-  </script>
-
-
 
 
 
   
+<script src="/js/local-search.js"></script>
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
 
-  
+
+
 
   
 
