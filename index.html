@@ -193,6 +193,340 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/12/wxacode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/12/wxacode/" class="post-title-link" itemprop="url">从获取微信小程序码说起</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-06-12 12:54:54 / Modified: 15:32:01" itemprop="dateCreated datePublished" datetime="2021-06-12T12:54:54+00:00">2021-06-12</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>微信官方对于小程序码的获取可以查看连接<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/qr-code.html">https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/qr-code.html</a></p>
+<p>接口B，可以生成不受数量限制的小程序码，并且支持不太长的path和不超过32字符的参数。这样的话，就可以使用path和对应的参数来做一些事情。</p>
+<p>接口B的介绍，可以查看<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html">https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html</a></p>
+<p>简单来说，生成小程序码，是访问网址<code>https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN</code>，并发起 post 请求，请求参数是一个 json 字符串，json 字符串的具体说明可以查看<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html">接口B的说明</a></p>
+<p>我从官网摘下来了</p>
+<table>
+<thead>
+<tr>
+<th align="center">属性</th>
+<th align="center">类型</th>
+<th align="center">默认值</th>
+<th align="center">必填</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">access_token</td>
+<td align="center">string</td>
+<td align="center"></td>
+<td align="center">是</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/access-token/auth.getAccessToken.html">接口调用凭证</a></td>
+</tr>
+<tr>
+<td align="center">scene</td>
+<td align="center">string</td>
+<td align="center"></td>
+<td align="center">是</td>
+<td align="center">最大32个可见字符，只支持数字，大小写英文以及部分特殊字符：!#$&amp;’()*+,/:;=?@-._~，其它字符请自行编码为合法字符（因不支持%，中文无法使用 urlencode 处理，请使用其他编码方式）</td>
+</tr>
+<tr>
+<td align="center">page</td>
+<td align="center">string</td>
+<td align="center">主页</td>
+<td align="center">否</td>
+<td align="center">必须是已经发布的小程序存在的页面（否则报错），例如 pages/index/index,   根路径前不要填加 /,不能携带参数（参数请放在scene字段里），如果不填写这个字段，默认跳主页面</td>
+</tr>
+<tr>
+<td align="center">width</td>
+<td align="center">number</td>
+<td align="center">430</td>
+<td align="center">否</td>
+<td align="center">小程序码宽度，单位是px，最小280px，最大 1280px</td>
+</tr>
+<tr>
+<td align="center">auto_color</td>
+<td align="center">boolean</td>
+<td align="center">false</td>
+<td align="center">否</td>
+<td align="center">自动配置线条颜色，如果颜色依然是黑色，则说明不建议配置主色调，默认 false</td>
+</tr>
+<tr>
+<td align="center">line_color</td>
+<td align="center">Object</td>
+<td align="center">{“r”:0,”g”:0,”b”:0}</td>
+<td align="center">否</td>
+<td align="center">auto_color 为   false 时生效，使用 rgb 设置颜色   例如 {“r”:”xxx”,”g”:”xxx”,”b”:”xxx”} 十进制表示</td>
+</tr>
+<tr>
+<td align="center">is_hyaline</td>
+<td align="center">boolean</td>
+<td align="center">false</td>
+<td align="center">否</td>
+<td align="center">是否需要透明底色，为   true 时，生成透明底色的小程序</td>
+</tr>
+</tbody></table>
+<p>access_token 是使用小程序的 appid 和 appsecret 生成的，可以查看<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/access-token/auth.getAccessToken.html">接口调用凭证</a></p>
+<p>简单来说，就是访问使用 appid 和 appsecret 拼接而成的 <code>https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET</code> ，发起 Get 请求，appid和appsecret 正确的情况下，会返回一个 json 字符串。</p>
+<p>本文使用 libcurl 来实现访问微信服务器并最后获得小程序码的步骤。</p>
+<h2 id="libcurl-发起-post-请求和-get-请求"><a href="#libcurl-发起-post-请求和-get-请求" class="headerlink" title="libcurl 发起 post 请求和 get 请求"></a>libcurl 发起 post 请求和 get 请求</h2><p>为了方便操作，建议使用linux操作系统，Windows可能会面临一系列的 libcurl 及其库的编译，不熟悉的情况下，操作是十分繁琐的。</p>
+<p>下面的实现是参考了 libcurl 的sample来实现的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;curl/curl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;memory.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __cplusplus</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> <span class="keyword">bool</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> true 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> false 0</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// __cplusplus</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/*存储以POST方式需要发送的数据*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Request</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">char</span>* readptr;</span><br><span class="line">    <span class="keyword">size_t</span> sizeleft;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Response</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span>* response;</span><br><span class="line">    <span class="keyword">size_t</span> size;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*发送数据的回调函数*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">size_t</span> <span class="title">send_callback</span><span class="params">(<span class="keyword">char</span>* dest, <span class="keyword">size_t</span> size, <span class="keyword">size_t</span> nmemb, <span class="keyword">void</span>* userp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Request</span>* <span class="title">wt</span> = (<span class="title">struct</span> <span class="title">Request</span>*)<span class="title">userp</span>;</span></span><br><span class="line">    <span class="keyword">size_t</span> buffer_size = size * nmemb;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (wt-&gt;sizeleft) &#123;</span><br><span class="line">        <span class="comment">/* copy as much as possible from the source to the destination */</span></span><br><span class="line">        <span class="keyword">size_t</span> copy_this_much = wt-&gt;sizeleft;</span><br><span class="line">        <span class="keyword">if</span> (copy_this_much &gt; buffer_size)</span><br><span class="line">            copy_this_much = buffer_size;</span><br><span class="line">        <span class="built_in">memcpy</span>(dest, wt-&gt;readptr, copy_this_much);</span><br><span class="line"></span><br><span class="line">        wt-&gt;readptr += copy_this_much;</span><br><span class="line">        wt-&gt;sizeleft -= copy_this_much;</span><br><span class="line">        <span class="keyword">return</span> copy_this_much; <span class="comment">/* we copied this many bytes */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* no more data left to deliver */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*接收数据的回调函数*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">size_t</span> <span class="title">receive_callback</span><span class="params">(<span class="keyword">void</span>* data, <span class="keyword">size_t</span> size, <span class="keyword">size_t</span> nmemb, <span class="keyword">void</span>* userp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">size_t</span> realsize = size * nmemb;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Response</span>* <span class="title">mem</span> = (<span class="title">struct</span> <span class="title">Response</span>*)<span class="title">userp</span>;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span>* ptr = (<span class="keyword">char</span>*)<span class="built_in">realloc</span>(mem-&gt;response, mem-&gt;size + realsize + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (ptr == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">/* out of memory! */</span></span><br><span class="line"></span><br><span class="line">    mem-&gt;response = ptr;</span><br><span class="line">    <span class="built_in">memcpy</span>(&amp;(mem-&gt;response[mem-&gt;size]), data, realsize);</span><br><span class="line">    mem-&gt;size += realsize;</span><br><span class="line">    mem-&gt;response[mem-&gt;size] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> realsize;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*如果定义了 USE_SPECCIFIC_CACERT_PEM ，那么函数第一个参数应该指向一个 catcert.pem 证书*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">handle_https_callback</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* certpem, <span class="keyword">const</span> <span class="keyword">char</span>* url, <span class="keyword">const</span> <span class="keyword">char</span>* parameter, <span class="keyword">size_t</span> size_send, <span class="keyword">void</span>** responsedata, <span class="keyword">size_t</span>* size_receive, <span class="keyword">char</span>** content_type, <span class="keyword">bool</span> post, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">else</span></span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">handle_https_callback</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* url, <span class="keyword">const</span> <span class="keyword">char</span>* parameter, <span class="keyword">size_t</span> size_send, <span class="keyword">void</span>** responsedata, <span class="keyword">size_t</span>* size_receive, <span class="keyword">char</span>** content_type, <span class="keyword">bool</span> post, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(url);</span><br><span class="line">    CURL* curl;</span><br><span class="line">    CURLcode res;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Request</span> <span class="title">request</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Response</span> <span class="title">response</span> = &#123;</span> <span class="number">0</span> &#125;;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">curl_slist</span>* <span class="title">headers</span> = <span class="title">NULL</span>;</span></span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*如果parameter非空，那么有数据要发送，就申请相应的发送数据的空间*/</span></span><br><span class="line">    <span class="keyword">bool</span> hasParameter = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">bool</span> hasParameter = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (parameter != <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        hasParameter = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">size_t</span> len = <span class="built_in">strlen</span>(parameter);</span><br><span class="line">        <span class="keyword">size_t</span> min = len &lt; size_send ? len : size_send;</span><br><span class="line">        request.readptr = (<span class="keyword">char</span> *)parameter;</span><br><span class="line">        request.sizeleft = min;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    res = curl_global_init(CURL_GLOBAL_DEFAULT);</span><br><span class="line">    <span class="keyword">if</span> (res != CURLE_OK)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;curl_global_init() failed: %s\n&quot;</span>, curl_easy_strerror(res));</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    curl = curl_easy_init();</span><br><span class="line">    <span class="keyword">if</span> (curl)</span><br><span class="line">    &#123;</span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_URL, url);</span><br><span class="line">        <span class="keyword">if</span> (post)</span><br><span class="line">        &#123;</span><br><span class="line">            curl_easy_setopt(curl, CURLOPT_POST, <span class="number">1L</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*如果有数据需要发送，就设置相应的数据发送回调函数，要发送的数据和数据长度*/</span></span><br><span class="line">        <span class="keyword">if</span> (hasParameter)</span><br><span class="line">        &#123;</span><br><span class="line">            curl_easy_setopt(curl, CURLOPT_READFUNCTION, send_callback);</span><br><span class="line">            curl_easy_setopt(curl, CURLOPT_READDATA, &amp;request);</span><br><span class="line">            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (<span class="keyword">long</span>)request.sizeleft);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, receive_callback);</span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (<span class="keyword">void</span>*)&amp;response);</span><br><span class="line"></span><br><span class="line">        headers = curl_slist_append(headers, <span class="string">&quot;Content-Type: application/json&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*如果定义了 USE_SPECCIFIC_CACERT_PEM ，那么设置SSL认证证书*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_CAINFO, certpem)</span><br><span class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(DISABLE_CURL_SSL_VERIFY) <span class="comment">// 如果定义了 DISABLE_CURL_SSL_VERIFY 证书认证，那么就设置curl不强制认证服务器</span></span></span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, <span class="literal">false</span>);</span><br><span class="line">        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, <span class="number">0</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (verbose)</span><br><span class="line">        &#123;</span><br><span class="line">            curl_easy_setopt(curl, CURLOPT_VERBOSE, <span class="number">1L</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        res = curl_easy_perform(curl);</span><br><span class="line">        <span class="keyword">if</span> (res == CURLE_OK)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">long</span> http_code = <span class="number">0</span>;</span><br><span class="line">            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &amp;http_code);</span><br><span class="line">            <span class="keyword">if</span> (http_code == <span class="number">200</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">/*curl_easy_cleanup(curl) 会释放掉 tmp_content_type*/</span></span><br><span class="line">                <span class="keyword">char</span>* tmp_content_type = <span class="literal">NULL</span>;</span><br><span class="line">                curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &amp;tmp_content_type);</span><br><span class="line">                <span class="keyword">if</span>(tmp_content_type)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">size_t</span> tmplen = <span class="built_in">strlen</span>(tmp_content_type);</span><br><span class="line">                    *content_type = <span class="built_in">malloc</span>(tmplen + <span class="number">1</span>);</span><br><span class="line">                    <span class="built_in">memset</span>(*content_type, <span class="number">0</span>, tmplen + <span class="number">1</span>);</span><br><span class="line">                    <span class="built_in">memcpy</span>(*content_type, tmp_content_type, tmplen);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">/*用户需要自行释放 responsedata */</span></span><br><span class="line">                *responsedata = response.response;</span><br><span class="line">                *size_receive = response.size;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                result = <span class="number">-2</span>;</span><br><span class="line">                <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;net work error with http code %ld&quot;</span>, http_code);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            result = <span class="number">2</span>;</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;curl_easy_perform() failed: %s\n&quot;</span>, curl_easy_strerror(res));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        curl_slist_free_all(headers);</span><br><span class="line">        curl_easy_cleanup(curl);</span><br><span class="line">    &#125;</span><br><span class="line">    curl_global_cleanup();</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line">    <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// __cplusplus</span></span></span><br></pre></td></tr></table></figure>
+<p>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">handle_https_callback</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* url, <span class="keyword">const</span> <span class="keyword">char</span>* parameter, <span class="keyword">size_t</span> size_send, <span class="keyword">void</span>** responsedata, <span class="keyword">size_t</span>* size_receive, <span class="keyword">char</span>** content_type, <span class="keyword">bool</span> post, <span class="keyword">bool</span> verbose)</span></span></span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th align="center">属性</th>
+<th align="center">参数</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">传入参数</td>
+<td align="center">url</td>
+<td align="center">想要访问的url</td>
+</tr>
+<tr>
+<td align="center">传入参数</td>
+<td align="center">post</td>
+<td align="center">是否发起 post</td>
+</tr>
+<tr>
+<td align="center">传入参数</td>
+<td align="center">parameter</td>
+<td align="center">如果以 post 方式发起请求，parameter 是想要发送的数据，<br> 如果不是以 post 方式发起，此参数为 NULL</td>
+</tr>
+<tr>
+<td align="center">传入参数</td>
+<td align="center">size_send</td>
+<td align="center">要发送的数据长度，实际上发送的数据长度以 parameter 的<br>长度和 size_send 中去较小值</td>
+</tr>
+<tr>
+<td align="center">传出参数</td>
+<td align="center">responsedata</td>
+<td align="center">服务器发送回来的数据</td>
+</tr>
+<tr>
+<td align="center">传出参数</td>
+<td align="center">size_receive</td>
+<td align="center">服务器发送回来的数据的长度</td>
+</tr>
+<tr>
+<td align="center">传出参数</td>
+<td align="center">content_type</td>
+<td align="center">如果是获取 access_token ，那么这里的 content_type 应该<br>是 “application/json; encoding=utf-8”,如果是小程序码，那么这里<br>应该是”Image/jpeg”或者别的类型的content type</td>
+</tr>
+<tr>
+<td align="center">传入参数</td>
+<td align="center">verbose</td>
+<td align="center">设置是否打印 curl 调用过程中的信息</td>
+</tr>
+</tbody></table>
+<p>常见的 Content-Type 可能有以下这些(摘自 <a target="_blank" rel="noopener" href="https://github.com/yhirose/cpp-httplib">cpp-httplib</a> 的 README)</p>
+<table>
+<thead>
+<tr>
+<th align="left">Extension</th>
+<th align="left">MIME Type</th>
+<th align="left">Extension</th>
+<th align="left">MIME Type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">css</td>
+<td align="left">text/css</td>
+<td align="left">mpga</td>
+<td align="left">audio/mpeg</td>
+</tr>
+<tr>
+<td align="left">csv</td>
+<td align="left">text/csv</td>
+<td align="left">weba</td>
+<td align="left">audio/webm</td>
+</tr>
+<tr>
+<td align="left">txt</td>
+<td align="left">text/plain</td>
+<td align="left">wav</td>
+<td align="left">audio/wave</td>
+</tr>
+<tr>
+<td align="left">vtt</td>
+<td align="left">text/vtt</td>
+<td align="left">otf</td>
+<td align="left">font/otf</td>
+</tr>
+<tr>
+<td align="left">html, htm</td>
+<td align="left">text/html</td>
+<td align="left">ttf</td>
+<td align="left">font/ttf</td>
+</tr>
+<tr>
+<td align="left">apng</td>
+<td align="left">image/apng</td>
+<td align="left">woff</td>
+<td align="left">font/woff</td>
+</tr>
+<tr>
+<td align="left">avif</td>
+<td align="left">image/avif</td>
+<td align="left">woff2</td>
+<td align="left">font/woff2</td>
+</tr>
+<tr>
+<td align="left">bmp</td>
+<td align="left">image/bmp</td>
+<td align="left">7z</td>
+<td align="left">application/x-7z-compressed</td>
+</tr>
+<tr>
+<td align="left">gif</td>
+<td align="left">image/gif</td>
+<td align="left">atom</td>
+<td align="left">application/atom+xml</td>
+</tr>
+<tr>
+<td align="left">png</td>
+<td align="left">image/png</td>
+<td align="left">pdf</td>
+<td align="left">application/pdf</td>
+</tr>
+<tr>
+<td align="left">svg</td>
+<td align="left">image/svg+xml</td>
+<td align="left">mjs, js</td>
+<td align="left">application/javascript</td>
+</tr>
+<tr>
+<td align="left">webp</td>
+<td align="left">image/webp</td>
+<td align="left">json</td>
+<td align="left">application/json</td>
+</tr>
+<tr>
+<td align="left">ico</td>
+<td align="left">image/x-icon</td>
+<td align="left">rss</td>
+<td align="left">application/rss+xml</td>
+</tr>
+<tr>
+<td align="left">tif</td>
+<td align="left">image/tiff</td>
+<td align="left">tar</td>
+<td align="left">application/x-tar</td>
+</tr>
+<tr>
+<td align="left">tiff</td>
+<td align="left">image/tiff</td>
+<td align="left">xhtml, xht</td>
+<td align="left">application/xhtml+xml</td>
+</tr>
+<tr>
+<td align="left">jpeg, jpg</td>
+<td align="left">image/jpeg</td>
+<td align="left">xslt</td>
+<td align="left">application/xslt+xml</td>
+</tr>
+<tr>
+<td align="left">mp4</td>
+<td align="left">video/mp4</td>
+<td align="left">xml</td>
+<td align="left">application/xml</td>
+</tr>
+<tr>
+<td align="left">mpeg</td>
+<td align="left">video/mpeg</td>
+<td align="left">gz</td>
+<td align="left">application/gzip</td>
+</tr>
+<tr>
+<td align="left">webm</td>
+<td align="left">video/webm</td>
+<td align="left">zip</td>
+<td align="left">application/zip</td>
+</tr>
+<tr>
+<td align="left">mp3</td>
+<td align="left">audio/mp3</td>
+<td align="left">wasm</td>
+<td align="left">application/wasm</td>
+</tr>
+</tbody></table>
+<h2 id="获取-access-token"><a href="#获取-access-token" class="headerlink" title="获取 access_token"></a>获取 access_token</h2><p>基于上面的使用 libcurl 发起 post 和 get 请求，可以很容以的再封装一下，成为根据 appid 和 appsecret 来获取小程序的 access_token 的实现。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 为了方便对json处理，这里使用 rapidjson</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;rapidjson/document.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;rapidjson/writer.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;rapidjson/stringbuffer.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_wxacode_access_token</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* certpem, <span class="keyword">const</span> <span class="keyword">char</span>* appid, <span class="keyword">const</span> <span class="keyword">char</span>* appsecret, <span class="keyword">char</span>** access_token, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">else</span></span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_wxacode_access_token</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* appid, <span class="keyword">const</span> <span class="keyword">char</span>* appsecret, <span class="keyword">char</span>** access_token, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(appid);</span><br><span class="line">    assert(appsecret);</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* wxacode_domain = <span class="string">&quot;https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* secret_param = <span class="string">&quot;&amp;secret=&quot;</span>;</span><br><span class="line">    <span class="keyword">size_t</span> url_len = <span class="built_in">strlen</span>(wxacode_domain) + <span class="built_in">strlen</span>(appid) + <span class="built_in">strlen</span>(secret_param) + <span class="built_in">strlen</span>(appsecret);</span><br><span class="line">    <span class="keyword">char</span>* url = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(url_len + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (!url)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;<span class="comment">/*out of mempry*/</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">memset</span>(url, <span class="number">0</span>, url_len + <span class="number">1</span>);</span><br><span class="line">    sprintf_s(url, url_len + <span class="number">1</span>, <span class="string">&quot;%s%s%s%s&quot;</span>, wxacode_domain, appid, secret_param, appsecret);</span><br><span class="line">    <span class="keyword">if</span> (verbose)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;access to url:%s\r\n&quot;</span>, url);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span>* response = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">char</span>* content_type = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">size_t</span> len = <span class="number">0</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line">    <span class="keyword">int</span> result = handle_https_callback(certpem, url, <span class="literal">false</span>, <span class="literal">NULL</span>, <span class="number">0</span>, (<span class="keyword">void</span>**)&amp;response, &amp;len, &amp;content_type, verbose);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="keyword">int</span> result = handle_https_callback(url, <span class="literal">false</span>, <span class="literal">NULL</span>, <span class="number">0</span>, (<span class="keyword">void</span> **)&amp;response, &amp;len, &amp;content_type, verbose);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span><br><span class="line">    <span class="keyword">bool</span> get_access_token = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (result == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strstr</span>(content_type, <span class="string">&quot;application/json&quot;</span>))</span><br><span class="line">        &#123;</span><br><span class="line">            rapidjson::Document doc;</span><br><span class="line">            doc.Parse(response);</span><br><span class="line">            assert(doc.IsObject());</span><br><span class="line">            <span class="keyword">if</span> (doc.HasMember(<span class="string">&quot;access_token&quot;</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">/*如果返回内容包含 access_token，则提取对应的字段*/</span></span><br><span class="line">                <span class="keyword">const</span> <span class="keyword">char</span>* token = doc[<span class="string">&quot;access_token&quot;</span>].GetString();</span><br><span class="line">                <span class="keyword">size_t</span> token_len = <span class="built_in">strlen</span>(token);</span><br><span class="line">                *access_token = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(token_len + <span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (*access_token == <span class="literal">NULL</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="number">-1</span>;<span class="comment">/*out of memory*/</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="built_in">memset</span>(*access_token, <span class="number">0</span>, token_len + <span class="number">1</span>);</span><br><span class="line">                <span class="built_in">memcpy</span>(*access_token, token, token_len);</span><br><span class="line">                get_access_token = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!get_access_token)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">/*如果返回的 response 不是 json ，就直接将 response 内容传递回去*/</span></span><br><span class="line">            <span class="keyword">size_t</span> token_len = <span class="built_in">strlen</span>(response);</span><br><span class="line">            *access_token = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(token_len + <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">if</span> (*access_token == <span class="literal">NULL</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;<span class="comment">/*out of memory*/</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">memset</span>(*access_token, <span class="number">0</span>, token_len + <span class="number">1</span>);</span><br><span class="line">            <span class="built_in">memcpy</span>(*access_token, response, token_len);</span><br><span class="line">            result = <span class="number">4</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (url)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">free</span>(url);</span><br><span class="line">        url = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (response)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">free</span>(response);</span><br><span class="line">        response = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (content_type)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">free</span>(content_type);</span><br><span class="line">        content_type = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取小程序二维码"><a href="#获取小程序二维码" class="headerlink" title="获取小程序二维码"></a>获取小程序二维码</h2><p>和获取 access_token 类似，稍微封装一下就可以改写成为根据 access_token 获取小程序码的接口了</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_wxacode_unlimited</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* certpem, <span class="keyword">const</span> <span class="keyword">char</span>* access_token, <span class="keyword">unsigned</span> <span class="keyword">char</span>** qrcode, <span class="keyword">size_t</span>* size, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">else</span></span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_wxacode_unlimited</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* access_token,<span class="keyword">const</span> <span class="keyword">char</span>* parameter, <span class="keyword">unsigned</span> <span class="keyword">char</span>** qrcode, <span class="keyword">size_t</span>* size, <span class="keyword">bool</span> verbose)</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(access_token);</span><br><span class="line">    assert(parameter);</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* wxacodedomain = <span class="string">&quot;https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=&quot;</span>;</span><br><span class="line">    <span class="keyword">size_t</span> url_len = <span class="built_in">strlen</span>(wxacodedomain) + <span class="built_in">strlen</span>(access_token);</span><br><span class="line">    <span class="keyword">char</span>* url = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(url_len + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (url == <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;<span class="comment">/*out of mempry*/</span></span><br><span class="line">    &#125;</span><br><span class="line">    sprintf_s(url, url_len + <span class="number">1</span>, <span class="string">&quot;%s%s&quot;</span>, wxacodedomain, access_token);</span><br><span class="line">    <span class="keyword">if</span> (verbose)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;access to url:%s\r\n&quot;</span>, url);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span>* response = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">char</span>* content_type = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">size_t</span> len = <span class="number">0</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_SPECCIFIC_CACERT_PEM</span></span><br><span class="line">    <span class="keyword">int</span> result = handle_https_callback(certpem, url, <span class="literal">true</span>, parameter, <span class="built_in">strlen</span>(parameter), (<span class="keyword">void</span>**)&amp;response, &amp;len, &amp;content_type, verbose);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    <span class="keyword">int</span> result = handle_https_callback(url, <span class="literal">true</span>, parameter, <span class="built_in">strlen</span>(parameter), (<span class="keyword">void</span> **)&amp;response, &amp;len, &amp;content_type, verbose);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// USE_SPECCIFIC_CACERT_PEM</span></span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (result == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(<span class="built_in">strstr</span>(content_type, <span class="string">&quot;image/jpeg&quot;</span>)))</span><br><span class="line">        &#123;</span><br><span class="line">            result = <span class="number">4</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        *qrcode = (<span class="keyword">unsigned</span> <span class="keyword">char</span>*)<span class="built_in">malloc</span>(len+<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (*qrcode == <span class="literal">NULL</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;<span class="comment">/*out of memory*/</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">memset</span>(*qrcode, <span class="number">0</span>, len + <span class="number">1</span>);</span><br><span class="line">        <span class="built_in">memcpy</span>(*qrcode, response, len);</span><br><span class="line">        *size = len;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用示范"><a href="#使用示范" class="headerlink" title="使用示范"></a>使用示范</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main.cc</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* access_token = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* appid = <span class="string">&quot;your_appid&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* appsecret = <span class="string">&quot;your_appsecret&quot;</span>;</span><br><span class="line">    <span class="keyword">int</span> result = get_wxacode_access_token(appid, appsecret, &amp;access_token, <span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">if</span> (result &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in main func:%s\r\n&quot;</span>, access_token);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(result == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;access_token:%s\r\n&quot;</span>, access_token);</span><br><span class="line">        <span class="keyword">unsigned</span> <span class="keyword">char</span>* qrcode = <span class="literal">NULL</span>;</span><br><span class="line">        <span class="keyword">size_t</span> size = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">char</span>* parameter = <span class="string">&quot;&#123;\&quot;scene\&quot;:\&quot;testtest\&quot;&#125;&quot;</span>;</span><br><span class="line">        result = get_wxacode_unlimited(access_token, parameter, &amp;qrcode, &amp;size, <span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">if</span> (result &gt; <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;in main func qrcode:%s\r\n&quot;</span>, qrcode);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (result == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            FILE* file;</span><br><span class="line">            <span class="keyword">if</span> (fopen_s(&amp;file, <span class="string">&quot;wxacode.jpg&quot;</span>, <span class="string">&quot;wb+&quot;</span>) == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                fwrite(qrcode, <span class="number">1</span>, size, file);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;success write wxacode.jpg\r\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;failed to open wxacode.jpg\r\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (qrcode)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">free</span>(qrcode);</span><br><span class="line">            qrcode = <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (access_token)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">free</span>(access_token);</span><br><span class="line">        access_token = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h2><p>在 ubuntu 上，由于使用了 libcurl 访问https的链接，可以尝试安装这个包 <code>libcurl4-openssl-dev</code><br>在对返回值的处理中，使用了 rapidjson 作为处理json的库，可以尝试安装这个包<code>rapidjson-dev</code><br>编译时需要使用 <code>-lssl -lcurl</code>作为链接库</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/27/how-does-android-app-crash/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -217,14 +551,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2021-03-27 22:04:08" itemprop="dateCreated datePublished" datetime="2021-03-27T22:04:08+08:00">2021-03-27</time>
+              <time title="Created: 2021-03-27 22:04:08" itemprop="dateCreated datePublished" datetime="2021-03-27T22:04:08+00:00">2021-03-27</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-28 14:23:17" itemprop="dateModified" datetime="2021-03-28T14:23:17+08:00">2021-03-28</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -303,14 +637,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-10-20 22:26:52" itemprop="dateCreated datePublished" datetime="2020-10-20T22:26:52+08:00">2020-10-20</time>
+              <time title="Created: 2020-10-20 22:26:52" itemprop="dateCreated datePublished" datetime="2020-10-20T22:26:52+00:00">2020-10-20</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:19" itemprop="dateModified" datetime="2020-12-13T09:29:19+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -390,14 +724,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-10-09 21:34:14" itemprop="dateCreated datePublished" datetime="2020-10-09T21:34:14+08:00">2020-10-09</time>
+              <time title="Created: 2020-10-09 21:34:14" itemprop="dateCreated datePublished" datetime="2020-10-09T21:34:14+00:00">2020-10-09</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:18" itemprop="dateModified" datetime="2020-12-13T09:29:18+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -477,14 +811,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-08-16 09:41:40" itemprop="dateCreated datePublished" datetime="2020-08-16T09:41:40+08:00">2020-08-16</time>
+              <time title="Created: 2020-08-16 09:41:40" itemprop="dateCreated datePublished" datetime="2020-08-16T09:41:40+00:00">2020-08-16</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:18" itemprop="dateModified" datetime="2020-12-13T09:29:18+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -563,14 +897,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-06-21 10:31:37" itemprop="dateCreated datePublished" datetime="2020-06-21T10:31:37+08:00">2020-06-21</time>
+              <time title="Created: 2020-06-21 10:31:37" itemprop="dateCreated datePublished" datetime="2020-06-21T10:31:37+00:00">2020-06-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:18" itemprop="dateModified" datetime="2020-12-13T09:29:18+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -655,14 +989,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2019-10-07 17:53:35" itemprop="dateCreated datePublished" datetime="2019-10-07T17:53:35+08:00">2019-10-07</time>
+              <time title="Created: 2019-10-07 17:53:35" itemprop="dateCreated datePublished" datetime="2019-10-07T17:53:35+00:00">2019-10-07</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:19" itemprop="dateModified" datetime="2020-12-13T09:29:19+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -744,14 +1078,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2019-04-13 22:21:10" itemprop="dateCreated datePublished" datetime="2019-04-13T22:21:10+08:00">2019-04-13</time>
+              <time title="Created: 2019-04-13 22:21:10" itemprop="dateCreated datePublished" datetime="2019-04-13T22:21:10+00:00">2019-04-13</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:19" itemprop="dateModified" datetime="2020-12-13T09:29:19+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -832,14 +1166,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2019-01-10 10:14:22" itemprop="dateCreated datePublished" datetime="2019-01-10T10:14:22+08:00">2019-01-10</time>
+              <time title="Created: 2019-01-10 10:14:22" itemprop="dateCreated datePublished" datetime="2019-01-10T10:14:22+00:00">2019-01-10</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:18" itemprop="dateModified" datetime="2020-12-13T09:29:18+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -924,14 +1258,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2018-12-06 09:36:28" itemprop="dateCreated datePublished" datetime="2018-12-06T09:36:28+08:00">2018-12-06</time>
+              <time title="Created: 2018-12-06 09:36:28" itemprop="dateCreated datePublished" datetime="2018-12-06T09:36:28+00:00">2018-12-06</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:19" itemprop="dateModified" datetime="2020-12-13T09:29:19+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           <br>
@@ -968,92 +1302,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/06/tensorflow-for-poets/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2018/10/13/mcpe-server/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BDZNH">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/13/mcpe-server/" class="post-title-link" itemprop="url">MC 基岩版(PE) 服务器来了</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-13 15:12:04" itemprop="dateCreated datePublished" datetime="2018-10-13T15:12:04+08:00">2018-10-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:50:13" itemprop="dateModified" datetime="2020-12-13T09:50:13+08:00">2020-12-13</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>0</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>好长时间没写了，前段时间登陆上MC官网，发现PE版本的服务端已经放出来了，有 Windows 版本和 Linux 版本，小小的尝试了一下，记录一下遇到的坑。<br>先放链接<a target="_blank" rel="noopener" href="https://minecraft.net/en-us/download/server/bedrock/">https://minecraft.net/en-us/download/server/bedrock/</a></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/13/mcpe-server/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1144,7 +1392,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-count">77</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1187,12 +1435,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="Symbols count total">278k</span>
+    <span title="Symbols count total">294k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="Reading time total">4:13</span>
+    <span title="Reading time total">4:27</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>

@@ -29,8 +29,8 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png">
 <meta property="og:image" content="http://example.com/2018/04/19/Auto-Control-Raspberry-Fan/1.png">
-<meta property="article:published_time" content="2018-04-19T07:09:42.000Z">
-<meta property="article:modified_time" content="2020-12-13T01:29:18.000Z">
+<meta property="article:published_time" content="2018-04-19T15:09:42.000Z">
+<meta property="article:modified_time" content="2021-06-12T12:48:26.443Z">
 <meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2018/04/19/Auto-Control-Raspberry-Fan/rpi-pins-40-0.png">
@@ -224,14 +224,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2018-04-19 15:09:42" itemprop="dateCreated datePublished" datetime="2018-04-19T15:09:42+08:00">2018-04-19</time>
+              <time title="Created: 2018-04-19 15:09:42" itemprop="dateCreated datePublished" datetime="2018-04-19T15:09:42+00:00">2018-04-19</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-13 09:29:18" itemprop="dateModified" datetime="2020-12-13T09:29:18+08:00">2020-12-13</time>
+                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
               </span>
 
           
@@ -299,7 +299,7 @@
 
 <hr>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://blog.newnius.com/raspberry-control-fan-with-transistor.html">https://blog.newnius.com/raspberry-control-fan-with-transistor.html</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lulipro/p/5992172.html">树莓派wiringPi库详解</a><br>PS:链接一内的脚本用Python实现，无奈Python会占用大量CPU，对树莓派来说并不合适。后来虽然在百度也找到一些python脚本，占用资源也很少，但是还是写了这个练手。</p>
-<h3 id="百度贴吧找到的python脚本"><a href="#百度贴吧找到的python脚本" class="headerlink" title="百度贴吧找到的python脚本"></a>百度贴吧找到的python脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># encoding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> RPi.GPIO</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">RPi.GPIO.setwarnings(<span class="literal">False</span>)</span><br><span class="line">RPi.GPIO.setmode(RPi.GPIO.BCM)</span><br><span class="line">RPi.GPIO.setup(<span class="number">2</span>, RPi.GPIO.OUT)</span><br><span class="line">pwm = RPi.GPIO.PWM(<span class="number">2</span>,<span class="number">100</span>)</span><br><span class="line">RPi.GPIO.setwarnings(<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">speed = <span class="number">0</span></span><br><span class="line">prv_temp = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		</span><br><span class="line">				tmpFile = <span class="built_in">open</span>( <span class="string">&#x27;/sys/class/thermal/thermal_zone0/temp&#x27;</span> )</span><br><span class="line">				cpu_temp = <span class="built_in">int</span>(tmpFile.read())</span><br><span class="line">				tmpFile.close()</span><br><span class="line">				<span class="keyword">if</span> cpu_temp&gt;=<span class="number">34500</span> :</span><br><span class="line">				</span><br><span class="line">						<span class="keyword">if</span> prv_temp&lt;<span class="number">34500</span> :</span><br><span class="line">						<span class="comment">#启动时防止风扇卡死先全功率转0.1秒</span></span><br><span class="line">								pwm.start(<span class="number">0</span>)</span><br><span class="line">								pwm.ChangeDutyCycle(<span class="number">100</span>)</span><br><span class="line">								time.sleep(<span class="number">.1</span>)</span><br><span class="line">						speed = <span class="built_in">min</span>( cpu_temp/<span class="number">125</span>-<span class="number">257</span> , <span class="number">100</span> )</span><br><span class="line">						pwm.ChangeDutyCycle(speed)</span><br><span class="line">				<span class="keyword">else</span> :</span><br><span class="line">						pwm.stop()</span><br><span class="line">				prv_temp = cpu_temp</span><br><span class="line">				</span><br><span class="line">				time.sleep(<span class="number">5</span>)</span><br><span class="line">				</span><br><span class="line"><span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">		<span class="keyword">pass</span></span><br><span class="line">pwm.stop()</span><br></pre></td></tr></table></figure>
+<h3 id="百度贴吧找到的python脚本"><a href="#百度贴吧找到的python脚本" class="headerlink" title="百度贴吧找到的python脚本"></a>百度贴吧找到的python脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># encoding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> RPi.GPIO</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line">RPi.GPIO.setwarnings(<span class="literal">False</span>)</span><br><span class="line">RPi.GPIO.setmode(RPi.GPIO.BCM)</span><br><span class="line">RPi.GPIO.setup(<span class="number">2</span>, RPi.GPIO.OUT)</span><br><span class="line">pwm = RPi.GPIO.PWM(<span class="number">2</span>,<span class="number">100</span>)</span><br><span class="line">RPi.GPIO.setwarnings(<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">speed = <span class="number">0</span></span><br><span class="line">prv_temp = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		</span><br><span class="line">				tmpFile = open( <span class="string">&#x27;/sys/class/thermal/thermal_zone0/temp&#x27;</span> )</span><br><span class="line">				cpu_temp = int(tmpFile.read())</span><br><span class="line">				tmpFile.close()</span><br><span class="line">				<span class="keyword">if</span> cpu_temp&gt;=<span class="number">34500</span> :</span><br><span class="line">				</span><br><span class="line">						<span class="keyword">if</span> prv_temp&lt;<span class="number">34500</span> :</span><br><span class="line">						<span class="comment">#启动时防止风扇卡死先全功率转0.1秒</span></span><br><span class="line">								pwm.start(<span class="number">0</span>)</span><br><span class="line">								pwm.ChangeDutyCycle(<span class="number">100</span>)</span><br><span class="line">								time.sleep(<span class="number">.1</span>)</span><br><span class="line">						speed = min( cpu_temp/<span class="number">125</span><span class="number">-257</span> , <span class="number">100</span> )</span><br><span class="line">						pwm.ChangeDutyCycle(speed)</span><br><span class="line">				<span class="keyword">else</span> :</span><br><span class="line">						pwm.stop()</span><br><span class="line">				prv_temp = cpu_temp</span><br><span class="line">				</span><br><span class="line">				time.sleep(<span class="number">5</span>)</span><br><span class="line">				</span><br><span class="line"><span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">		<span class="keyword">pass</span></span><br><span class="line">pwm.stop()</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -396,7 +396,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-count">77</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -439,12 +439,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="Symbols count total">278k</span>
+    <span title="Symbols count total">294k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="Reading time total">4:13</span>
+    <span title="Reading time total">4:27</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
