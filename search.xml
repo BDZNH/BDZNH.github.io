@@ -5239,6 +5239,8 @@ table th:first-of-type {
     <url>/2021/06/12/wxacode/</url>
     <content><![CDATA[<p>微信官方对于小程序码的获取可以查看连接<a href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/qr-code.html">https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/qr-code.html</a></p>
 <p>接口B，可以生成不受数量限制的小程序码，并且支持不太长的path和不超过32字符的参数。这样的话，就可以使用path和对应的参数来做一些事情。</p>
+<a id="more"></a>
+
 <p>接口B的介绍，可以查看<a href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html">https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html</a></p>
 <p>简单来说，生成小程序码，是访问网址<code>https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN</code>，并发起 post 请求，请求参数是一个 json 字符串，json 字符串的具体说明可以查看<a href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/qr-code/wxacode.getUnlimited.html">接口B的说明</a></p>
 <p>我从官网摘下来了</p>
