@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
+  <link rel="mask-icon" href="/images/fire.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文以 WxaCode为例，讲一下 UWP 初学者用到的一些东西。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UWP简单教程">
+<meta property="og:url" content="http://example.com/2021/06/29/UWP-beginner/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="本文以 WxaCode为例，讲一下 UWP 初学者用到的一些东西。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2021/06/29/UWP-beginner/wide.jpg">
+<meta property="og:image" content="http://example.com/2021/06/29/UWP-beginner/wide.jpg">
+<meta property="og:image" content="http://example.com/2021/06/29/UWP-beginner/narrow.jpg">
+<meta property="og:image" content="http://example.com/2021/06/29/UWP-beginner/settings.jpg">
+<meta property="article:published_time" content="2021-06-29T14:14:45.000Z">
+<meta property="article:modified_time" content="2021-06-29T15:06:35.908Z">
+<meta property="article:author" content="SupperMary">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/06/29/UWP-beginner/wide.jpg">
+
+<link rel="canonical" href="http://example.com/2021/06/29/UWP-beginner/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>UWP简单教程 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/29/UWP-beginner/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          UWP简单教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-06-29 14:14:45 / Modified: 15:06:35" itemprop="dateCreated datePublished" datetime="2021-06-29T14:14:45+00:00">2021-06-29</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文以 <a target="_blank" rel="noopener" href="https://github.com/BDZNH/WxaCode-UWP">WxaCode</a>为例，讲一下 UWP 初学者用到的一些东西。</p>
+<img src="/2021/06/29/UWP-beginner/wide.jpg" class="" title="homepage">
+
+<a id="more"></a>
+<h1 id="UWP-的坐标系"><a href="#UWP-的坐标系" class="headerlink" title="UWP 的坐标系"></a>UWP 的坐标系</h1><p>以 16:9 的屏幕为例，左上角是 (0,0) ，右下角是 (1920,1080)，我使用的屏幕是 4K 屏，应用读出来的也还是 1920x1080 。这也省事一些，不用过度关心不同分辨率的情况。</p>
+<h1 id="动态响应布局"><a href="#动态响应布局" class="headerlink" title="动态响应布局"></a>动态响应布局</h1><p>简单来说，动态响应布局可以根据当前屏幕的宽度（或高度），来选择不同的布局，对于PC来说，由于纵向可以用滚轮滚动，所以多数情况下，我们还是以宽度作为布局变化的点。</p>
+<p>微信小程序码这个应用中，除去 UWP 自带的控件 <code>NavigationView</code> 之外（NavigationView 控件自带动态响应效果），手动实现了动态响应布局的是 HomePage ，下面是 HomePage 的 xml 实现</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Page</span></span></span><br><span class="line"><span class="tag">    <span class="attr">x:Class</span>=<span class="string">&quot;WxaCode.HomePage&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:x</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:local</span>=<span class="string">&quot;using:WxaCode&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:d</span>=<span class="string">&quot;http://schemas.microsoft.com/expression/blend/2008&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:mc</span>=<span class="string">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">mc:Ignorable</span>=<span class="string">&quot;d&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">Background</span>=<span class="string">&quot;&#123;ThemeResource ApplicationPageBackgroundThemeBrush&#125;&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Grid</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">VisualStateManager.VisualStateGroups</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">VisualStateGroup</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">VisualState</span> <span class="attr">x:Name</span>=<span class="string">&quot;WideLayout&quot;</span> &gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">VisualState.StateTriggers</span>&gt;</span></span><br><span class="line">                        <span class="comment">&lt;!--VisualState to be triggered when window width is &gt;=720 effective pixels.--&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">AdaptiveTrigger</span> <span class="attr">MinWindowWidth</span>=<span class="string">&quot;720&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">VisualState.StateTriggers</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">VisualState.Setters</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;wxacodeimage.(Grid.Row)&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;0&quot;</span> /&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;wxacodeimage.(Grid.Column)&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;wxacodeimage.MaxHeight&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;900&quot;</span> /&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;wxacodeimage.MaxWidth&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;900&quot;</span> /&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;Container.HorizontalAlignment&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;Stretch&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">Setter</span> <span class="attr">Target</span>=<span class="string">&quot;Container.MinHeight&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;600&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">VisualState.Setters</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">VisualState</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">VisualStateGroup</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">VisualStateManager.VisualStateGroups</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Grid</span> <span class="attr">x:Name</span>=<span class="string">&quot;Container&quot;</span> <span class="attr">MinHeight</span>=<span class="string">&quot;1000&quot;</span> <span class="attr">HorizontalAlignment</span>=<span class="string">&quot;Center&quot;</span> &gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Grid.ColumnDefinitions</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;Auto&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">Grid.ColumnDefinitions</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;Auto&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;Auto&quot;</span>/&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                <span class="tag">&lt;<span class="name">Grid</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxaCodeParamsGrid&quot;</span> <span class="attr">Width</span>=<span class="string">&quot;350&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;10,10,10,10&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> &gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Grid.ColumnDefinitions</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;2*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;2*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;3*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">ColumnDefinition</span> <span class="attr">Width</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">Grid.ColumnDefinitions</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">RowDefinition</span> <span class="attr">Height</span>=<span class="string">&quot;*&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">Grid.RowDefinitions</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBox</span> <span class="attr">x:Name</span>=<span class="string">&quot;AppidTextBlock&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;Appid&quot;</span> <span class="attr">PlaceholderText</span>=<span class="string">&quot;必须填写，应用不缓存&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,5,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;4&quot;</span> <span class="attr">TextChanged</span>=<span class="string">&quot;AppidTextBlock_TextChanged&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBox</span> <span class="attr">x:Name</span>=<span class="string">&quot;AppsecretTextBlock&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;Appsecret&quot;</span> <span class="attr">PlaceholderText</span>=<span class="string">&quot;必须填写，应用不缓存&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,5,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;1&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;4&quot;</span> <span class="attr">TextChanged</span>=<span class="string">&quot;AppsecretTextBlock_TextChanged&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBox</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeSceneTextBlock&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;请输入 scene:&quot;</span> <span class="attr">PlaceholderText</span>=<span class="string">&quot;不超过32个字符(必须填写)&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,5,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;2&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;4&quot;</span> <span class="attr">TextChanged</span>=<span class="string">&quot;WxacodeSceneTextBlock_TextChanged&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBox</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodePageTextBlock&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;请输入 page:&quot;</span> <span class="attr">PlaceholderText</span>=<span class="string">&quot;已发布的page(可不填，默认为 pages/index/index )&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,5,5&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;3&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;4&quot;</span> <span class="attr">TextChanged</span>=<span class="string">&quot;WxacodePageTextBlock_TextChanged&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Slider</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeWidthSlider&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">AutomationProperties.Name</span>=<span class="string">&quot;simple slider&quot;</span> <span class="attr">Minimum</span>=<span class="string">&quot;280&quot;</span> <span class="attr">Maximum</span>=<span class="string">&quot;1280&quot;</span> <span class="attr">StepFrequency</span>=<span class="string">&quot;1&quot;</span> <span class="attr">SmallChange</span>=<span class="string">&quot;1&quot;</span> <span class="attr">LargeChange</span>=<span class="string">&quot;100&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;430&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;4&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">ValueChanged</span>=<span class="string">&quot;WxacodeWidthSlider_ValueChanged&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBlock</span> <span class="attr">Text</span>=<span class="string">&quot;小程序码宽度&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;4&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span>/&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBlock</span> <span class="attr">Text</span>=<span class="string">&quot;&#123;x:Bind WxacodeWidthSlider.Value.ToString(), Mode=OneWay&#125;&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,5,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">HorizontalAlignment</span>=<span class="string">&quot;Right&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;4&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;3&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">ToggleSwitch</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeAutoColorSwitch&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;自动配置线条颜色&quot;</span> <span class="attr">AutomationProperties.Name</span>=<span class="string">&quot;simple ToggleSwitch&quot;</span> <span class="attr">Toggled</span>=<span class="string">&quot;ToggleAutoColorSwitch&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;5&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">ToggleSwitch</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeIsHyalineSwitch&quot;</span> <span class="attr">Header</span>=<span class="string">&quot;透明底色&quot;</span> <span class="attr">AutomationProperties.Name</span>=<span class="string">&quot;simple ToggleSwitch&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,0,0,0&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;5&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">Toggled</span>=<span class="string">&quot;WxacodeIsHyalineSwitch_Toggled&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Slider</span> <span class="attr">IsEnabled</span>=<span class="string">&quot;&#123;x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay&#125;&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeLineColorRedSlider&quot;</span> <span class="attr">Foreground</span>=<span class="string">&quot;Red&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;6&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">Minimum</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Maximum</span>=<span class="string">&quot;255&quot;</span> <span class="attr">StepFrequency</span>=<span class="string">&quot;1&quot;</span> <span class="attr">SmallChange</span>=<span class="string">&quot;1&quot;</span> <span class="attr">LargeChange</span>=<span class="string">&quot;10&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;0&quot;</span> <span class="attr">ValueChanged</span>=<span class="string">&quot;WxacodeLineColorRedSlider_ValueChanged&quot;</span>  /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBlock</span> <span class="attr">Text</span>=<span class="string">&quot;线条颜色(red)&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;6&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Rectangle</span> <span class="attr">x:Name</span>=<span class="string">&quot;ColorPreview&quot;</span> <span class="attr">Stroke</span>=<span class="string">&quot;Black&quot;</span> <span class="attr">Fill</span>=<span class="string">&quot;White&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;6&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;3&quot;</span> <span class="attr">Grid.RowSpan</span>=<span class="string">&quot;3&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Stretch&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Slider</span> <span class="attr">IsEnabled</span>=<span class="string">&quot;&#123;x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay&#125;&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeLineColorGreenSlier&quot;</span> <span class="attr">Foreground</span>=<span class="string">&quot;Green&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;7&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">Minimum</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Maximum</span>=<span class="string">&quot;255&quot;</span> <span class="attr">StepFrequency</span>=<span class="string">&quot;1&quot;</span> <span class="attr">SmallChange</span>=<span class="string">&quot;1&quot;</span> <span class="attr">LargeChange</span>=<span class="string">&quot;10&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;0&quot;</span> <span class="attr">ValueChanged</span>=<span class="string">&quot;WxacodeLineColorGreenSlier_ValueChanged&quot;</span>  /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBlock</span> <span class="attr">Text</span>=<span class="string">&quot;线条颜色(green)&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;7&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Slider</span> <span class="attr">IsEnabled</span>=<span class="string">&quot;&#123;x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay&#125;&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;WxacodeLineColorBlueSlider&quot;</span> <span class="attr">Foreground</span>=<span class="string">&quot;Blue&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;8&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> <span class="attr">Minimum</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Maximum</span>=<span class="string">&quot;255&quot;</span> <span class="attr">StepFrequency</span>=<span class="string">&quot;1&quot;</span> <span class="attr">SmallChange</span>=<span class="string">&quot;1&quot;</span> <span class="attr">LargeChange</span>=<span class="string">&quot;10&quot;</span> <span class="attr">Value</span>=<span class="string">&quot;0&quot;</span> <span class="attr">ValueChanged</span>=<span class="string">&quot;WxacodeLineColorBlueSlider_ValueChanged&quot;</span>  /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">TextBlock</span> <span class="attr">Text</span>=<span class="string">&quot;线条颜色(blue)&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;8&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Margin</span>=<span class="string">&quot;5,5,0,5&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">Style</span>=<span class="string">&quot;&#123;StaticResource AccentButtonStyle&#125;&quot;</span> <span class="attr">Content</span>=<span class="string">&quot;获取小程序码&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;GetWxaCodeButton&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;9&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Click</span>=<span class="string">&quot;GetWxaCodeUnlimited&quot;</span> /&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">Style</span>=<span class="string">&quot;&#123;StaticResource AccentButtonStyle&#125;&quot;</span> <span class="attr">Content</span>=<span class="string">&quot;保存小程序码&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;SaveWxaCodeButton&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;9&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;2&quot;</span> <span class="attr">Grid.ColumnSpan</span>=<span class="string">&quot;2&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">Click</span>=<span class="string">&quot;SaveWxacodeImage&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">                <span class="tag">&lt;/<span class="name">Grid</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Image</span> <span class="attr">x:Name</span>=<span class="string">&quot;wxacodeimage&quot;</span> <span class="attr">Source</span>=<span class="string">&quot;/Assets/wxacodesample.jpg&quot;</span> <span class="attr">MaxWidth</span>=<span class="string">&quot;350&quot;</span> <span class="attr">Grid.Row</span>=<span class="string">&quot;1&quot;</span> <span class="attr">Grid.Column</span>=<span class="string">&quot;0&quot;</span> <span class="attr">HorizontalAlignment</span>=<span class="string">&quot;Center&quot;</span> <span class="attr">VerticalAlignment</span>=<span class="string">&quot;Center&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">Grid</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Grid</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Page</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对比一下UWP新建时，空白页的 xml 内容</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Page</span></span></span><br><span class="line"><span class="tag">    <span class="attr">x:Class</span>=<span class="string">&quot;NavigationViewTest.BlankPage1&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:x</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:local</span>=<span class="string">&quot;using:NavigationViewTest&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:d</span>=<span class="string">&quot;http://schemas.microsoft.com/expression/blend/2008&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:mc</span>=<span class="string">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">mc:Ignorable</span>=<span class="string">&quot;d&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">Background</span>=<span class="string">&quot;&#123;ThemeResource ApplicationPageBackgroundThemeBrush&#125;&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Grid</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Grid</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Page</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>动态响应布局的关键内容 <code>VisualStateManager</code> 即放在 <code>Grid</code> 下。然后我们再在 Grid 新建一个 Grid 布局，用这个子布局来承载页面的内容。相当于这个 Page 下有一个根 Grid ，将这个根 Grid 的 (0,0) 单元格，作为一个新的子 Grid 的内容，这里面再添加这个页面的承载元素，这样 VisualStateManager 就能生效了。</p>
+<p>VisualStateManager 的语法意思是，在页面大于或小于某个值（坐标系 1920x1080）时，改变控件的一些属性，本例中，改变了承载小程序码的 Image 控件所在的行和列，并且设置相应的宽度实现。下面两图是实现的动态响应布局的效果。</p>
+<img src="/2021/06/29/UWP-beginner/wide.jpg" class="" title="当界面较宽时">
+
+<img src="/2021/06/29/UWP-beginner/narrow.jpg" class="" title="当界面较窄时">
+
+<h1 id="导航栏"><a href="#导航栏" class="headerlink" title="导航栏"></a>导航栏</h1><p>导航栏是 UWP 自带的一个控件，Windows 10 的设置下的每一个子页面，都是导航栏的例子，这个控件是 <code>NavigationView</code> ，使用时在 Nuget 包管理器中，为当前解决方案添加 <code>Microsoft.UI.Xaml</code>。在页面的 Page 节点的配置中，添加<code>xmlns:muxc=&quot;using:Microsoft.UI.Xaml.Controls&quot;</code>字段，然后在这个页面下的 Grid 内添加一个 NavigationView 控件，以微信小程序码为例，内容如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Page</span></span></span><br><span class="line"><span class="tag">    <span class="attr">x:Class</span>=<span class="string">&quot;WxaCode.MainPage&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:x</span>=<span class="string">&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:local</span>=<span class="string">&quot;using:WxaCode&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:d</span>=<span class="string">&quot;http://schemas.microsoft.com/expression/blend/2008&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:mc</span>=<span class="string">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:muxc</span>=<span class="string">&quot;using:Microsoft.UI.Xaml.Controls&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">mc:Ignorable</span>=<span class="string">&quot;d&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">Background</span>=<span class="string">&quot;&#123;ThemeResource ApplicationPageBackgroundThemeBrush&#125;&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Grid</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">muxc:NavigationView</span> <span class="attr">x:Name</span>=<span class="string">&quot;NaviView&quot;</span> <span class="attr">ItemInvoked</span>=<span class="string">&quot;NaviView_ItemInvoked&quot;</span> <span class="attr">IsBackButtonVisible</span>=<span class="string">&quot;Collapsed&quot;</span> &gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">muxc:NavigationView.MenuItems</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">muxc:NavigationViewItem</span> <span class="attr">Icon</span>=<span class="string">&quot;Home&quot;</span> <span class="attr">Content</span>=<span class="string">&quot;操作&quot;</span> <span class="attr">Tag</span>=<span class="string">&quot;HomePage&quot;</span> <span class="attr">x:Name</span>=<span class="string">&quot;homepage&quot;</span> /&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">muxc:NavigationViewItem</span> <span class="attr">Icon</span>=<span class="string">&quot;Help&quot;</span> <span class="attr">Content</span>=<span class="string">&quot;关于&quot;</span> <span class="attr">Tag</span>=<span class="string">&quot;AboutPage&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">muxc:NavigationView.MenuItems</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">ScrollViewer</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">Frame</span> <span class="attr">x:Name</span>=<span class="string">&quot;ContentFrame&quot;</span> <span class="attr">Padding</span>=<span class="string">&quot;12,50,12,24&quot;</span> <span class="attr">IsTabStop</span>=<span class="string">&quot;True&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">ScrollViewer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">muxc:NavigationView</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Grid</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Page</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意其中的 <code>ScrollViewer</code> 和其内的 <code>Frame</code> ，这里将会承载每一个页面不同页面的具体内容，本例中，实际实现是把 homepage 和 aboutpage 作为一个子布局，放到 <code>Frame</code> 上。这样导航栏可以一直存在，通过点击导航栏，替换里面的 <code>Frame</code> 对应的页面，即可达到通过导航栏来切换页面的效果，具体的代码实现可以查看应用的源码。</p>
+<h1 id="本地设置"><a href="#本地设置" class="headerlink" title="本地设置"></a>本地设置</h1><p>本地设置通常是存放一些设置项，本例中通过封装UWP自带的 <code>Windows.Storage.ApplicationData.Current.LocalSettings</code> 来实现，比如是否保存 appid 和 appsecret ,如下图所示</p>
+<img src="/2021/06/29/UWP-beginner/settings.jpg" class="" title="设置">
+
+<h1 id="在应用退出时保存数据"><a href="#在应用退出时保存数据" class="headerlink" title="在应用退出时保存数据"></a>在应用退出时保存数据</h1><p>可能百度大学会告诉你，UWP在应用关闭时，需要申请一个受限权限”confirmAppClose”，但是由于是一个受限制的权限，有可能会因为这个权限，应用商店不允许发布（我没有尝试，我换了另外一种做法），如果你有安卓应用开发的经验，就会知道，安卓应用关闭时，Activity会收到 onPause,onStop,onDestroy三个事件通知，这三个地方足够你做很多事情，UWP有类似的地方，每一个UWP应用都有一个 App.xaml.cs，其内的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private void OnSuspending(object sender, SuspendingEventArgs e)</span><br><span class="line">&#123;</span><br><span class="line">    var deferral &#x3D; e.SuspendingOperation.GetDeferral();</span><br><span class="line">    &#x2F;&#x2F;TODO: 保存应用程序状态并停止任何后台活动</span><br><span class="line">    deferral.Complete();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/25/WxaCodePrivacyPolicy/" rel="prev" title="微信小程序码隐私政策">
+      <i class="fa fa-chevron-left"></i> 微信小程序码隐私政策
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#UWP-%E7%9A%84%E5%9D%90%E6%A0%87%E7%B3%BB"><span class="nav-number">1.</span> <span class="nav-text">UWP 的坐标系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%93%8D%E5%BA%94%E5%B8%83%E5%B1%80"><span class="nav-number">2.</span> <span class="nav-text">动态响应布局</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%BC%E8%88%AA%E6%A0%8F"><span class="nav-number">3.</span> <span class="nav-text">导航栏</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">本地设置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9C%A8%E5%BA%94%E7%94%A8%E9%80%80%E5%87%BA%E6%97%B6%E4%BF%9D%E5%AD%98%E6%95%B0%E6%8D%AE"><span class="nav-number">5.</span> <span class="nav-text">在应用退出时保存数据</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="SupperMary"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">309k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">4:41</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
