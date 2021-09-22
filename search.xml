@@ -5544,4 +5544,24 @@ table th:first-of-type {
 <p>已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。</p>
 ]]></content>
   </entry>
+  <entry>
+    <title>在 Ubuntu 内如何更改 Chrome 的语言</title>
+    <url>/2021/09/22/how-to-change-chrome-language-in-ubuntu/</url>
+    <content><![CDATA[<p>在 Ubuntu(20.04) 内更改 Chrome 的语言时，并没有像是 Windows 的<code>以这种语言显示 Google Chrome</code>的选项。最多也只能修改提示翻译的优先语言。没有严格意义上的“更改显示语言”的选项。<br>在 Ubuntu 上，Chrome的显示语言可以根据系统语言变化，一种办法是将系统语言设置成你想要显示的语言，但是对于中文用户来说，更多的场景可能是系统语言是英文，应用语言是中文，比如这里的Chrome。如果你是我所说的这种情况，那么本文的内容可能对你有帮助。</p>
+<img src="/2021/09/22/how-to-change-chrome-language-in-ubuntu/1.png" class="">
+
+<a id="more"></a>
+
+<p>在你的终端尝试以下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">LANGUAGE=zh_cn google-chrome</span><br></pre></td></tr></table></figure>
+
+<p>此时如果启动 Chrome 能显示中文的话，我们的需求已经满足一大半了。如果使用命令行即可满足需求的话，就截至这里就可以了。</p>
+<p>Ubuntu 的任务栏可以将常用的 APP 钉在这里(Ubuntu 称为 favorite)，那么如何更改从这里启动的 Chrome的语言呢？<br>通过搜索引擎可以知道，这个 favorite 对应的文件在 <code>/usr/share/applications</code> ，我们找到 Chrome 对应的文件 <code>/usr/share/applications/google-chrome.desktop</code>，查看其内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[Desktop Entry]</span><br><span class="line">Version=1.0</span><br><span class="line">Name=Google Chrome</span><br><span class="line"><span class="comment"># Only KDE 4 seems to use GenericName, so we reuse the KDE strings.</span></span><br><span class="line"><span class="comment"># From Ubuntu&#x27;s language-pack-kde-XX-base packages, version 9.04-20090413.</span></span><br><span class="line">GenericName=Web Browser</span><br><span class="line">......</span><br><span class="line">Exec=/usr/bin/google-chrome-stable %U</span><br><span class="line">StartupNotify=<span class="literal">true</span></span><br><span class="line">Terminal=<span class="literal">false</span></span><br><span class="line">Icon=google-chrome</span><br><span class="line">Type=Application</span><br><span class="line">Categories=Network;WebBrowser;</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p>如果你注意到了 <code>Exec=/usr/bin/google-chrome-stable</code> 字段，那么你肯定能猜到，我们可以为这个可执行程序添加命令行参数<code>LANGUAGE=zh_cn</code>来让Chrome启动时以中文启动。遗憾的是，这里不行。直接加在这里不仅无法使用，而且还会导致 GNOME 桌面找不到 Chrome 了。<br>下面是我的解决办法</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">touch chrome_cn.sh</span><br><span class="line">echo &quot;#!&#x2F;bin&#x2F;bash&quot; &gt; chrome_cn.sh</span><br><span class="line">echo &quot;LANGUAGE&#x3D;zh_cn &#x2F;usr&#x2F;bin&#x2F;google-chrome-stable $@&quot; &gt;&gt; chrome_cn.sh</span><br><span class="line">sudo cp -f chrome_cn.sh &#x2F;usr&#x2F;bin&#x2F;chrome_cn.sh</span><br></pre></td></tr></table></figure>
+<p>然后将 <code>/usr/share/applications/google-chrome.desktop</code> 里的所有 <code>/usr/bin/google-chrome-stable</code> 换成 <code>/usr/bin/chrome_cn.sh</code> 。让我们点击图标的时候，实际执行的是一个 sh 脚本，然后把 <code>LANGUAGE=zh_cn</code> 写在脚本里，让脚本去启动 Chrome ，这样就可以让桌面上任务栏启动的 Chrome 变成中文了。</p>
+<p>最好不要直接更改 <code>LANGUAGE</code> 这个环境变量的值，这个值与系统语言相关。</p>
+]]></content>
+  </entry>
 </search>
