@@ -193,6 +193,86 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/05/23/open-android-screencap-raw-img/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/05/23/open-android-screencap-raw-img/" class="post-title-link" itemprop="url">如何打开安卓的 screencap 命令生成的 raw 图片</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-05-23 14:32:54 / Modified: 15:01:20" itemprop="dateCreated datePublished" datetime="2023-05-23T14:32:54+00:00">2023-05-23</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>0</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>以 Android 9.0 为例，screencap 的实现可以查看 <a target="_blank" rel="noopener" href="http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp">http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp</a> 。<br>screencap 的命令格式是<br><code>screencap &lt;imgpath&gt;</code> 或者 <code>screencap -p &lt;imgpath&gt;</code>。<br>如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">uint32_t</span> c = <span class="built_in">dataSpaceToInt</span>(d);</span><br><span class="line">    <span class="built_in">write</span>(fd, &amp;w, <span class="number">4</span>);</span><br><span class="line">    <span class="built_in">write</span>(fd, &amp;h, <span class="number">4</span>);</span><br><span class="line">    <span class="built_in">write</span>(fd, &amp;f, <span class="number">4</span>);</span><br><span class="line">    <span class="built_in">write</span>(fd, &amp;c, <span class="number">4</span>);</span><br><span class="line">    <span class="type">size_t</span> Bpp = <span class="built_in">bytesPerPixel</span>(f);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> y=<span class="number">0</span> ; y&lt;h ; y++) &#123;</span><br><span class="line">        <span class="built_in">write</span>(fd, base, w*Bpp);</span><br><span class="line">        base = (<span class="type">void</span> *)((<span class="type">char</span> *)base + s*Bpp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的实现可以看到，文件头是 16 字节，分别是图像宽，图像高，像素格式，reserved。然后是一个 RGBA 格式保存的图像数据（它为什么不保存为bitmap呢!）。<br>将文件名后缀改为 .raw 使用 Photoshop 即可打开文件查看。可以参考下图填写参数</p>
+<img src="/2023/05/23/open-android-screencap-raw-img/pssample.png" class="">
+
+<p>如果不知道图像宽度和高度，可以将图像当作二进制打开。看前 8 个字节即可。<br>本文示例中，前 16 字节为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">38 04 00 00 70 08 00 00 01 00 00 00 01 00 00 00</span><br></pre></td></tr></table></figure>
+<p>小端序存储，转换成整数为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x0438 = 1080</span><br><span class="line">0x0870 = 2160</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/22/how-to-change-chrome-language-in-ubuntu/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -957,99 +1037,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/10/07/create-a-own-csgo-public-server/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="SupperMary">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BDZNH">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/10/07/create-a-own-csgo-public-server/" class="post-title-link" itemprop="url">CSGO联机的小事儿</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2019-10-07 17:53:35" itemprop="dateCreated datePublished" datetime="2019-10-07T17:53:35+00:00">2019-10-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>0</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="CS-GO-联机的那些事儿"><a href="#CS-GO-联机的那些事儿" class="headerlink" title="CS:GO 联机的那些事儿"></a>CS:GO 联机的那些事儿</h2><p>CS也是一款相当经典的枪战游戏了，这几天琢磨了一些联机的事情，这里汇总一下。</p>
-<h2 id="局域网联机"><a href="#局域网联机" class="headerlink" title="局域网联机"></a>局域网联机</h2><p>搜到的资料大都不太全，并且是很老很老版本的CSGO，甚至是CS1.6版本，若是硬件条件满足的话，CSGO的体验会好一些。</p>
-<p>局域网联机需要一个人打开“机器人练习赛”，然后打开任意地图，另外一个人在控制台输入 “connect x.x.x.x”，x.x.x.x 为先打开地图的人电脑的IP。</p>
-<p>打开控制台需要在 设置/游戏设置/游戏/启用开发者控制台/是 ，然后按下 “`”，就是波浪线上的那个键。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/10/07/create-a-own-csgo-public-server/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1117,7 +1108,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">80</span>
+          <span class="site-state-item-count">81</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1160,12 +1151,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="Symbols count total">310k</span>
+    <span title="Symbols count total">311k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="Reading time total">4:42</span>
+    <span title="Reading time total">4:43</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
