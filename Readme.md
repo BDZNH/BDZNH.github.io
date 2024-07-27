@@ -1,1 +1,1 @@
-# Personal blog.[https://bdznh.github.io](https://bdznh.github.io)
+# Personal blog: [https://bdznh.github.io](https://bdznh.github.io)
