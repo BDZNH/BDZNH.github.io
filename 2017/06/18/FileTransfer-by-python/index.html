@@ -1,37 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
-  <link rel="mask-icon" href="/images/fire.svg" color="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manul","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta property="og:type" content="article">
 <meta property="og:title" content="用Python搭建FTP服务器">
 <meta property="og:url" content="http://example.com/2017/06/18/FileTransfer-by-python/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:locale" content="en_US">
+<meta property="og:locale">
 <meta property="og:image" content="http://example.com/2017/06/18/FileTransfer-by-python/1.jpg">
 <meta property="og:image" content="http://example.com/2017/06/18/FileTransfer-by-python/3.jpg">
 <meta property="og:image" content="http://example.com/2017/06/18/FileTransfer-by-python/2.jpg">
 <meta property="og:image" content="http://example.com/2017/06/18/FileTransfer-by-python/4.jpg">
 <meta property="og:image" content="http://example.com/2017/06/18/FileTransfer-by-python/5.jpg">
 <meta property="article:published_time" content="2017-06-18T15:07:27.000Z">
-<meta property="article:modified_time" content="2021-06-12T12:48:26.447Z">
+<meta property="article:modified_time" content="2024-07-27T01:48:12.418Z">
 <meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2017/06/18/FileTransfer-by-python/1.jpg">
@@ -45,7 +45,7 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'en'
+    lang   : 'zh'
   };
 </script>
 
@@ -116,35 +116,35 @@
 
 
 <nav class="site-nav">
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-minecraft">
 
-    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
 
   </li>
         <li class="menu-item menu-item-projects">
 
-    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -201,11 +201,11 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
     <link itemprop="mainEntityOfPage" href="http://example.com/2017/06/18/FileTransfer-by-python/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="SupperMary">
       <meta itemprop="description" content="">
     </span>
@@ -221,7 +221,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -229,10 +229,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
+                <time title="Modified: 2024-07-27 01:48:12" itemprop="dateModified" datetime="2024-07-27T01:48:12+00:00">2024-07-27</time>
               </span>
 
           
@@ -242,20 +242,6 @@
               </span>
               <span class="post-meta-item-text">Views: </span>
               <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>NaN:aN</span>
             </span>
 
         </div>
@@ -268,13 +254,13 @@
 
       
         <img src="/2017/06/18/FileTransfer-by-python/1.jpg" class="">
-<a id="more"></a>
+<span id="more"></span>
 <h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>在之前的<a target="_blank" rel="noopener" href="http://bdznh.coding.me/2016/11/25/High-Speed-transfer/">某篇文章</a>中，介绍了告诉传输文件的办法，在文中，我使用了<code>nginx</code>来共享文件，缺点在于Windows的文件编码方式为GBK，在传输中文名的文件的时候，会出错，Windows下搭建FTP服务器的方式还有Windows自带的<code>Internet Information Service 管理器</code>，此法可解决中文问题，但是CPU占用较高，我的电脑上用IIS(Internet Information Service 管理器)搭建的FTP服务器来传松文件的时候，CPU占用超过30%，但是用<code>nginx</code>CPU占用不到5%。所以，今天换另外一个FTP服务器——<code>pyftpdlib</code></p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>首先，电脑上得有已经安装好的python环境，然后使用pip命令安装</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip insstall pyftpdlib</span><br></pre></td></tr></table></figure>
 
 <h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><p>编辑一个纯文本文件，其内容如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line">from pyftpdlib.authorizers import DummyAuthorizer</span><br><span class="line">from pyftpdlib.handlers import FTPHandler</span><br><span class="line">from pyftpdlib.servers import FTPServer</span><br><span class="line">#新建一个用户组</span><br><span class="line">authorizer &#x3D; DummyAuthorizer()</span><br><span class="line">#将用户名，密码，指定目录，权限 添加到里面</span><br><span class="line">authorizer.add_user(&quot;fan&quot;, &quot;root&quot;, &quot;E:&#x2F;UT_Downloads&#x2F;&quot;, perm&#x3D;&quot;elr&quot;)#adfmw</span><br><span class="line">#这个是添加匿名用户,任何人都可以访问，如果去掉的话，需要输入用户名和密码，可以自己尝试</span><br><span class="line">authorizer.add_anonymous(&quot;D:&#x2F;&quot;)</span><br><span class="line"></span><br><span class="line">handler &#x3D; FTPHandler</span><br><span class="line">handler.authorizer &#x3D; authorizer</span><br><span class="line">#开启服务器</span><br><span class="line">server &#x3D; FTPServer((&quot;127.0.0.1&quot;, 21), handler)</span><br><span class="line">server.serve_forever()</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line">from pyftpdlib.authorizers import DummyAuthorizer</span><br><span class="line">from pyftpdlib.handlers import FTPHandler</span><br><span class="line">from pyftpdlib.servers import FTPServer</span><br><span class="line">#新建一个用户组</span><br><span class="line">authorizer = DummyAuthorizer()</span><br><span class="line">#将用户名，密码，指定目录，权限 添加到里面</span><br><span class="line">authorizer.add_user(&quot;fan&quot;, &quot;root&quot;, &quot;E:/UT_Downloads/&quot;, perm=&quot;elr&quot;)#adfmw</span><br><span class="line">#这个是添加匿名用户,任何人都可以访问，如果去掉的话，需要输入用户名和密码，可以自己尝试</span><br><span class="line">authorizer.add_anonymous(&quot;D:/&quot;)</span><br><span class="line"></span><br><span class="line">handler = FTPHandler</span><br><span class="line">handler.authorizer = authorizer</span><br><span class="line">#开启服务器</span><br><span class="line">server = FTPServer((&quot;127.0.0.1&quot;, 21), handler)</span><br><span class="line">server.serve_forever()</span><br></pre></td></tr></table></figure>
 <p>其中，<code>E:/UT_Downloads/</code>是需要共享的文件所在路径，可以自行更改，<code>fan</code>和<code>root</code>是用户名和密码，也可以自己改动，而<code>authorizer.add_anonymous(&quot;D:/&quot;)</code>是用来控制是否允许匿名用户登录的，若是把改行注释(行首加#号)，在登录服务器的时候，就需要输入用户名和密码了</p>
 <img src="/2017/06/18/FileTransfer-by-python/3.jpg" class="">
 <p>将文件名后缀设置为<code>.py</code>,在命令行下切换到该文件所在目录，使用<code>python ***.py</code>就可以打开FTP服务器了</p>
@@ -285,8 +271,10 @@
 
 <h2 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h2><ol>
 <li>以上示范代码，可以提供文件的下载，但是还不支持文件上传，若有上传文件的需要，可阅读官方的<a target="_blank" rel="noopener" href="http://pythonhosted.org/pyftpdlib/">文档</a>。<br>我编辑此文的时候，还未与<code>nginx</code>的性能相比较过。</li>
-<li>Windows下的中文乱码<h3 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h3>此问题表现为在浏览器打开FTP服务器是正常的，在文件管理器打开FTP服务器是乱码的。<h3 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h3>解决方法为更改<code>pyftpdlib</code>的源代码，到<a target="_blank" rel="noopener" href="https://github.com/giampaolo/pyftpdlib/">https://github.com/giampaolo/pyftpdlib/</a>下载源代码，更改<code>pyftpdlib</code>文件夹下的<code>filesystems.py</code>,第<code>471</code>行和<code>603</code>的<code>utf8</code>改为<code>gbk</code>,文件<code>handlers.py</code>的<code>1382</code>行的<code>utf8</code>改为<code>gbk</code>，然后在命令行切换到<code>setup.py</code>文件所在的目录，使用命令<code>python setup.py install</code>进行安装。</li>
+<li>Windows下的中文乱码</li>
 </ol>
+<h3 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h3><p>此问题表现为在浏览器打开FTP服务器是正常的，在文件管理器打开FTP服务器是乱码的。</p>
+<h3 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h3><p>解决方法为更改<code>pyftpdlib</code>的源代码，到<a target="_blank" rel="noopener" href="https://github.com/giampaolo/pyftpdlib/">https://github.com/giampaolo/pyftpdlib/</a>下载源代码，更改<code>pyftpdlib</code>文件夹下的<code>filesystems.py</code>,第<code>471</code>行和<code>603</code>的<code>utf8</code>改为<code>gbk</code>,文件<code>handlers.py</code>的<code>1382</code>行的<code>utf8</code>改为<code>gbk</code>，然后在命令行切换到<code>setup.py</code>文件所在的目录，使用命令<code>python setup.py install</code>进行安装。</p>
 <h2 id="卸载pyftpdlib"><a href="#卸载pyftpdlib" class="headerlink" title="卸载pyftpdlib"></a>卸载<code>pyftpdlib</code></h2><p>由于之前已经通过命令<code>pip insstall pyftpdlib</code>安装过了，所以用源代码安装的时候会提示已经安装，可以通过命令</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip uninstall pyftpdlib</span><br></pre></td></tr></table></figure>
 <p>来将之前的<code>pyftpdlib</code>卸载掉，然后再安装更改源代码后的<code>pyftpdlib</code></p>
@@ -376,8 +364,6 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="SupperMary"
-      src="/images/avatar.jpg">
   <p class="site-author-name" itemprop="name">SupperMary</p>
   <div class="site-description" itemprop="description"></div>
 </div>
@@ -419,22 +405,12 @@
 
 <div class="copyright">
   
-  &copy; 2016 – 
-  <span itemprop="copyrightYear">2023</span>
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
-    </span>
-    <span title="Symbols count total">NaNm</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="Reading time total">NaN:aN</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>

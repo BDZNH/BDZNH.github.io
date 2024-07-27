@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
-  <link rel="mask-icon" href="/images/fire.svg" color="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manul","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="之前编译Putty的时候，遇到如下错误： 1234567In file included from ..&#x2F;windows&#x2F;window.c:29:0:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h: In function &#39;IsPlatformNT&amp;#39">
+  <meta name="description" content="之前编译Putty的时候，遇到如下错误： 1234567In file included from ..&#x2F;windows&#x2F;window.c:29:0:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h: In function &#x27;IsPlatformNT&#x27;:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mi">
 <meta property="og:type" content="article">
 <meta property="og:title" content="搞定Putty的编译问题">
 <meta property="og:url" content="http://example.com/2017/11/11/Fix-putty-bug/index.html">
 <meta property="og:site_name" content="BDZNH">
-<meta property="og:description" content="之前编译Putty的时候，遇到如下错误： 1234567In file included from ..&#x2F;windows&#x2F;window.c:29:0:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h: In function &#39;IsPlatformNT&amp;#39">
-<meta property="og:locale" content="en_US">
+<meta property="og:description" content="之前编译Putty的时候，遇到如下错误： 1234567In file included from ..&#x2F;windows&#x2F;window.c:29:0:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h: In function &#x27;IsPlatformNT&#x27;:D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mi">
+<meta property="og:locale">
 <meta property="og:image" content="http://example.com/2017/11/11/Fix-putty-bug/1.png">
 <meta property="article:published_time" content="2017-11-11T12:40:43.000Z">
-<meta property="article:modified_time" content="2021-06-12T12:48:26.455Z">
+<meta property="article:modified_time" content="2024-07-27T01:48:12.418Z">
 <meta property="article:author" content="SupperMary">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2017/11/11/Fix-putty-bug/1.png">
@@ -43,7 +43,7 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'en'
+    lang   : 'zh'
   };
 </script>
 
@@ -114,35 +114,35 @@
 
 
 <nav class="site-nav">
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-minecraft">
 
-    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
 
   </li>
         <li class="menu-item menu-item-projects">
 
-    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -199,11 +199,11 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
     <link itemprop="mainEntityOfPage" href="http://example.com/2017/11/11/Fix-putty-bug/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="SupperMary">
       <meta itemprop="description" content="">
     </span>
@@ -219,7 +219,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -227,10 +227,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
+                <time title="Modified: 2024-07-27 01:48:12" itemprop="dateModified" datetime="2024-07-27T01:48:12+00:00">2024-07-27</time>
               </span>
 
           
@@ -240,20 +240,6 @@
               </span>
               <span class="post-meta-item-text">Views: </span>
               <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>NaN:aN</span>
             </span>
 
         </div>
@@ -266,9 +252,9 @@
 
       
         <p>之前编译Putty的时候，遇到如下错误：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ..&#x2F;windows&#x2F;window.c:29:0:</span><br><span class="line">D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h: In function &#39;IsPlatformNT&#39;:</span><br><span class="line">D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h:130:38: error: &#39;osvi&#39; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize &#x3D; sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:&#x2F;CodeBlocks&#x2F;MinGW&#x2F;i686-w64-mingw32&#x2F;include&#x2F;multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In file included from ../windows/window.c:29:0:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h: In function &#x27;IsPlatformNT&#x27;:</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: error: &#x27;osvi&#x27; undeclared (first use in this function)</span><br><span class="line">     oi.dwOSVersionInfoSize = sizeof (osvi);</span><br><span class="line">                                      ^~~~</span><br><span class="line">D:/CodeBlocks/MinGW/i686-w64-mingw32/include/multimon.h:130:38: note: each undeclared identifier is reported only once for each function it appears in</span><br><span class="line">mingw32-make: *** [.\Makefile.mgw:963: window.o] Error 1</span><br></pre></td></tr></table></figure>
 
-<a id="more"></a>
+<span id="more"></span>
 
 <p>之前没怎么仔细看过报错信息，而是把Visual Studio的<code>multimon.h</code>替换掉Mingw的来解决报错。<br>现在回头仔细看了看了信息，无非是Mingw的<code>multimon.h</code>里面的<code>IsPlatformNT</code>函数内的<code>osvi</code>未定义，同时打开了Mingw和Visual Studio的<code>multimon.h</code>，显示如下</p>
 <img src="/2017/11/11/Fix-putty-bug/1.png" class="">
@@ -358,8 +344,6 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="SupperMary"
-      src="/images/avatar.jpg">
   <p class="site-author-name" itemprop="name">SupperMary</p>
   <div class="site-description" itemprop="description"></div>
 </div>
@@ -401,22 +385,12 @@
 
 <div class="copyright">
   
-  &copy; 2016 – 
-  <span itemprop="copyrightYear">2023</span>
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
-    </span>
-    <span title="Symbols count total">NaNm</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="Reading time total">NaN:aN</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>

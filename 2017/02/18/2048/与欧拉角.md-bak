@@ -1,0 +1,69 @@
+---
+mathjax: true
+title: 欧拉角与四元数
+date: 2016-11-26 16:04:15
+tags: 
+ - 学术
+---
+
+#### 欧拉角转四元数
+前面已经知道，当描述坐标系旋转时，有
+
+$$ \begin{bmatrix}0\\\^br
+\end{bmatrix}
+= (q_n^b)^{-1}\*\begin{bmatrix}0\\\^nr\end{bmatrix}*q_n^b
+$$
+<!-- more --> 
+将旋转$q_n^b$分解为绕z轴、y轴、x轴的三次旋转，旋转序为Z-Y-X，则三次旋转对应的角度分别为yaw、pitch、roll。
+
+设三次旋转对应的四元数分别为$$q\_z(\psi),q_y(\theta),q_x(\phi)$$
+
+则有: $$q\_n^b = q_z(\psi)\*q_y(\theta)\*q_x(\phi)$$
+
+
+因为四元数$q_x(\phi)$表示的旋转为绕x轴单位向量(1, 0, 0)旋转角度$\phi$
+
+因此$$q_x(\phi) = (cos(\frac{\phi}{2}), sin(\frac{\phi}{2}), 0, 0)$$
+
+同理$$q_y(\theta) = (cos(\frac{\theta}{2}), 0, sin(\frac{\theta}{2}), 0)$$
+
+$$\quad\;\;q_z(\psi) = (cos(\frac{\psi}{2}), 0, 0, sin(\frac{\psi}{2}))$$
+
+
+根据四元数乘法公式
+
+$$ q\_n^b = q\_z(\psi)\*q_y(\theta)\*q_x(\phi)=
+\begin{bmatrix}
+cos(\frac{\phi}{2})cos(\frac{\theta}{2})cos(\frac{\psi}{2})+sin(\frac{\phi}{2})sin(\frac{\theta}{2})sin(\frac{\psi}{2}) \\
+sin(\frac{\phi}{2})cos(\frac{\theta}{2})cos(\frac{\psi}{2})-cos(\frac{\phi}{2})sin(\frac{\theta}{2})sin(\frac{\psi}{2}) \\
+cos(\frac{\phi}{2})sin(\frac{\theta}{2})cos(\frac{\psi}{2})+sin(\frac{\phi}{2})cos(\frac{\theta}{2})sin(\frac{\psi}{2}) \\
+cos(\frac{\phi}{2})cos(\frac{\theta}{2})sin(\frac{\psi}{2})-sin(\frac{\phi}{2})sin(\frac{\theta}{2})cos(\frac{\psi}{2}) 
+\end{bmatrix}
+$$
+
+#### 四元数转欧拉角
+前面已经知道，旋转序为Z-Y-X时，旋转矩阵可以表示为:
+
+$ R_b^n =
+\begin{bmatrix}
+cos(\psi)cos(\theta)  &  cos(\psi)sin(\theta)sin(\phi)-sin(\psi)cos(\phi)  &  cos(\psi)sin(\theta)cos(\phi)+sin(\psi)sin(\phi) \\\
+sin(\psi)cos(\theta)  &  sin(\psi)sin(\theta)sin(\phi)+cos(\psi)cos(\phi)  &  sin(\psi)sin(\theta)cos(\phi)-cos(\psi)sin(\phi) \\\
+-sin(\theta)          &  cos(\theta)sin(\phi)                              &  cos(\theta)cos(\phi)
+\end{bmatrix}
+$
+
+$\quad\ = 
+\begin{bmatrix}
+{q_0}^2+{q_1}^2-{q_2}^2-{q_3}^2  &  2(q_1q_2-q_0q_3)                &  2(q_1q_3+q_0q_2) \\\
+2(q_1q_2+q_0q_3)                 &  {q_0}^2-{q_1}^2+{q_2}^2-{q_3}^2 &  2(q_2q_3-q_0q_1) \\\
+2(q_1q_3-q_0q_2)                 &  2(q_2q_3+q_0q_1)                &  {q_0}^2-{q_1}^2-{q_2}^2+{q_3}^2
+\end{bmatrix}
+$
+
+于是有:
+$\phi = atan2(2(q_0q_1+q_2q_3), 1-2({q_1}^2+{q_2}^2))$
+
+$\theta = asin(2(q_0q_2-q_1q_3))$
+
+$\psi = atan2(2(q_0q_3+q_1q_2), 1-2({q_2}^2+{q_3}^2))$
+

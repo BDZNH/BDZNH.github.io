@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/fire-128x128.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/fire-32x32.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/fire-16x16.ico">
-  <link rel="mask-icon" href="/images/fire.svg" color="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manul","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件xSwipe 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。">
@@ -26,9 +26,9 @@
 <meta property="og:url" content="http://example.com/2016/03/28/ubuntu-touchpad/index.html">
 <meta property="og:site_name" content="BDZNH">
 <meta property="og:description" content="描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件xSwipe 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。">
-<meta property="og:locale" content="en_US">
+<meta property="og:locale">
 <meta property="article:published_time" content="2016-03-28T22:01:22.000Z">
-<meta property="article:modified_time" content="2021-06-12T12:48:26.611Z">
+<meta property="article:modified_time" content="2024-07-27T01:48:12.462Z">
 <meta property="article:author" content="SupperMary">
 <meta property="article:tag" content="ubuntu touchpad 触控板调节">
 <meta name="twitter:card" content="summary">
@@ -42,7 +42,7 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'en'
+    lang   : 'zh'
   };
 </script>
 
@@ -113,35 +113,35 @@
 
 
 <nav class="site-nav">
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-minecraft">
 
-    <a href="/Minecraft/" rel="section"><i class="fa fa-fw fa-gamepad"></i>Minecraft</a>
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
 
   </li>
         <li class="menu-item menu-item-projects">
 
-    <a href="/app/" rel="section"><i class="fa fa-fw fa-building-o"></i>Projects</a>
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -198,11 +198,11 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
     <link itemprop="mainEntityOfPage" href="http://example.com/2016/03/28/ubuntu-touchpad/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="image" content="/images/avatar.gif">
       <meta itemprop="name" content="SupperMary">
       <meta itemprop="description" content="">
     </span>
@@ -218,7 +218,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -226,10 +226,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-12 12:48:26" itemprop="dateModified" datetime="2021-06-12T12:48:26+00:00">2021-06-12</time>
+                <time title="Modified: 2024-07-27 01:48:12" itemprop="dateModified" datetime="2024-07-27T01:48:12+00:00">2024-07-27</time>
               </span>
 
           
@@ -239,20 +239,6 @@
               </span>
               <span class="post-meta-item-text">Views: </span>
               <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span></span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>NaN:aN</span>
             </span>
 
         </div>
@@ -265,7 +251,7 @@
 
       
         <p>描述：ubuntu的触控板手势不多，最高只支持两点触控，白白浪费了触控板这四点触控。偶然在知乎上看到有人用一个软件<a target="_blank" rel="noopener" href="https://github.com/iberianpig/xSwipe">xSwipe</a> 成功实现多点触控，实测可以自行调节所需手势，我在安装过程中遇到一些麻烦，这里记录下来，作为备用。</p>
-<a id="more"></a>
+<span id="more"></span>
 
 <p>xSwipe在开源项目网站GitHub上可以找到，<a target="_blank" rel="noopener" href="https://github.com/iberianpig/xSwipe">传送门</a>,或访问 <a target="_blank" rel="noopener" href="https://github.com/iberianpig/xSwipe">https://github.com/iberianpig/xSwipe</a> PS:由于服务器在国外，国内访问可能很慢，我将所需文件备份了一份，下载地址放在文章末尾了。</p>
 <p>官网上的说明文档是英文版，虽然推荐读者阅读原版文档，但是为了照顾英语不好的同志，我找了一篇中文博客(<a target="_blank" rel="noopener" href="http://loliko.me/zai-linuxzhong-tian-jia-hong-mo-ban-shou-shi/">点我访问</a>),安装过程这篇博客已经说得很清楚了，这里不再叙述。 下面贴出官方的说明文档：</p>
@@ -273,43 +259,34 @@
 <h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>Before running the script, you must first do some preparations.</p>
 <p>1: Download xSwipe<br>2:Install X11::GUITest<br>3:Enable SHMConfig</p>
 <h3 id="1-Download-xSwipe"><a href="#1-Download-xSwipe" class="headerlink" title="1. Download xSwipe"></a>1. Download xSwipe</h3><p>Type below code, download xSwipe from github</p>
-<pre><code class="bash">$ cd ~
-$ wget https://github.com/iberianpig/xSwipe/archive/master.zip
-$ unzip master.zip</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~</span><br><span class="line">$ wget https://github.com/iberianpig/xSwipe/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br></pre></td></tr></table></figure>
+
 <h3 id="2-Install-X11-GUITest"><a href="#2-Install-X11-GUITest" class="headerlink" title="2. Install X11::GUITest"></a>2. Install X11::GUITest</h3><p>To install libx11-guitest-perl from synaptic package manager Or run the script on the terminal run as</p>
-<pre><code class="bash">$ sudo apt-get install libx11-guitest-perl
-NOTE: If using Ubuntu14.04, or later
-Install older version synaptics driver that is compatible with xSwipe.
-$ sudo apt-get install -y git build-essential libevdev-dev autoconf automake libmtdev-dev xorg-dev xutils-dev libtool
-$ sudo apt-get remove -y xserver-xorg-input-synaptics
-$ git clone https://github.com/Chosko/xserver-xorg-input-synaptics.git
-$ cd xserver-xorg-input-synaptics
-$ ./autogen.sh
-$ ./configure --exec_prefix=/usr
-$ make
-$ sudo make install</code></pre>
-<h3 id="3-Enable-SHMConfig"><a href="#3-Enable-SHMConfig" class="headerlink" title="3. Enable SHMConfig"></a>3. Enable SHMConfig</h3><p>Open /etc/X11/xorg.conf.d/50-synaptics.conf with your favorite text editor and edit it to enable SHMConfig</p>
-<pre><code class="bash">$ sudo gedit /etc/X11/xorg.conf.d/50-synaptics.conf  </code></pre>
-<p>NOTE:You will need to create the /etc/X11/xorg.conf.d/ directory and create 50-synaptics.conf if it does’nt exist yet. $ sudo mkdir /etc/X11/xorg.conf.d/</p>
-<p>/etc/X11/xorg.conf.d/50-synaptics.conf<br>Section “InputClass”<br>Identifier “evdev touchpad catchall”<br>Driver “synaptics”<br>MatchDevicePath “/dev/input/event*”<br>MatchIsTouchpad “on”<br>Option “Protocol” “event”<br>Option “SHMConfig” “on”<br>EndSection<br>To reflect SHMConfig, restart your session.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">sudo</span> apt-get install libx11-guitest-perl</span><br><span class="line">NOTE: If using Ubuntu14.04, or later</span><br><span class="line">Install older version synaptics driver that is compatible with xSwipe.</span><br><span class="line">$ <span class="built_in">sudo</span> apt-get install -y git build-essential libevdev-dev autoconf automake libmtdev-dev xorg-dev xutils-dev libtool</span><br><span class="line">$ <span class="built_in">sudo</span> apt-get remove -y xserver-xorg-input-synaptics</span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/Chosko/xserver-xorg-input-synaptics.git</span><br><span class="line">$ <span class="built_in">cd</span> xserver-xorg-input-synaptics</span><br><span class="line">$ ./autogen.sh</span><br><span class="line">$ ./configure --exec_prefix=/usr</span><br><span class="line">$ make</span><br><span class="line">$ <span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Enable-SHMConfig"><a href="#3-Enable-SHMConfig" class="headerlink" title="3. Enable SHMConfig"></a>3. Enable SHMConfig</h3><p>Open &#x2F;etc&#x2F;X11&#x2F;xorg.conf.d&#x2F;50-synaptics.conf with your favorite text editor and edit it to enable SHMConfig</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">sudo</span> gedit /etc/X11/xorg.conf.d/50-synaptics.conf  </span><br></pre></td></tr></table></figure>
+<p>NOTE:You will need to create the &#x2F;etc&#x2F;X11&#x2F;xorg.conf.d&#x2F; directory and create 50-synaptics.conf if it does’nt exist yet. $ sudo mkdir &#x2F;etc&#x2F;X11&#x2F;xorg.conf.d&#x2F;</p>
+<p>&#x2F;etc&#x2F;X11&#x2F;xorg.conf.d&#x2F;50-synaptics.conf<br>Section “InputClass”<br>Identifier “evdev touchpad catchall”<br>Driver “synaptics”<br>MatchDevicePath “&#x2F;dev&#x2F;input&#x2F;event*”<br>MatchIsTouchpad “on”<br>Option “Protocol” “event”<br>Option “SHMConfig” “on”<br>EndSection<br>To reflect SHMConfig, restart your session.</p>
 <p>That’s it for preparation.</p>
 <h3 id="Run-xSwipe"><a href="#Run-xSwipe" class="headerlink" title="Run xSwipe"></a>Run xSwipe</h3><p>To run xSwipe, type below code on terminal.</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl
-Note:You should run xSwipe.pl in same directory as &quot;eventKey.cfg&quot; .</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ perl ~/xSwipe-master/xSwipe.pl</span><br><span class="line">Note:You should run xSwipe.pl <span class="keyword">in</span> same directory as <span class="string">&quot;eventKey.cfg&quot;</span> .</span><br></pre></td></tr></table></figure>
 <p>You can use “swipe” with 3 or 4 fingers, they can call an event. Additionally, some gestures are avilable.</p>
 <p>edge-swipe : swipe with 2 fingers from outside edge(need to enable with option).<br>long-press : hold pressure for 0.5 seconds with 3 or 4 fingers.</p>
-<h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p>-d RATE : RATE is sensitivity to swipe.Default value is 1. Shorten swipe-length by half (e.g.,$ perl xSwipe.pl -d 0.5)<br>-m INTERVAL : INTERVAL is how often synclient monitor changes to the touchpad state. Default value is 10(ms). Set 50ms as monitoring-span. (e.g.,$ perl xSwipe.pl -m 50)<br>-n : Natural scroll like Macbook, use “/nScroll/eventKey.cfg”.<br>-e : Enable edge-swipe</p>
+<h3 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h3><p>-d RATE : RATE is sensitivity to swipe.Default value is 1. Shorten swipe-length by half (e.g.,$ perl xSwipe.pl -d 0.5)<br>-m INTERVAL : INTERVAL is how often synclient monitor changes to the touchpad state. Default value is 10(ms). Set 50ms as monitoring-span. (e.g.,$ perl xSwipe.pl -m 50)<br>-n : Natural scroll like Macbook, use “&#x2F;nScroll&#x2F;eventKey.cfg”.<br>-e : Enable edge-swipe</p>
 <h3 id="Customize"><a href="#Customize" class="headerlink" title="Customize"></a>Customize</h3><p>You can customize the settings for gestues to edit eventKey.cfg. Please check this article, “How to customize gesture”.</p>
-<h3 id="Bindable-gestures"><a href="#Bindable-gestures" class="headerlink" title="Bindable gestures"></a>Bindable gestures</h3><p>3/4/5 fingers swipe<br>2/3/4/5 fingers long-press<br>2/3/4 fingers edge-swipe<br>2fingers edge-swipe: only swipe-left/right from right/left edge<br>3fingers edge-swipe: only swipe-down from top egde</p>
-<h3 id="Example-shortcut-keys"><a href="#Example-shortcut-keys" class="headerlink" title="Example shortcut keys"></a>Example shortcut keys</h3><p>go back/forward on browser (Alt+Left, Alt+Right)<br>open/close a tab on browser (Ctrl+t/Ctrl+w)<br>move tabs (Ctrl+Tab, Ctrl+Shift+Tab)<br>move workspaces (Alt+Ctrl+Lert, Alt+Ctrl+Right, Alt+Ctrl+Up, Alt+Ctrl+Down)<br>move a window (Alt+F7)<br>open launcher (Alt+F8)<br>open a terminal (Ctrl+Alt+t)<br>close a window (Alt+F4)<br>Please let me know if you have any questions about this program.</p>
+<h3 id="Bindable-gestures"><a href="#Bindable-gestures" class="headerlink" title="Bindable gestures"></a>Bindable gestures</h3><p>3&#x2F;4&#x2F;5 fingers swipe<br>2&#x2F;3&#x2F;4&#x2F;5 fingers long-press<br>2&#x2F;3&#x2F;4 fingers edge-swipe<br>2fingers edge-swipe: only swipe-left&#x2F;right from right&#x2F;left edge<br>3fingers edge-swipe: only swipe-down from top egde</p>
+<h3 id="Example-shortcut-keys"><a href="#Example-shortcut-keys" class="headerlink" title="Example shortcut keys"></a>Example shortcut keys</h3><p>go back&#x2F;forward on browser (Alt+Left, Alt+Right)<br>open&#x2F;close a tab on browser (Ctrl+t&#x2F;Ctrl+w)<br>move tabs (Ctrl+Tab, Ctrl+Shift+Tab)<br>move workspaces (Alt+Ctrl+Lert, Alt+Ctrl+Right, Alt+Ctrl+Up, Alt+Ctrl+Down)<br>move a window (Alt+F7)<br>open launcher (Alt+F8)<br>open a terminal (Ctrl+Alt+t)<br>close a window (Alt+F4)<br>Please let me know if you have any questions about this program.</p>
 <p>我按照说明文档安装好所需软件之后，进行到最后一步</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl</code></pre>
-<p>遇到错误提示：<br>“Can’t locate Smart/Comments.pm in @INC (you may need to install the Smart::Comments module) (@INC contains: /etc/perl /usr/local/lib/perl/5.18.2 /usr/local/share/perl/5.18.2 /usr/lib/perl5 /usr/share/perl5 /usr/lib/perl/5.18 /usr/share/perl/5.18 /usr/local/lib/site_perl .) at /home/jackson/xSwipe-master/xSwipe.pl line 15.”</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ perl ~/xSwipe-master/xSwipe.pl</span><br></pre></td></tr></table></figure>
+
+<p>遇到错误提示：<br>“Can’t locate Smart&#x2F;Comments.pm in @INC (you may need to install the Smart::Comments module) (@INC contains: &#x2F;etc&#x2F;perl &#x2F;usr&#x2F;local&#x2F;lib&#x2F;perl&#x2F;5.18.2 &#x2F;usr&#x2F;local&#x2F;share&#x2F;perl&#x2F;5.18.2 &#x2F;usr&#x2F;lib&#x2F;perl5 &#x2F;usr&#x2F;share&#x2F;perl5 &#x2F;usr&#x2F;lib&#x2F;perl&#x2F;5.18 &#x2F;usr&#x2F;share&#x2F;perl&#x2F;5.18 &#x2F;usr&#x2F;local&#x2F;lib&#x2F;site_perl .) at &#x2F;home&#x2F;jackson&#x2F;xSwipe-master&#x2F;xSwipe.pl line 15.”</p>
 <p>百度无果，最后还是google给了我<a target="_blank" rel="noopener" href="https://forum.teksyndicate.com/t/perl-smart-comments/86880">答案</a> 可以访问原文地址:<a target="_blank" rel="noopener" href="https://forum.teksyndicate.com/t/perl-smart-comments/86880">https://forum.teksyndicate.com/t/perl-smart-comments/86880</a></p>
 <p>做法是，在终端键入下列命令:</p>
-<pre><code class="bash">sudo cpan -i Smart::Comments</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> cpan -i Smart::Comments</span><br></pre></td></tr></table></figure>
+
 <p>等待完成即可，不出意外的话，通过命令：</p>
-<pre><code class="bash">$ perl ~/xSwipe-master/xSwipe.pl</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ perl ~/xSwipe-master/xSwipe.pl</span><br></pre></td></tr></table></figure>
 <p>就可以开启三点以上触控板手势了，可以根据需要自行更改eventKey.cfg的内容来获得自己想要的手势。</p>
 <p><a target="_blank" rel="noopener" href="http://pan.baidu.com/s/1gesqHm7">xSwipe下载</a>：<a target="_blank" rel="noopener" href="http://pan.baidu.com/s/1gesqHm7">http://pan.baidu.com/s/1gesqHm7</a></p>
 <p>此文章仅作参考使用，使用时请仔细阅读说明文档。</p>
@@ -403,8 +380,6 @@ Note:You should run xSwipe.pl in same directory as &quot;eventKey.cfg&quot; .</c
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="SupperMary"
-      src="/images/avatar.jpg">
   <p class="site-author-name" itemprop="name">SupperMary</p>
   <div class="site-description" itemprop="description"></div>
 </div>
@@ -446,22 +421,12 @@ Note:You should run xSwipe.pl in same directory as &quot;eventKey.cfg&quot; .</c
 
 <div class="copyright">
   
-  &copy; 2016 – 
-  <span itemprop="copyrightYear">2023</span>
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">SupperMary</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
-    </span>
-    <span title="Symbols count total">NaNm</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-    <span title="Reading time total">NaN:aN</span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
