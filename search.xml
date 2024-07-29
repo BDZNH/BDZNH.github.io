@@ -851,6 +851,40 @@ pwm.stop()
 ]]></content>
   </entry>
   <entry>
+    <title>Google BBR 提速</title>
+    <url>/2017/07/18/BBR/</url>
+    <content><![CDATA[{% asset_img 1.jpg 单边提速神器 %}
+<!-- more -->
+谷歌总是有各种惊喜。偶然挖到这个家伙——[BBR](https://github.com/google/bbr)。
+vps加速有之前的锐速，也有[kcptun](https://github.com/xtaci/kcptun)，锐速效果不好，kcptun搭建步骤繁琐，并且是双边加速，很不方便。
+bbr是单边加速，给服务器一端配置好之后，所有客户端都能用。在教育网的IPv6下，晚八点左右，平时仅能达到500KB，开启bbr之后，可以达到2M+，效果很明显。
+## 安装内核
+bbr依赖于高于4.9+的Linux内核，要使用bbr，首先得升级内核。
+对于Ubuntu，可以这样做：
+```bash
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001_4.10.1-041001.201702260735_all.deb
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-image-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
+sudo dpkg -i *.deb && sudo reboot
+```
+重启之后，输入`uname -sr`可以看到新的内核已经安装。
+## 启动bbr
+输入`lsmod | grep bbr`，如果结果中没有 tcp_bbr 的话就先执行
+```bash
+modprobe tcp_bbr
+echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sysctl -p
+```
+然后依次执行：
+```bash
+sysctl net.ipv4.tcp_available_congestion_control
+sysctl net.ipv4.tcp_congestion_control
+```
+每条命令输入之后，提示信息里面都有`bbr`，则表示bbr已经开启。]]></content>
+  </entry>
+  <entry>
     <title>从组合数讲起</title>
     <url>/2016/12/09/Dynamic-programming/</url>
     <content><![CDATA[## 概要
@@ -986,40 +1020,6 @@ F(38)=F(37)+F(36);
         <tag>算法</tag>
         <tag>动态规划</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>Google BBR 提速</title>
-    <url>/2017/07/18/BBR/</url>
-    <content><![CDATA[{% asset_img 1.jpg 单边提速神器 %}
-<!-- more -->
-谷歌总是有各种惊喜。偶然挖到这个家伙——[BBR](https://github.com/google/bbr)。
-vps加速有之前的锐速，也有[kcptun](https://github.com/xtaci/kcptun)，锐速效果不好，kcptun搭建步骤繁琐，并且是双边加速，很不方便。
-bbr是单边加速，给服务器一端配置好之后，所有客户端都能用。在教育网的IPv6下，晚八点左右，平时仅能达到500KB，开启bbr之后，可以达到2M+，效果很明显。
-## 安装内核
-bbr依赖于高于4.9+的Linux内核，要使用bbr，首先得升级内核。
-对于Ubuntu，可以这样做：
-```bash
-wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001_4.10.1-041001.201702260735_all.deb
-wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
-wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-image-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
-sudo dpkg -i *.deb && sudo reboot
-```
-重启之后，输入`uname -sr`可以看到新的内核已经安装。
-## 启动bbr
-输入`lsmod | grep bbr`，如果结果中没有 tcp_bbr 的话就先执行
-```bash
-modprobe tcp_bbr
-echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-sysctl -p
-```
-然后依次执行：
-```bash
-sysctl net.ipv4.tcp_available_congestion_control
-sysctl net.ipv4.tcp_congestion_control
-```
-每条命令输入之后，提示信息里面都有`bbr`，则表示bbr已经开启。]]></content>
   </entry>
   <entry>
     <title>FRP</title>
@@ -1628,17 +1628,6 @@ frp 交流群：606194980 (QQ 群号)
       </tags>
   </entry>
   <entry>
-    <title>First day</title>
-    <url>/2016/03/26/First-day/</url>
-    <content><![CDATA[### 今天，正式开始！
-2016年3月26日 于西安电子科技大学
-
-{% asset_img myweblogo.jpg This %}
-
-
-]]></content>
-  </entry>
-  <entry>
     <title>用Python搭建FTP服务器</title>
     <url>/2017/06/18/FileTransfer-by-python/</url>
     <content><![CDATA[{% asset_img 1.jpg %}
@@ -1697,6 +1686,17 @@ pip insstall pyftpdlib
 pip uninstall pyftpdlib
 ```
 来将之前的`pyftpdlib`卸载掉，然后再安装更改源代码后的`pyftpdlib`
+]]></content>
+  </entry>
+  <entry>
+    <title>First day</title>
+    <url>/2016/03/26/First-day/</url>
+    <content><![CDATA[### 今天，正式开始！
+2016年3月26日 于西安电子科技大学
+
+{% asset_img myweblogo.jpg This %}
+
+
 ]]></content>
   </entry>
   <entry>
@@ -2001,6 +2001,107 @@ route -A inet6 add 2000::/3 `route -A inet6 | grep ::/0 | awk 'NR==1{print "gw "
 ]]></content>
   </entry>
   <entry>
+    <title>Minecraft Server</title>
+    <url>/2016/07/03/Minecraft-server/</url>
+    <content><![CDATA[{% asset_img mc.jpg This is Minecraft %}
+
+<!-- more -->
+
+Minecraft由java编写，运行我的世界服务器(客户端)需要在计算机安装java运行环境，然后再计算机上运行服务端，在客户端填写运行服务端的计算机的ip地址就行(如果全部是默认设置的话) 
+PS：本文所涉及的命令操作，在windows中为命令提示符下输入，在Linux中为终端或者控制台输入。下面不再特别说明。
+
+## 第一步：在计算机上安装java运行环境。
+计算机系统如果为windows，前往java官网下载“*jre*”运行环境，双击，默认安装在C盘，可以根据需要更改。没有特殊需要的话，一直点击下一步直到安装完成就行。
+计算机系统如果为cent OS/red hat，可以输入如下命令
+```bash
+yum -y list | grep *java*
+```
+来查看有哪些java包可用，安装需要的包即可。
+计算机系统如果为debian/ubuntu或基于它们的衍生版，输入如下命令
+```bash
+sudo apt-get install default-jre*
+```
+即可安装java。
+
+## 第二步：运行Minecraft服务端
+Minecraft服务端分为官方服务端和第三方服务端，官方服务端可以在MC官网下载到。这里提供1.10版本下载地址(经过测试，把下面链接中的1.10改成其他相应版本就能下载相应版本的服务端，把1.10改成1.9.4就能下载到1.9.4的服务端)
+
+```bash
+https://s3.amazonaws.com/Minecraft.Download/versions/1.10/minecraft_server.1.10.jar
+```
+也可以前往[https://minecraft.net/zh-hans/download/server](https://minecraft.net/zh-hans/download/server)获取最新版本的官方服务端。
+第三方服务端这里提供一个网址——www.mcadmin.net，这个网址提供“水龙头”和“水桶”服务端下载。
+一般客户端只能进入同版本的服务端，跨版本的服务端为第三方制作，可以前往www.mcbbs.net了解更多信息。
+服务端为一个“.jar”文件，windows下使用命令行/linux下使用终端或者控制台，切换到服务端文件所在目录，输入命令
+```bash
+java -jar *.jar
+```
+(这里*.jar是指你下载到的服务端的文件的文件名)
+这里还可以使用参数控制服务器所使用的内存，比如
+```bash
+java -Xmx768M -Xms512M -jar minecraft_server.1.10.jar
+```
+"-Xmx768M"是限制服务器所使用的最大内存，"-Xms512M"是限制服务器所使用的最小内存。
+当出现如如下图的画面时，代表服务端开启成功(这里演示所使用的服务端为官服，版本1.10)
+
+{% asset_img mc-server-1.jpg The server of Minecraft is OK %}
+
+
+## 第三步： 联机
+
+### 3.1
+
+如果玩家在同一个局域网 (比如电脑连接了同一台路由器后者交换机，找到开启服务端的电脑的IP地址，在多人游戏中输入服务端的电脑的IP地址即可连接)
+Windows可以用ipconfig，linux卡可以使用ifconfig查找自己的IP地址。
+
+### 3.2
+
+如果玩家相隔很远，这个时候就需要公网IP了。获取公网IP的办法有很多：
+1. 租用服务器，阿里云和腾讯云都有针对学生认证的优惠，阿里云认证之后为10元每月，腾讯云认证后为1元每月；
+2. 内网穿透
+腾讯云和阿里云去官网登录按照提示来就行，这里不再赘述。
+内网穿透估计大多数人都搞不定，这里指一个方向——花生壳，  到花生壳的官网查找，用内网穿透拿到公网IP，这样朋友就能和自己连接上了。
+
+## 开服神器推荐——McMyAdmin
+
+由于普通开服后，管理服务器时涉及很多命令操作，许多纯白的小白还是搞不定，这里推荐一个操作简单的开服软件——[McMyAdmin](http://www.mcmyadmin.com/)
+
+{% asset_img mc-server-2.jpg Minecraft %}
+
+{% asset_img mc-server-3.jpg Minecraft %}
+
+{% asset_img mc-server-4.jpg Minecraft %}
+
+PS：在运行linux的计算机上运行这个软件需要安装mono，由于在windows上运行这个McMyAdmin网上已经有很多教程了，这里不再累述。
+我在安装mono时遇到不少麻烦，首先是cent OS自带源里面不包含mono，必须手动安装，然后百度，找了各种博客，按照叙述一步一步来，还是失败，最后在mono的[wiki](http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives)找到解决办法，如下
+
+CentOS 7, Fedora 19 (and later), and derivatives(需要root权限)
+```bash
+yum install yum-utils
+rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
+yum update
+yum install mono-devel 
+```
+Debian, Ubuntu, and derivatives(root)
+```bash
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+sudo apt-get update
+sudo apt-get install mono-devel 
+```
+然后输入命令"mono -v"
+出现如下信息则表示mono安装成功
+
+{% asset_img mc-server-mono.jpg MONO %}
+## 关于服务器的选择
+服务器系统，最好选择红帽或者Cent OS，红帽背后是企业级支持，虽然个人用不上，但是，可以用它的衍生版Cent OS，至于为什么不选择Ubuntu之类的，我在腾讯云的1core & 1G RAM的VPS上，Ubuntu的表现远远不如Cent OS。]]></content>
+      <tags>
+        <tag>Minecraft</tag>
+        <tag>Games</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Lake Counting</title>
     <url>/2016/04/03/Lake-Counting/</url>
     <content><![CDATA[## Lake Couting
@@ -2138,104 +2239,162 @@ for( ; i<n ; i++)
       </tags>
   </entry>
   <entry>
-    <title>Minecraft Server</title>
-    <url>/2016/07/03/Minecraft-server/</url>
-    <content><![CDATA[{% asset_img mc.jpg This is Minecraft %}
-
+    <title>NOIP 2015 信息传递</title>
+    <url>/2017/01/19/NOIP-2015-Message/</url>
+    <content><![CDATA[初探图论，这本来是大一就该学的，没想到拖到这个假期，感觉好懒啊。
+尝试做了一下NOIP 2015 day1 的信息传递，整理如下。
 <!-- more -->
+## 题目
+{% asset_img 1.jpg %}
+## 源代码
+```C++
+#include <iostream>
+#include <cstdio>
+using namespace std;
 
-Minecraft由java编写，运行我的世界服务器(客户端)需要在计算机安装java运行环境，然后再计算机上运行服务端，在客户端填写运行服务端的计算机的ip地址就行(如果全部是默认设置的话) 
-PS：本文所涉及的命令操作，在windows中为命令提示符下输入，在Linux中为终端或者控制台输入。下面不再特别说明。
-
-## 第一步：在计算机上安装java运行环境。
-计算机系统如果为windows，前往java官网下载“*jre*”运行环境，双击，默认安装在C盘，可以根据需要更改。没有特殊需要的话，一直点击下一步直到安装完成就行。
-计算机系统如果为cent OS/red hat，可以输入如下命令
-```bash
-yum -y list | grep *java*
+int main()
+{
+    int n,i,j=0;
+    cin>>n;
+    int circle[n+2]={0},status[n+2]={0},via[n+2]={0},flag[n+2]={0};//circle用来存储输入的数据，status用来记录i个人有几个人会告诉他信息，via用来记录某个人是否被告诉过信息
+    for( i = 1 ; i <= n ; i++ )
+    {
+        cin>>circle[i];
+        status[circle[i]]++;
+    }
+    for( i = 1 ; i <=  n; i++ )
+    {
+        if(status[i]==0)
+        {
+            flag[j++]=i;
+            via[i]=1;
+        }
+    }
+    for( i = 0 ; i < j ; i++ )
+    {
+        status[circle[flag[i]]]--;
+        if(status[circle[flag[i]]]==0)
+        {
+            flag[j++]=circle[flag[i]];
+            via[circle[flag[i]]]=1;
+        }
+    }
+    int ans=n,temp;
+    for( i = 1 ; i <= n ; i++ )
+    {
+        if( via[i]==0 && circle[i]!=0 )
+        {
+            via[i]=1;
+            temp=1;
+            j=circle[i];
+            while(!via[j])
+            {
+                via[j]=1;
+                j=circle[j];
+                temp++;
+            }
+            if(temp<ans)
+                ans=temp;
+        }
+    }
+    printf("%d",ans);
+    return 0;
+}
 ```
-来查看有哪些java包可用，安装需要的包即可。
-计算机系统如果为debian/ubuntu或基于它们的衍生版，输入如下命令
-```bash
-sudo apt-get install default-jre*
+## 解析
+### 题意说明 
+代码大量参考了[此文章](http://www.cnblogs.com/zbtrs/p/5762788.html)
+文中的没有给出详细解题信息，我看了之后整理了一下。
+文中有这样一句话
+> 其实这道题题意非常明确，就是让我们寻找一个最小环的长度，怎么求呢？也很简单，先把[入度](http://baike.baidu.com/link?url=r3KqWUoNomP_vuWuIwtmI0cVz1oglvwYD99gDNTo6pDwJTZeey4OHOxFCxDV7ZbRZsIi9OA8tGhT_oB7Uro0HunPx8I7TweWgo-IeUcGoya)为0的点删除，然后把这个点指向的点的入度-1，如果入度为0，也删去，这样就只保留有用的点，那么从任意一个点开始，用vis数组记录是否被访问过，访问到一个新节点就累加计数器，然后就做出来了.bfs和dfs都可以.
+
+把样例输入数据变成图，就成了这样：
+{% asset_img 2.jpg %}
+从图中可以看到，第一个人讲自己所知道的信息告诉第二个人，第二个人告诉第四个人，第三个人告诉第二个人，第四个人告诉第三个人，第五个人告诉第一个人。这样，仔细一看，2绝对不可能从1处获得自己的生日(游戏结束条件)
+
+很容易看出，2将自己的生日告诉3，3告诉4，4告诉2，2获得了自己的生日，游戏结束，对于3和4来说也同样是这样。
+
+所以，这个题简短来说，就是找到图中的最小环。
+
+### 解题思路
+首先，由于5--->1--->2并不构成圈，所以2不可能从1处获得自己的信息，所以干脆将5-->1-->2这条路去掉，这样，只需要统计形成圈的有几个人就行了，若有多个圈，找出最小的圈就好。
+{% asset_img 4.jpg %}
+
+### 代码分析
+#### 存储数据，计算权值
+```C++
+    for( i = 1 ; i <= n ; i++ )
+    {
+        cin>>circle[i];
+        status[circle[i]]++;
+    }
 ```
-即可安装java。
-
-## 第二步：运行Minecraft服务端
-Minecraft服务端分为官方服务端和第三方服务端，官方服务端可以在MC官网下载到。这里提供1.10版本下载地址(经过测试，把下面链接中的1.10改成其他相应版本就能下载相应版本的服务端，把1.10改成1.9.4就能下载到1.9.4的服务端)
-
-```bash
-https://s3.amazonaws.com/Minecraft.Download/versions/1.10/minecraft_server.1.10.jar
+这一段意思很明显，输入数据，然后，记录每个人有几个人告诉他信息
+#### 找到权值为0的人
+权值为0，也就是示范数据中的5号，没有任何人将自己的信息告诉他
+```C++
+    for( i = 1 ; i <=  n; i++ )
+    {
+        if(status[i]==0)
+        {
+            flag[j++]=i;
+            via[i]=1;
+        }
+    }
 ```
-也可以前往[https://minecraft.net/zh-hans/download/server](https://minecraft.net/zh-hans/download/server)获取最新版本的官方服务端。
-第三方服务端这里提供一个网址——www.mcadmin.net，这个网址提供“水龙头”和“水桶”服务端下载。
-一般客户端只能进入同版本的服务端，跨版本的服务端为第三方制作，可以前往www.mcbbs.net了解更多信息。
-服务端为一个“.jar”文件，windows下使用命令行/linux下使用终端或者控制台，切换到服务端文件所在目录，输入命令
-```bash
-java -jar *.jar
+flag用于标记权值为0的人的编号
+#### 去除权值为0的点
+```C++
+    for( i = 0 ; i < j ; i++ )
+    {
+        status[circle[flag[i]]]--;//去掉某个权值为0的点之后，讲它所指向的人的权值减1
+        if(status[circle[flag[i]]]==0)//若此人的权值减1之后，其权值为0，就将他的编号标记一下，同时更新j(x循环结束条件)的值
+        {
+            flag[j++]=circle[flag[i]];
+            via[circle[flag[i]]]=1;
+        }
+    }
 ```
-(这里*.jar是指你下载到的服务端的文件的文件名)
-这里还可以使用参数控制服务器所使用的内存，比如
-```bash
-java -Xmx768M -Xms512M -jar minecraft_server.1.10.jar
+#### 计算圈的成员数目，找到最小的圈
+```C++
+    int ans=n,temp;
+    for( i = 1 ; i <= n ; i++ )
+    {
+        if( via[i]==0 && circle[i]!=0 )
+        {
+            via[i]=1;
+            temp=1;
+            j=circle[i];
+            while(!via[j])
+            {
+                via[j]=1;
+                j=circle[j];
+                temp++;
+            }
+            if(temp<ans)
+                ans=temp;
+        }
+    }
 ```
-"-Xmx768M"是限制服务器所使用的最大内存，"-Xms512M"是限制服务器所使用的最小内存。
-当出现如如下图的画面时，代表服务端开启成功(这里演示所使用的服务端为官服，版本1.10)
+## 一点点小总结
+可能我的解析说得也并不比原文详细多少，`实际上我是跟着代码一步一步调试，才看懂原文的代码的`。
 
-{% asset_img mc-server-1.jpg The server of Minecraft is OK %}
-
-
-## 第三步： 联机
-
-### 3.1
-
-如果玩家在同一个局域网 (比如电脑连接了同一台路由器后者交换机，找到开启服务端的电脑的IP地址，在多人游戏中输入服务端的电脑的IP地址即可连接)
-Windows可以用ipconfig，linux卡可以使用ifconfig查找自己的IP地址。
-
-### 3.2
-
-如果玩家相隔很远，这个时候就需要公网IP了。获取公网IP的办法有很多：
-1. 租用服务器，阿里云和腾讯云都有针对学生认证的优惠，阿里云认证之后为10元每月，腾讯云认证后为1元每月；
-2. 内网穿透
-腾讯云和阿里云去官网登录按照提示来就行，这里不再赘述。
-内网穿透估计大多数人都搞不定，这里指一个方向——花生壳，  到花生壳的官网查找，用内网穿透拿到公网IP，这样朋友就能和自己连接上了。
-
-## 开服神器推荐——McMyAdmin
-
-由于普通开服后，管理服务器时涉及很多命令操作，许多纯白的小白还是搞不定，这里推荐一个操作简单的开服软件——[McMyAdmin](http://www.mcmyadmin.com/)
-
-{% asset_img mc-server-2.jpg Minecraft %}
-
-{% asset_img mc-server-3.jpg Minecraft %}
-
-{% asset_img mc-server-4.jpg Minecraft %}
-
-PS：在运行linux的计算机上运行这个软件需要安装mono，由于在windows上运行这个McMyAdmin网上已经有很多教程了，这里不再累述。
-我在安装mono时遇到不少麻烦，首先是cent OS自带源里面不包含mono，必须手动安装，然后百度，找了各种博客，按照叙述一步一步来，还是失败，最后在mono的[wiki](http://www.mono-project.com/docs/getting-started/install/linux/#centos-7-fedora-19-and-later-and-derivatives)找到解决办法，如下
-
-CentOS 7, Fedora 19 (and later), and derivatives(需要root权限)
-```bash
-yum install yum-utils
-rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
-yum-config-manager --add-repo http://download.mono-project.com/repo/centos/
-yum update
-yum install mono-devel 
+然后，我剔除了原文的队列，使用了一个数组代替，导致我不得不更新数组的有效长度，也就是文中的j值。反而让代码变得更加难以理解。不过，也照顾了一下不知道队列的小伙伴。
+然后，原文使用了
+```C++
+memset(to, 0, sizeof(to));
 ```
-Debian, Ubuntu, and derivatives(root)
-```bash
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
-sudo apt-get update
-sudo apt-get install mono-devel 
+来将数组清零，有时候，会忘记这个函数的用法，所以我用了下面的办法
+```C++
+int a[100]={0};
 ```
-然后输入命令"mono -v"
-出现如下信息则表示mono安装成功
+这样，只要初始化数组的第一个元素为0，数组的其他元素会全都变成0。
 
-{% asset_img mc-server-mono.jpg MONO %}
-## 关于服务器的选择
-服务器系统，最好选择红帽或者Cent OS，红帽背后是企业级支持，虽然个人用不上，但是，可以用它的衍生版Cent OS，至于为什么不选择Ubuntu之类的，我在腾讯云的1core & 1G RAM的VPS上，Ubuntu的表现远远不如Cent OS。]]></content>
+{% cq %}生命重在折腾{% endcq %}]]></content>
       <tags>
-        <tag>Minecraft</tag>
-        <tag>Games</tag>
+        <tag>C</tag>
+        <tag>C++</tag>
+        <tag>NOIP</tag>
       </tags>
   </entry>
   <entry>
@@ -2496,165 +2655,6 @@ sudo apt-get install mono-devel
 | 暗海晶石   | 海晶碎片、墨囊        | [![img](1-150402112449.jpg)](1-150402112449.jpg) | 用于装饰         |]]></content>
       <tags>
         <tag>Minecraft</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NOIP 2015 信息传递</title>
-    <url>/2017/01/19/NOIP-2015-Message/</url>
-    <content><![CDATA[初探图论，这本来是大一就该学的，没想到拖到这个假期，感觉好懒啊。
-尝试做了一下NOIP 2015 day1 的信息传递，整理如下。
-<!-- more -->
-## 题目
-{% asset_img 1.jpg %}
-## 源代码
-```C++
-#include <iostream>
-#include <cstdio>
-using namespace std;
-
-int main()
-{
-    int n,i,j=0;
-    cin>>n;
-    int circle[n+2]={0},status[n+2]={0},via[n+2]={0},flag[n+2]={0};//circle用来存储输入的数据，status用来记录i个人有几个人会告诉他信息，via用来记录某个人是否被告诉过信息
-    for( i = 1 ; i <= n ; i++ )
-    {
-        cin>>circle[i];
-        status[circle[i]]++;
-    }
-    for( i = 1 ; i <=  n; i++ )
-    {
-        if(status[i]==0)
-        {
-            flag[j++]=i;
-            via[i]=1;
-        }
-    }
-    for( i = 0 ; i < j ; i++ )
-    {
-        status[circle[flag[i]]]--;
-        if(status[circle[flag[i]]]==0)
-        {
-            flag[j++]=circle[flag[i]];
-            via[circle[flag[i]]]=1;
-        }
-    }
-    int ans=n,temp;
-    for( i = 1 ; i <= n ; i++ )
-    {
-        if( via[i]==0 && circle[i]!=0 )
-        {
-            via[i]=1;
-            temp=1;
-            j=circle[i];
-            while(!via[j])
-            {
-                via[j]=1;
-                j=circle[j];
-                temp++;
-            }
-            if(temp<ans)
-                ans=temp;
-        }
-    }
-    printf("%d",ans);
-    return 0;
-}
-```
-## 解析
-### 题意说明 
-代码大量参考了[此文章](http://www.cnblogs.com/zbtrs/p/5762788.html)
-文中的没有给出详细解题信息，我看了之后整理了一下。
-文中有这样一句话
-> 其实这道题题意非常明确，就是让我们寻找一个最小环的长度，怎么求呢？也很简单，先把[入度](http://baike.baidu.com/link?url=r3KqWUoNomP_vuWuIwtmI0cVz1oglvwYD99gDNTo6pDwJTZeey4OHOxFCxDV7ZbRZsIi9OA8tGhT_oB7Uro0HunPx8I7TweWgo-IeUcGoya)为0的点删除，然后把这个点指向的点的入度-1，如果入度为0，也删去，这样就只保留有用的点，那么从任意一个点开始，用vis数组记录是否被访问过，访问到一个新节点就累加计数器，然后就做出来了.bfs和dfs都可以.
-
-把样例输入数据变成图，就成了这样：
-{% asset_img 2.jpg %}
-从图中可以看到，第一个人讲自己所知道的信息告诉第二个人，第二个人告诉第四个人，第三个人告诉第二个人，第四个人告诉第三个人，第五个人告诉第一个人。这样，仔细一看，2绝对不可能从1处获得自己的生日(游戏结束条件)
-
-很容易看出，2将自己的生日告诉3，3告诉4，4告诉2，2获得了自己的生日，游戏结束，对于3和4来说也同样是这样。
-
-所以，这个题简短来说，就是找到图中的最小环。
-
-### 解题思路
-首先，由于5--->1--->2并不构成圈，所以2不可能从1处获得自己的信息，所以干脆将5-->1-->2这条路去掉，这样，只需要统计形成圈的有几个人就行了，若有多个圈，找出最小的圈就好。
-{% asset_img 4.jpg %}
-
-### 代码分析
-#### 存储数据，计算权值
-```C++
-    for( i = 1 ; i <= n ; i++ )
-    {
-        cin>>circle[i];
-        status[circle[i]]++;
-    }
-```
-这一段意思很明显，输入数据，然后，记录每个人有几个人告诉他信息
-#### 找到权值为0的人
-权值为0，也就是示范数据中的5号，没有任何人将自己的信息告诉他
-```C++
-    for( i = 1 ; i <=  n; i++ )
-    {
-        if(status[i]==0)
-        {
-            flag[j++]=i;
-            via[i]=1;
-        }
-    }
-```
-flag用于标记权值为0的人的编号
-#### 去除权值为0的点
-```C++
-    for( i = 0 ; i < j ; i++ )
-    {
-        status[circle[flag[i]]]--;//去掉某个权值为0的点之后，讲它所指向的人的权值减1
-        if(status[circle[flag[i]]]==0)//若此人的权值减1之后，其权值为0，就将他的编号标记一下，同时更新j(x循环结束条件)的值
-        {
-            flag[j++]=circle[flag[i]];
-            via[circle[flag[i]]]=1;
-        }
-    }
-```
-#### 计算圈的成员数目，找到最小的圈
-```C++
-    int ans=n,temp;
-    for( i = 1 ; i <= n ; i++ )
-    {
-        if( via[i]==0 && circle[i]!=0 )
-        {
-            via[i]=1;
-            temp=1;
-            j=circle[i];
-            while(!via[j])
-            {
-                via[j]=1;
-                j=circle[j];
-                temp++;
-            }
-            if(temp<ans)
-                ans=temp;
-        }
-    }
-```
-## 一点点小总结
-可能我的解析说得也并不比原文详细多少，`实际上我是跟着代码一步一步调试，才看懂原文的代码的`。
-
-然后，我剔除了原文的队列，使用了一个数组代替，导致我不得不更新数组的有效长度，也就是文中的j值。反而让代码变得更加难以理解。不过，也照顾了一下不知道队列的小伙伴。
-然后，原文使用了
-```C++
-memset(to, 0, sizeof(to));
-```
-来将数组清零，有时候，会忘记这个函数的用法，所以我用了下面的办法
-```C++
-int a[100]={0};
-```
-这样，只要初始化数组的第一个元素为0，数组的其他元素会全都变成0。
-
-{% cq %}生命重在折腾{% endcq %}]]></content>
-      <tags>
-        <tag>C</tag>
-        <tag>C++</tag>
-        <tag>NOIP</tag>
       </tags>
   </entry>
   <entry>
@@ -3592,6 +3592,332 @@ App展示广告，得有一个地方给它下载广告，阻止App连接相应�
 ```]]></content>
   </entry>
   <entry>
+    <title>Configure Git to use a proxy</title>
+    <url>/2017/10/13/Set-proxy-for-git/</url>
+    <content><![CDATA[
+From: [https://gist.github.com/evantoli/f8c23a37eb3558ab8765](https://gist.github.com/evantoli/f8c23a37eb3558ab8765)
+
+## In Brief
+
+You may need to configure a proxy server if you're having trouble cloning 
+or fetching from a remote repository or getting an error 
+like `unable to access '...' Couldn't resolve host '...'`.
+<!-- more -->
+Consider something like:
+
+```
+git config --global http.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
+```
+
+Or for a specific domain, something like:
+
+```
+git config --global http.https://domain.com.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
+git config --global http.https://domain.com.sslVerify false
+```
+
+Setting `http.<url>.sslVerify` to `false` may help you quickly get going if your workplace 
+employs man-in-the-middle HTTPS proxying. Longer term, you could get the 
+root CA that they are applying to the certificate chain
+and specify it with either `http.sslCAInfo` or `http.sslCAPath`.
+
+See also the [git-config](https://git-scm.com/docs/git-config) documentation, especially the following 
+sections if you're having HTTPS/SSL issues
+ 
+ * `http.sslVerify`
+ * `http.sslCAInfo`
+ * `http.sslCAPath`
+ * `http.sslCert`
+ * `http.sslKey`
+ * `http.sslCertPasswordProtected`
+
+## In Detail
+
+### Configure the proxy 
+
+You can configure these globally in your user `~/.gitconfig` file using the `--global` switch, or local to a repository in its `.git/config` file.
+
+#### Setting a global proxy
+
+Configure a global proxy if all access to all repos require this proxy
+
+```
+git config --global http.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
+```
+#### Setting a global socks5 proxy
+```
+git config --global http.proxy 'socks5://server:port'
+```
+#### URL specific proxy
+
+If you wish to specify that a proxy should be used for just 
+some URLs that specify the URL as a git config subsection
+using `http.<url>.key` notation:
+
+```
+git config --global http.https://domain.com.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
+```
+
+Which will result in the following in the `~/.gitconfig` file:
+
+```
+[http]
+[http "https://domain.com"]
+	proxy = http://proxyUsername:proxyPassword@proxy.server.com:port
+```
+
+#### Handle subsequent SSL protocol errors
+
+If you're still having trouble cloning or fetching and are now getting 
+an `unable to access 'https://...': Unknown SSL protocol error in connection to ...:443` then
+you may decide to switch off SSL verification for the single operation 
+by using the `-c http.sslVerify=false` option
+
+```
+git -c http.sslVerify=false clone https://domain.com/path/to/git
+```
+
+Once cloned, you may decide set this for just this cloned 
+repository's `.git/config` by doing. Notice the absence of the `--global`
+
+```
+git config http.sslVerify false
+```
+
+If you choose to make it global then limit it to a URL using 
+the `http.<url>.sslVerify` notation: 
+
+```
+git config --global http.https://domain.com.sslVerify false
+```
+
+Which will result in the following in the `~/.gitconfig` file:
+
+```
+[http]
+[http "https://domain.com"]
+	proxy = http://proxyUsername:proxyPassword@proxy.server.com:port
+	sslVerify = false
+```
+
+### Show current configuration
+
+To show the current configuration of all `http` sections
+
+```
+git config --global --get-regexp http.*
+```
+
+If you are in a locally cloned repository folder then you drop 
+the `--global` and see all current config:
+
+```
+git config --get-regexp http.*
+```
+
+### Unset a proxy or SSL verification
+
+Use the `--unset` flag to remove configuration being specific about the
+property -- for example whether it was `http.proxy` or `http.<url>.proxy`. 
+Consider using any of the following:
+
+```
+git config --global --unset http.proxy
+git config --global --unset http.https://domain.com.proxy
+
+git config --global --unset http.sslVerify
+git config --global --unset http.https://domain.com.sslVerify
+
+```
+]]></content>
+  </entry>
+  <entry>
+    <title>UWP简单教程</title>
+    <url>/2021/06/29/UWP-beginner/</url>
+    <content><![CDATA[
+本文以 [WxaCode](https://github.com/BDZNH/WxaCode-UWP)为例，讲一下 UWP 初学者用到的一些东西。
+
+{% asset_img wide.jpg homepage %}
+
+<!-- more -->
+# UWP 的坐标系
+以 16:9 的屏幕为例，左上角是 (0,0) ，右下角是 (1920,1080)，我使用的屏幕是 4K 屏，应用读出来的也还是 1920x1080 。这也省事一些，不用过度关心不同分辨率的情况。
+
+
+# 动态响应布局
+
+简单来说，动态响应布局可以根据当前屏幕的宽度（或高度），来选择不同的布局，对于PC来说，由于纵向可以用滚轮滚动，所以多数情况下，我们还是以宽度作为布局变化的点。
+
+微信小程序码这个应用中，除去 UWP 自带的控件 `NavigationView` 之外（NavigationView 控件自带动态响应效果），手动实现了动态响应布局的是 HomePage ，下面是 HomePage 的 xml 实现
+```xml
+<Page
+    x:Class="WxaCode.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WxaCode"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="WideLayout" >
+                    <VisualState.StateTriggers>
+                        <!--VisualState to be triggered when window width is >=720 effective pixels.-->
+                        <AdaptiveTrigger MinWindowWidth="720" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="wxacodeimage.(Grid.Row)" Value="0" />
+                        <Setter Target="wxacodeimage.(Grid.Column)" Value="1" />
+                        <Setter Target="wxacodeimage.MaxHeight" Value="900" />
+                        <Setter Target="wxacodeimage.MaxWidth" Value="900" />
+                        <Setter Target="Container.HorizontalAlignment" Value="Stretch"/>
+                        <Setter Target="Container.MinHeight" Value="600"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="Container" MinHeight="1000" HorizontalAlignment="Center" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid x:Name="WxaCodeParamsGrid" Width="350" Margin="10,10,10,10" Grid.Row="0" Grid.Column="0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBox x:Name="AppidTextBlock" Header="Appid" PlaceholderText="必须填写，应用不缓存" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="AppidTextBlock_TextChanged" />
+                    <TextBox x:Name="AppsecretTextBlock" Header="Appsecret" PlaceholderText="必须填写，应用不缓存" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="AppsecretTextBlock_TextChanged" />
+                    <TextBox x:Name="WxacodeSceneTextBlock" Header="请输入 scene:" PlaceholderText="不超过32个字符(必须填写)" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="WxacodeSceneTextBlock_TextChanged"/>
+                    <TextBox x:Name="WxacodePageTextBlock" Header="请输入 page:" PlaceholderText="已发布的page(可不填，默认为 pages/index/index )" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="WxacodePageTextBlock_TextChanged"/>
+
+                    <Slider x:Name="WxacodeWidthSlider" Margin="5,5,0,5" VerticalAlignment="Center" AutomationProperties.Name="simple slider" Minimum="280" Maximum="1280" StepFrequency="1" SmallChange="1" LargeChange="100" Value="430" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" ValueChanged="WxacodeWidthSlider_ValueChanged"/>
+                    <TextBlock Text="小程序码宽度" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2"/>
+                    <TextBlock Text="{x:Bind WxacodeWidthSlider.Value.ToString(), Mode=OneWay}" Margin="5,5,5,5" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="3" />
+
+                    <ToggleSwitch x:Name="WxacodeAutoColorSwitch" Header="自动配置线条颜色" AutomationProperties.Name="simple ToggleSwitch" Toggled="ToggleAutoColorSwitch" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+                    <ToggleSwitch x:Name="WxacodeIsHyalineSwitch" Header="透明底色" AutomationProperties.Name="simple ToggleSwitch" Margin="5,0,0,0" VerticalAlignment="Center" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" Toggled="WxacodeIsHyalineSwitch_Toggled" />
+
+                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorRedSlider" Foreground="Red" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorRedSlider_ValueChanged"  />
+                    <TextBlock Text="线条颜色(red)" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="6" Grid.Column="2" />
+                    <Rectangle x:Name="ColorPreview" Stroke="Black" Fill="White" Grid.Row="6" Grid.Column="3" Grid.RowSpan="3" VerticalAlignment="Stretch" />
+
+                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorGreenSlier" Foreground="Green" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="5,5,0,5" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorGreenSlier_ValueChanged"  />
+                    <TextBlock Text="线条颜色(green)" Grid.Row="7" Grid.Column="2" VerticalAlignment="Center" Margin="5,5,0,5" />
+
+                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorBlueSlider" Foreground="Blue" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="5,5,0,5" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorBlueSlider_ValueChanged"  />
+                    <TextBlock Text="线条颜色(blue)" Grid.Row="8" Grid.Column="2" VerticalAlignment="Center" Margin="5,5,0,5" />
+
+                    <Button Style="{StaticResource AccentButtonStyle}" Content="获取小程序码" x:Name="GetWxaCodeButton" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Click="GetWxaCodeUnlimited" />
+                    <Button Style="{StaticResource AccentButtonStyle}" Content="保存小程序码" x:Name="SaveWxaCodeButton" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Click="SaveWxacodeImage"/>
+
+                </Grid>
+                <Image x:Name="wxacodeimage" Source="/Assets/wxacodesample.jpg" MaxWidth="350" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            </Grid>
+    </Grid>
+</Page>
+```
+
+对比一下UWP新建时，空白页的 xml 内容
+```xml
+<Page
+    x:Class="NavigationViewTest.BlankPage1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NavigationViewTest"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+
+    </Grid>
+</Page>
+```
+
+动态响应布局的关键内容 `VisualStateManager` 即放在 `Grid` 下。然后我们再在 Grid 新建一个 Grid 布局，用这个子布局来承载页面的内容。相当于这个 Page 下有一个根 Grid ，将这个根 Grid 的 (0,0) 单元格，作为一个新的子 Grid 的内容，这里面再添加这个页面的承载元素，这样 VisualStateManager 就能生效了。
+
+VisualStateManager 的语法意思是，在页面大于或小于某个值（坐标系 1920x1080）时，改变控件的一些属性，本例中，改变了承载小程序码的 Image 控件所在的行和列，并且设置相应的宽度实现。下面两图是实现的动态响应布局的效果。
+
+{% asset_img wide.jpg 当界面较宽时 %}
+
+{% asset_img narrow.jpg 当界面较窄时 %}
+
+# 导航栏
+导航栏是 UWP 自带的一个控件，Windows 10 的设置下的每一个子页面，都是导航栏的例子，这个控件是 `NavigationView` ，使用时在 Nuget 包管理器中，为当前解决方案添加 `Microsoft.UI.Xaml`。在页面的 Page 节点的配置中，添加`xmlns:muxc="using:Microsoft.UI.Xaml.Controls"`字段，然后在这个页面下的 Grid 内添加一个 NavigationView 控件，以微信小程序码为例，内容如下
+```xml
+<Page
+    x:Class="WxaCode.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WxaCode"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <muxc:NavigationView x:Name="NaviView" ItemInvoked="NaviView_ItemInvoked" IsBackButtonVisible="Collapsed" >
+            <muxc:NavigationView.MenuItems>
+                <muxc:NavigationViewItem Icon="Home" Content="操作" Tag="HomePage" x:Name="homepage" />
+                <muxc:NavigationViewItem Icon="Help" Content="关于" Tag="AboutPage" />
+            </muxc:NavigationView.MenuItems>
+            <ScrollViewer>
+                <Frame x:Name="ContentFrame" Padding="12,50,12,24" IsTabStop="True" />
+            </ScrollViewer>
+        </muxc:NavigationView>
+    </Grid>
+</Page>
+```
+注意其中的 `ScrollViewer` 和其内的 `Frame` ，这里将会承载每一个页面不同页面的具体内容，本例中，实际实现是把 homepage 和 aboutpage 作为一个子布局，放到 `Frame` 上。这样导航栏可以一直存在，通过点击导航栏，替换里面的 `Frame` 对应的页面，即可达到通过导航栏来切换页面的效果，具体的代码实现可以查看应用的源码。
+
+# 本地设置
+本地设置通常是存放一些设置项，本例中通过封装UWP自带的 `Windows.Storage.ApplicationData.Current.LocalSettings` 来实现，比如是否保存 appid 和 appsecret ,如下图所示
+{% asset_img settings.jpg 设置 %}
+
+# 在应用退出时保存数据
+可能百度大学会告诉你，UWP在应用关闭时，需要申请一个受限权限"confirmAppClose"，但是由于是一个受限制的权限，有可能会因为这个权限，应用商店不允许发布（我没有尝试，我换了另外一种做法），如果你有安卓应用开发的经验，就会知道，安卓应用关闭时，Activity会收到 onPause,onStop,onDestroy三个事件通知，这三个地方足够你做很多事情，UWP有类似的地方，每一个UWP应用都有一个 App.xaml.cs，其内的
+```
+private void OnSuspending(object sender, SuspendingEventArgs e)
+{
+    var deferral = e.SuspendingOperation.GetDeferral();
+    //TODO: 保存应用程序状态并停止任何后台活动
+    deferral.Complete();
+}
+```
+已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。]]></content>
+  </entry>
+  <entry>
     <title>作品推荐《我的三体》</title>
     <url>/2018/02/27/The-three-body-problem/</url>
     <content><![CDATA[
@@ -3976,332 +4302,6 @@ BiliBili的up主[神游八方](https://space.bilibili.com/614801#/)的作品，�
 第二天早晨，在王国的另一处海岸上，有人看到海中出现了一张白帆，那艘帆船后面拖曳着一道白云般的泡沫，在朝阳中驶向远方。
 以后，王国中的人们再也没有得到露珠公主和长帆的消息。事实上王国得不到任何外界的消息，公主带走了王国中最后一块半赫尔辛根默斯肯香皂，再也没有人能够冲破饕餮鱼的封锁。但没有人抱怨，人们早已习惯了这样的生活，这个故事结束后，无故事王国永远无故事了。
 但有时夜深人静，也有人讲述不是故事的故事，那是对露珠公主和长帆经历的想象。每个人的想象都不一样，但人们都认为他俩到过无数神奇的国度，还到过像大海一样广阔的陆地，他们永远在航行和旅途中，不管走到哪里，他们总是幸福地生活在一起。]]></content>
-  </entry>
-  <entry>
-    <title>Configure Git to use a proxy</title>
-    <url>/2017/10/13/Set-proxy-for-git/</url>
-    <content><![CDATA[
-From: [https://gist.github.com/evantoli/f8c23a37eb3558ab8765](https://gist.github.com/evantoli/f8c23a37eb3558ab8765)
-
-## In Brief
-
-You may need to configure a proxy server if you're having trouble cloning 
-or fetching from a remote repository or getting an error 
-like `unable to access '...' Couldn't resolve host '...'`.
-<!-- more -->
-Consider something like:
-
-```
-git config --global http.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
-```
-
-Or for a specific domain, something like:
-
-```
-git config --global http.https://domain.com.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
-git config --global http.https://domain.com.sslVerify false
-```
-
-Setting `http.<url>.sslVerify` to `false` may help you quickly get going if your workplace 
-employs man-in-the-middle HTTPS proxying. Longer term, you could get the 
-root CA that they are applying to the certificate chain
-and specify it with either `http.sslCAInfo` or `http.sslCAPath`.
-
-See also the [git-config](https://git-scm.com/docs/git-config) documentation, especially the following 
-sections if you're having HTTPS/SSL issues
- 
- * `http.sslVerify`
- * `http.sslCAInfo`
- * `http.sslCAPath`
- * `http.sslCert`
- * `http.sslKey`
- * `http.sslCertPasswordProtected`
-
-## In Detail
-
-### Configure the proxy 
-
-You can configure these globally in your user `~/.gitconfig` file using the `--global` switch, or local to a repository in its `.git/config` file.
-
-#### Setting a global proxy
-
-Configure a global proxy if all access to all repos require this proxy
-
-```
-git config --global http.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
-```
-#### Setting a global socks5 proxy
-```
-git config --global http.proxy 'socks5://server:port'
-```
-#### URL specific proxy
-
-If you wish to specify that a proxy should be used for just 
-some URLs that specify the URL as a git config subsection
-using `http.<url>.key` notation:
-
-```
-git config --global http.https://domain.com.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
-```
-
-Which will result in the following in the `~/.gitconfig` file:
-
-```
-[http]
-[http "https://domain.com"]
-	proxy = http://proxyUsername:proxyPassword@proxy.server.com:port
-```
-
-#### Handle subsequent SSL protocol errors
-
-If you're still having trouble cloning or fetching and are now getting 
-an `unable to access 'https://...': Unknown SSL protocol error in connection to ...:443` then
-you may decide to switch off SSL verification for the single operation 
-by using the `-c http.sslVerify=false` option
-
-```
-git -c http.sslVerify=false clone https://domain.com/path/to/git
-```
-
-Once cloned, you may decide set this for just this cloned 
-repository's `.git/config` by doing. Notice the absence of the `--global`
-
-```
-git config http.sslVerify false
-```
-
-If you choose to make it global then limit it to a URL using 
-the `http.<url>.sslVerify` notation: 
-
-```
-git config --global http.https://domain.com.sslVerify false
-```
-
-Which will result in the following in the `~/.gitconfig` file:
-
-```
-[http]
-[http "https://domain.com"]
-	proxy = http://proxyUsername:proxyPassword@proxy.server.com:port
-	sslVerify = false
-```
-
-### Show current configuration
-
-To show the current configuration of all `http` sections
-
-```
-git config --global --get-regexp http.*
-```
-
-If you are in a locally cloned repository folder then you drop 
-the `--global` and see all current config:
-
-```
-git config --get-regexp http.*
-```
-
-### Unset a proxy or SSL verification
-
-Use the `--unset` flag to remove configuration being specific about the
-property -- for example whether it was `http.proxy` or `http.<url>.proxy`. 
-Consider using any of the following:
-
-```
-git config --global --unset http.proxy
-git config --global --unset http.https://domain.com.proxy
-
-git config --global --unset http.sslVerify
-git config --global --unset http.https://domain.com.sslVerify
-
-```
-]]></content>
-  </entry>
-  <entry>
-    <title>UWP简单教程</title>
-    <url>/2021/06/29/UWP-beginner/</url>
-    <content><![CDATA[
-本文以 [WxaCode](https://github.com/BDZNH/WxaCode-UWP)为例，讲一下 UWP 初学者用到的一些东西。
-
-{% asset_img wide.jpg homepage %}
-
-<!-- more -->
-# UWP 的坐标系
-以 16:9 的屏幕为例，左上角是 (0,0) ，右下角是 (1920,1080)，我使用的屏幕是 4K 屏，应用读出来的也还是 1920x1080 。这也省事一些，不用过度关心不同分辨率的情况。
-
-
-# 动态响应布局
-
-简单来说，动态响应布局可以根据当前屏幕的宽度（或高度），来选择不同的布局，对于PC来说，由于纵向可以用滚轮滚动，所以多数情况下，我们还是以宽度作为布局变化的点。
-
-微信小程序码这个应用中，除去 UWP 自带的控件 `NavigationView` 之外（NavigationView 控件自带动态响应效果），手动实现了动态响应布局的是 HomePage ，下面是 HomePage 的 xml 实现
-```xml
-<Page
-    x:Class="WxaCode.HomePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:WxaCode"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup>
-                <VisualState x:Name="WideLayout" >
-                    <VisualState.StateTriggers>
-                        <!--VisualState to be triggered when window width is >=720 effective pixels.-->
-                        <AdaptiveTrigger MinWindowWidth="720" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="wxacodeimage.(Grid.Row)" Value="0" />
-                        <Setter Target="wxacodeimage.(Grid.Column)" Value="1" />
-                        <Setter Target="wxacodeimage.MaxHeight" Value="900" />
-                        <Setter Target="wxacodeimage.MaxWidth" Value="900" />
-                        <Setter Target="Container.HorizontalAlignment" Value="Stretch"/>
-                        <Setter Target="Container.MinHeight" Value="600"/>
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid x:Name="Container" MinHeight="1000" HorizontalAlignment="Center" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <Grid x:Name="WxaCodeParamsGrid" Width="350" Margin="10,10,10,10" Grid.Row="0" Grid.Column="0" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBox x:Name="AppidTextBlock" Header="Appid" PlaceholderText="必须填写，应用不缓存" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="AppidTextBlock_TextChanged" />
-                    <TextBox x:Name="AppsecretTextBlock" Header="Appsecret" PlaceholderText="必须填写，应用不缓存" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="AppsecretTextBlock_TextChanged" />
-                    <TextBox x:Name="WxacodeSceneTextBlock" Header="请输入 scene:" PlaceholderText="不超过32个字符(必须填写)" Margin="5,5,5,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="WxacodeSceneTextBlock_TextChanged"/>
-                    <TextBox x:Name="WxacodePageTextBlock" Header="请输入 page:" PlaceholderText="已发布的page(可不填，默认为 pages/index/index )" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" TextChanged="WxacodePageTextBlock_TextChanged"/>
-
-                    <Slider x:Name="WxacodeWidthSlider" Margin="5,5,0,5" VerticalAlignment="Center" AutomationProperties.Name="simple slider" Minimum="280" Maximum="1280" StepFrequency="1" SmallChange="1" LargeChange="100" Value="430" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" ValueChanged="WxacodeWidthSlider_ValueChanged"/>
-                    <TextBlock Text="小程序码宽度" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="2"/>
-                    <TextBlock Text="{x:Bind WxacodeWidthSlider.Value.ToString(), Mode=OneWay}" Margin="5,5,5,5" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="3" />
-
-                    <ToggleSwitch x:Name="WxacodeAutoColorSwitch" Header="自动配置线条颜色" AutomationProperties.Name="simple ToggleSwitch" Toggled="ToggleAutoColorSwitch" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
-                    <ToggleSwitch x:Name="WxacodeIsHyalineSwitch" Header="透明底色" AutomationProperties.Name="simple ToggleSwitch" Margin="5,0,0,0" VerticalAlignment="Center" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" Toggled="WxacodeIsHyalineSwitch_Toggled" />
-
-                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorRedSlider" Foreground="Red" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorRedSlider_ValueChanged"  />
-                    <TextBlock Text="线条颜色(red)" Margin="5,5,0,5" VerticalAlignment="Center" Grid.Row="6" Grid.Column="2" />
-                    <Rectangle x:Name="ColorPreview" Stroke="Black" Fill="White" Grid.Row="6" Grid.Column="3" Grid.RowSpan="3" VerticalAlignment="Stretch" />
-
-                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorGreenSlier" Foreground="Green" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="5,5,0,5" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorGreenSlier_ValueChanged"  />
-                    <TextBlock Text="线条颜色(green)" Grid.Row="7" Grid.Column="2" VerticalAlignment="Center" Margin="5,5,0,5" />
-
-                    <Slider IsEnabled="{x:Bind WxacodeAutoColorSwitch.IsOn.Equals(x:False), Mode=OneWay}" x:Name="WxacodeLineColorBlueSlider" Foreground="Blue" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="5,5,0,5" Minimum="0" Maximum="255" StepFrequency="1" SmallChange="1" LargeChange="10" Value="0" ValueChanged="WxacodeLineColorBlueSlider_ValueChanged"  />
-                    <TextBlock Text="线条颜色(blue)" Grid.Row="8" Grid.Column="2" VerticalAlignment="Center" Margin="5,5,0,5" />
-
-                    <Button Style="{StaticResource AccentButtonStyle}" Content="获取小程序码" x:Name="GetWxaCodeButton" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Click="GetWxaCodeUnlimited" />
-                    <Button Style="{StaticResource AccentButtonStyle}" Content="保存小程序码" x:Name="SaveWxaCodeButton" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Click="SaveWxacodeImage"/>
-
-                </Grid>
-                <Image x:Name="wxacodeimage" Source="/Assets/wxacodesample.jpg" MaxWidth="350" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
-
-            </Grid>
-    </Grid>
-</Page>
-```
-
-对比一下UWP新建时，空白页的 xml 内容
-```xml
-<Page
-    x:Class="NavigationViewTest.BlankPage1"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:NavigationViewTest"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-
-    </Grid>
-</Page>
-```
-
-动态响应布局的关键内容 `VisualStateManager` 即放在 `Grid` 下。然后我们再在 Grid 新建一个 Grid 布局，用这个子布局来承载页面的内容。相当于这个 Page 下有一个根 Grid ，将这个根 Grid 的 (0,0) 单元格，作为一个新的子 Grid 的内容，这里面再添加这个页面的承载元素，这样 VisualStateManager 就能生效了。
-
-VisualStateManager 的语法意思是，在页面大于或小于某个值（坐标系 1920x1080）时，改变控件的一些属性，本例中，改变了承载小程序码的 Image 控件所在的行和列，并且设置相应的宽度实现。下面两图是实现的动态响应布局的效果。
-
-{% asset_img wide.jpg 当界面较宽时 %}
-
-{% asset_img narrow.jpg 当界面较窄时 %}
-
-# 导航栏
-导航栏是 UWP 自带的一个控件，Windows 10 的设置下的每一个子页面，都是导航栏的例子，这个控件是 `NavigationView` ，使用时在 Nuget 包管理器中，为当前解决方案添加 `Microsoft.UI.Xaml`。在页面的 Page 节点的配置中，添加`xmlns:muxc="using:Microsoft.UI.Xaml.Controls"`字段，然后在这个页面下的 Grid 内添加一个 NavigationView 控件，以微信小程序码为例，内容如下
-```xml
-<Page
-    x:Class="WxaCode.MainPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:WxaCode"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-        <muxc:NavigationView x:Name="NaviView" ItemInvoked="NaviView_ItemInvoked" IsBackButtonVisible="Collapsed" >
-            <muxc:NavigationView.MenuItems>
-                <muxc:NavigationViewItem Icon="Home" Content="操作" Tag="HomePage" x:Name="homepage" />
-                <muxc:NavigationViewItem Icon="Help" Content="关于" Tag="AboutPage" />
-            </muxc:NavigationView.MenuItems>
-            <ScrollViewer>
-                <Frame x:Name="ContentFrame" Padding="12,50,12,24" IsTabStop="True" />
-            </ScrollViewer>
-        </muxc:NavigationView>
-    </Grid>
-</Page>
-```
-注意其中的 `ScrollViewer` 和其内的 `Frame` ，这里将会承载每一个页面不同页面的具体内容，本例中，实际实现是把 homepage 和 aboutpage 作为一个子布局，放到 `Frame` 上。这样导航栏可以一直存在，通过点击导航栏，替换里面的 `Frame` 对应的页面，即可达到通过导航栏来切换页面的效果，具体的代码实现可以查看应用的源码。
-
-# 本地设置
-本地设置通常是存放一些设置项，本例中通过封装UWP自带的 `Windows.Storage.ApplicationData.Current.LocalSettings` 来实现，比如是否保存 appid 和 appsecret ,如下图所示
-{% asset_img settings.jpg 设置 %}
-
-# 在应用退出时保存数据
-可能百度大学会告诉你，UWP在应用关闭时，需要申请一个受限权限"confirmAppClose"，但是由于是一个受限制的权限，有可能会因为这个权限，应用商店不允许发布（我没有尝试，我换了另外一种做法），如果你有安卓应用开发的经验，就会知道，安卓应用关闭时，Activity会收到 onPause,onStop,onDestroy三个事件通知，这三个地方足够你做很多事情，UWP有类似的地方，每一个UWP应用都有一个 App.xaml.cs，其内的
-```
-private void OnSuspending(object sender, SuspendingEventArgs e)
-{
-    var deferral = e.SuspendingOperation.GetDeferral();
-    //TODO: 保存应用程序状态并停止任何后台活动
-    deferral.Complete();
-}
-```
-已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。]]></content>
   </entry>
   <entry>
     <title>Visual Code</title>
@@ -4919,6 +4919,32 @@ logwrite 这个函数是用来将putty窗口内显示的字符输出到log文件
 ]]></content>
   </entry>
   <entry>
+    <title>也许是一个特性</title>
+    <url>/2017/07/02/an-error/</url>
+    <content><![CDATA[{% asset_img 1.jpg %}
+<!-- more -->
+遇到一个神奇的现象，仅作记录，如下代码：
+```C++
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    printf("啊哈哈");
+    return 0;
+}
+```
+一眼看过去，肯定会编译错误，`printf`的头文件`cstdio`都没有包含进去，事实证明，确实如此：
+{% asset_img 2.jpg compile with g++ 5.4.0 %}
+那么，再来一张如何:
+{% asset_img 3.jpg compile with g++ 7.1.0 %}
+这几日折腾putty，下载了gcc-7.1.0，顺手把Code::Blocks的编译器换了，结果出这么个岔子，也许7.1.0版本的`iostream`已经包含了`printf`了吧，某天应该会被这个“特性”坑一把吧!
+{% cq %}生命重在折腾{% endcq %}]]></content>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>安卓app如何从剪贴板获取图片</title>
     <url>/2020/08/16/android-app-load-image-from-clipboard/</url>
     <content><![CDATA[
@@ -5066,32 +5092,6 @@ public class MainActivity extends AppCompatActivity {
 {% asset_img picture2.png %}]]></content>
   </entry>
   <entry>
-    <title>也许是一个特性</title>
-    <url>/2017/07/02/an-error/</url>
-    <content><![CDATA[{% asset_img 1.jpg %}
-<!-- more -->
-遇到一个神奇的现象，仅作记录，如下代码：
-```C++
-#include <iostream>
-using namespace std;
-
-int main()
-{
-    printf("啊哈哈");
-    return 0;
-}
-```
-一眼看过去，肯定会编译错误，`printf`的头文件`cstdio`都没有包含进去，事实证明，确实如此：
-{% asset_img 2.jpg compile with g++ 5.4.0 %}
-那么，再来一张如何:
-{% asset_img 3.jpg compile with g++ 7.1.0 %}
-这几日折腾putty，下载了gcc-7.1.0，顺手把Code::Blocks的编译器换了，结果出这么个岔子，也许7.1.0版本的`iostream`已经包含了`printf`了吧，某天应该会被这个“特性”坑一把吧!
-{% cq %}生命重在折腾{% endcq %}]]></content>
-      <tags>
-        <tag>C++</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android Studio启用IPv6支持</title>
     <url>/2017/09/30/android-studio-ipv6/</url>
     <content><![CDATA[{% asset_img 1.png%}
@@ -5138,228 +5138,6 @@ Linux的hosts文件在`/etc/hosts`，同样把上面的地址添加就好，但�
 
 其实吧，说到底，还是为了钱，大陆毕竟是一块大蛋糕，谷歌也想来分一块，不知道什么时候来呢？
 And，和Android 8一块来的，谷歌也带来[Kotlin对安卓的支持](https://www.zhihu.com/topic/20008824/hot)，这是不是对Oracle的一点警示呢。]]></content>
-  </entry>
-  <entry>
-    <title>从零开始建立PuTTY工程</title>
-    <url>/2018/05/20/build-putty-step-by-step/</url>
-    <content><![CDATA[
-PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考[MANIFEST](#MANIFEST))
-
-{% asset_image 25.png %}
-
-所以，从零开始建立putty的Viusal Studio2017解决方案。
-
-<!-- more -->
-
-首先，建立一个空项目(记得勾选为解决方案创建目录)
-{% asset_image 1.png %}
-
-这个时候，在你的putty源码目录的windows文件夹内会有一个putty文件夹，里面会有一个`putty.sln`和一个`putty`文件夹，将windows文件夹内的putty文件夹更名为VS2017(仅仅是为了与已有的解决方案统一风格而已，名字随意)，这个时候，你可以对着解决方案的putty项目，点击右键，移动到添加，然后点击添加现有现有项，或者可以直接按下`Shift + Alt +A`，对着原本就有的PuTTY项目，分别添加源文件、头文件、资源文件:
-
-{% asset_image 2.png %}
-添加完成之后，putty项目看起来应该是这个样子的
-
-{% asset_image 3.png %}
-
-## 无法打开包括文件: “unix.h”
-
-按下`Ctrl+Shift+B`，你就会看到这样的画面：
-
-{% asset_image 4.png %}
-错误
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C1083	无法打开包括文件: “unix.h”: No such file or directory	putty	d:\desktop\putty-en\puttyps.h	14	
-```
-原因很明显，它们找不到头文件在哪儿，右击项目，点击属性，选中C/C++，在附加包含目录内填入`..\..\..\./;..\..\..\unix/;..\..\..\charset/;..\..\..\windows/;`
-
-{% asset_image 5.png %}
-这个是用来指定编译器搜索头文件的目录的，这里用的是相对路径(相对于putty解决方案内putty项目的路径，也就是putty源码的根目录，unix目录，charset目录和windows目录)，这个附加目录也可以在`VC++目录`的包含目录里面填写，如下图
-
-{% asset_image 6.png %}
-库目录在putty项目的建立过程中不用填写，putty没有用到第三方库，这里不用填写。
-
-## 无法打开包括文件: “dlfcn.h”
-
-再次生成解决方案，你会遇到第二个问题
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C1083	无法打开包括文件: “dlfcn.h”: No such file or directory	putty	d:\desktop\putty-en\unix\unix.h	11	
-```
-
-{% asset_image 7.png %}
-依旧打开项目属性，点击`C/C++`，预处理器,预处理器定义
-
-{% asset_image 8.png %}
-点击右边的下拉箭头，点击编辑，填入以下内容：
-```
-WIN32
-_WINDOWS
-_CRT_SECURE_NO_WARNINGS
-```
-这个时候，看起来应该是这个样子的("dlfcn.h"是Linux系统的头文件，猜测加预处理参数是为了让编译器知道不去试图查找这个文件)
-{% asset_image 9.png %}
-
-## case 表达式不是常量
-
-再次生成解决方案，你会遇到第三个问题
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C2051	case 表达式不是常量	putty	d:\desktop\putty-en\ssh.c	1372	
-```
-
-{% asset_img 10.png %}
-
-打开项目属性，选中`C/C++`，将调试信息格式更改为“程序数据库”，
-{% asset_img 11.png %}
-
-## 使用了可能未初始化的本地指针变量
-
-再次生成解决方案，你会遇到第四个问题
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C4703	使用了可能未初始化的本地指针变量“oev”	putty	d:\desktop\putty-en\windows\winhandl.c	342	
-```
-{% asset_img 12.png %}
-打开项目属性，选中`C/C++`，将SDL检查改为否
-
-{% asset_img 13.png %}
-
-## noshare.obj & winshare.obj
-
-再次生成解决方案，好了，你成功的将错误减少到了四个
-```
-
-错误	LNK2005	_platform_ssh_share 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	
-
-错误	LNK2005	_platform_ssh_share_cleanup 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	
-
-错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	
-
-错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	
-```
-
-{% asset_img 14.png %}
-
-对于错误1和错误2，我只能说，可能原本设计项目的人比较神奇，这两个错误花了我相当长的时间才排查掉，原因说得很清楚了，在连接`winshare.obj`的时候，发现函数`_platform_ssh_share`和`_platform_ssh_share_cleanup`已经在` noshare.obj`内定义过，`noshare.c`文件内的内容如下 
-```C
-/*
- * Stub implementation of SSH connection-sharing IPC, for any
- * platform which can't support it at all.
- */
-
-#include <stdio.h>
-#include <assert.h>
-#include <errno.h>
-
-#include "tree234.h"
-#include "putty.h"
-#include "ssh.h"
-#include "network.h"
-
-int platform_ssh_share(const char *name, Conf *conf,
-                       Plug downplug, Plug upplug, Socket *sock,
-                       char **logtext, char **ds_err, char **us_err,
-                       int can_upstream, int can_downstream)
-{
-    return SHARE_NONE;
-}
-
-void platform_ssh_share_cleanup(const char *name)
-{
-}
-```
-
-大致上看起来就是重定义了，BUT，为什么原本有的putty项目可以编译？，尝试将`noshare.c`从项目中移除之后，再次编译，这两错误不见了，但是，为什么原本的项目可以编译呢，好生奇怪，两天之后，偶然发现，原本项目内的`noshare.c`文件前面的图标和其他源文件长得不一样，仿佛发现了什么，点开属性一看，原来如此:
-右击`noshare.c`点击属性，选中常规，点击“项类型”右边的下拉箭头，改成`C/C++标头`，
-
-{% asset_img 15.png %}
-
-## MANIFEST
-
-再次生成解决方案，好了，这次你只能看到两个问题了
-```
-错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	
-
-错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	
-```
-
-但是这两个问题都不是源代码的问题(其实用源码内原本就有的解决方案能编译成功，就说明代码没问题了(PS:严格来说也不是没有可能)),对于`错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	`，右击项目，点击属性，点击清单工具，选中输入和输出，将嵌入清单改成“否”
-
-{% asset_img 16.png %}
-
-再次生成解决方案，错误变成了
-
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	LNK2019	无法解析的外部符号 _ImmGetContext@4，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
-错误	LNK2019	无法解析的外部符号 _ImmReleaseContext@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
-错误	LNK2019	无法解析的外部符号 _ImmGetCompositionStringW@16，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
-错误	LNK2019	无法解析的外部符号 _ImmSetCompositionFontA@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
-错误	LNK2019	无法解析的外部符号 _ImmSetCompositionWindow@8，该符号在函数 _sys_cursor_update 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
-错误	LNK1120	5 个无法解析的外部命令	putty	D:\Desktop\putty-en\windows\VS2017\Debug\putty.exe	1	
-```
-
-{% asset_img 17.png %}
-
-熟悉的话，很容易就知道这个是因为缺了静态库
-右击项目，点击属性，点击链接器，选中输入，点击附加依赖项右边的下拉箭头，点击编辑，
-
-{% asset_img 18.png %}
-
-填入imm32.lib，它看起来就是这样子的
-
-{% asset_img 19.png %}
-
-再次编译，哈哈哈，终于成功了
-
-{% asset_img 20.png %}
-
-{% asset_img 21.png %}
-
-## 其他可能遇到的问题
-
-### cannot open include file 'version.h'
-
-不过你也有可能遇到这个问题
-```
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	RC1015	cannot open include file 'version.h'.	putty	D:\Desktop\putty-en\windows\version.rc2	9	
-```
-{% asset_img 22.png %}
-如果你在[第一步](#%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E5%8C%85%E6%8B%AC%E6%96%87%E4%BB%B6-%E2%80%9Cunix-h%E2%80%9D)中，填写附加包含目录的时候，填在了`VC++目录`里面，则不会遇到此问题，若是填到了`C/C++`则会遇到，一个办法是更改到`VC++`目录去，另外一个办法是在项目属性的资源选项下面，附加目录里面填上`..\..\..\./;`
-
-{% asset_img 23.png %}
-
-### 关于依赖库
-
-在putty原本带的解决方案内的附加依赖项是下面这些
-
-```
-advapi32.lib
-comdlg32.lib
-gdi32.lib
-imm32.lib
-ole32.lib
-shell32.lib
-user32.lib
-```
-
-在Windows 10 1803上，Visual Studio 2017 的预先包含的静态库里面已经包含了除去`imm32.lib`之外的所有今天库，所以我只添加了它。有关Visual Studio的各种报错，查看巨硬(微软)的文档是一个好办法，百度得到的办法虽说更为简洁明了一些，但是因为复现环境不一样，有时候并没有效果。
-
-### 调整项目属性之后不生效
-
-PS：若是调整项目属性之后不生效，请留意调整的项目和生成解决方案的是否是同一个编译选项
-{% asset_img 24.png %}
-
-### 让其他项目用同样的属性
-
-按照上一个描述的问题，对于一个工程，在win32和x86的Release和Debug模式都需要调整属性，就整整四个了，整个PuTTY解决方案其实包括了 `pageant plink pscp psftp putty puttygen puttytel testbn`,其它七个再来一次，简直爽歪歪，这个时候项目属性表就有用了，可以参考[https://www.cnblogs.com/haomiao/p/5812860.html](https://www.cnblogs.com/haomiao/p/5812860.html)，若是找不到属性管理器，可以点击视图下的其他窗口的“属性管理器”。
-
-### 懒人包
-GitHub上有已经汉化完成的版本——[https://github.com/larryli/PuTTY](https://github.com/larryli/PuTTY)
-下载搭建好的PuTTY的Visual Studio 2017解决方案，可以前往[https://github.com/BDZNH/PuTTY](https://github.com/BDZNH/PuTTY)
-]]></content>
   </entry>
   <entry>
     <title>在Windows中手动编译Putty</title>
@@ -5925,6 +5703,228 @@ PS:这个头文件是VS编译器的头文件，我给弄到MinGW里面来了。
 {% cq %}生命重在折腾{% endcq %}]]></content>
   </entry>
   <entry>
+    <title>从零开始建立PuTTY工程</title>
+    <url>/2018/05/20/build-putty-step-by-step/</url>
+    <content><![CDATA[
+PuTTY的源码下载之后，里面已经带有Visual Studio 2010和Visual Studio 2012的解决方案，但是惊奇的发现，用这个两个解决方案编译出来的putty居然是xp风格的，和官网下载到的不一样。(如果只是要单纯的解决这个xp风格，可以参考[MANIFEST](#MANIFEST))
+
+{% asset_image 25.png %}
+
+所以，从零开始建立putty的Viusal Studio2017解决方案。
+
+<!-- more -->
+
+首先，建立一个空项目(记得勾选为解决方案创建目录)
+{% asset_image 1.png %}
+
+这个时候，在你的putty源码目录的windows文件夹内会有一个putty文件夹，里面会有一个`putty.sln`和一个`putty`文件夹，将windows文件夹内的putty文件夹更名为VS2017(仅仅是为了与已有的解决方案统一风格而已，名字随意)，这个时候，你可以对着解决方案的putty项目，点击右键，移动到添加，然后点击添加现有现有项，或者可以直接按下`Shift + Alt +A`，对着原本就有的PuTTY项目，分别添加源文件、头文件、资源文件:
+
+{% asset_image 2.png %}
+添加完成之后，putty项目看起来应该是这个样子的
+
+{% asset_image 3.png %}
+
+## 无法打开包括文件: “unix.h”
+
+按下`Ctrl+Shift+B`，你就会看到这样的画面：
+
+{% asset_image 4.png %}
+错误
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	C1083	无法打开包括文件: “unix.h”: No such file or directory	putty	d:\desktop\putty-en\puttyps.h	14	
+```
+原因很明显，它们找不到头文件在哪儿，右击项目，点击属性，选中C/C++，在附加包含目录内填入`..\..\..\./;..\..\..\unix/;..\..\..\charset/;..\..\..\windows/;`
+
+{% asset_image 5.png %}
+这个是用来指定编译器搜索头文件的目录的，这里用的是相对路径(相对于putty解决方案内putty项目的路径，也就是putty源码的根目录，unix目录，charset目录和windows目录)，这个附加目录也可以在`VC++目录`的包含目录里面填写，如下图
+
+{% asset_image 6.png %}
+库目录在putty项目的建立过程中不用填写，putty没有用到第三方库，这里不用填写。
+
+## 无法打开包括文件: “dlfcn.h”
+
+再次生成解决方案，你会遇到第二个问题
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	C1083	无法打开包括文件: “dlfcn.h”: No such file or directory	putty	d:\desktop\putty-en\unix\unix.h	11	
+```
+
+{% asset_image 7.png %}
+依旧打开项目属性，点击`C/C++`，预处理器,预处理器定义
+
+{% asset_image 8.png %}
+点击右边的下拉箭头，点击编辑，填入以下内容：
+```
+WIN32
+_WINDOWS
+_CRT_SECURE_NO_WARNINGS
+```
+这个时候，看起来应该是这个样子的("dlfcn.h"是Linux系统的头文件，猜测加预处理参数是为了让编译器知道不去试图查找这个文件)
+{% asset_image 9.png %}
+
+## case 表达式不是常量
+
+再次生成解决方案，你会遇到第三个问题
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	C2051	case 表达式不是常量	putty	d:\desktop\putty-en\ssh.c	1372	
+```
+
+{% asset_img 10.png %}
+
+打开项目属性，选中`C/C++`，将调试信息格式更改为“程序数据库”，
+{% asset_img 11.png %}
+
+## 使用了可能未初始化的本地指针变量
+
+再次生成解决方案，你会遇到第四个问题
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	C4703	使用了可能未初始化的本地指针变量“oev”	putty	d:\desktop\putty-en\windows\winhandl.c	342	
+```
+{% asset_img 12.png %}
+打开项目属性，选中`C/C++`，将SDL检查改为否
+
+{% asset_img 13.png %}
+
+## noshare.obj & winshare.obj
+
+再次生成解决方案，好了，你成功的将错误减少到了四个
+```
+
+错误	LNK2005	_platform_ssh_share 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	
+
+错误	LNK2005	_platform_ssh_share_cleanup 已经在 noshare.obj 中定义	putty	D:\Desktop\putty-en\windows\VS2017\putty\winshare.obj	1	
+
+错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	
+
+错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	
+```
+
+{% asset_img 14.png %}
+
+对于错误1和错误2，我只能说，可能原本设计项目的人比较神奇，这两个错误花了我相当长的时间才排查掉，原因说得很清楚了，在连接`winshare.obj`的时候，发现函数`_platform_ssh_share`和`_platform_ssh_share_cleanup`已经在` noshare.obj`内定义过，`noshare.c`文件内的内容如下 
+```C
+/*
+ * Stub implementation of SSH connection-sharing IPC, for any
+ * platform which can't support it at all.
+ */
+
+#include <stdio.h>
+#include <assert.h>
+#include <errno.h>
+
+#include "tree234.h"
+#include "putty.h"
+#include "ssh.h"
+#include "network.h"
+
+int platform_ssh_share(const char *name, Conf *conf,
+                       Plug downplug, Plug upplug, Socket *sock,
+                       char **logtext, char **ds_err, char **us_err,
+                       int can_upstream, int can_downstream)
+{
+    return SHARE_NONE;
+}
+
+void platform_ssh_share_cleanup(const char *name)
+{
+}
+```
+
+大致上看起来就是重定义了，BUT，为什么原本有的putty项目可以编译？，尝试将`noshare.c`从项目中移除之后，再次编译，这两错误不见了，但是，为什么原本的项目可以编译呢，好生奇怪，两天之后，偶然发现，原本项目内的`noshare.c`文件前面的图标和其他源文件长得不一样，仿佛发现了什么，点开属性一看，原来如此:
+右击`noshare.c`点击属性，选中常规，点击“项类型”右边的下拉箭头，改成`C/C++标头`，
+
+{% asset_img 15.png %}
+
+## MANIFEST
+
+再次生成解决方案，好了，这次你只能看到两个问题了
+```
+错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	
+
+错误	LNK1123	转换到 COFF 期间失败: 文件无效或损坏	putty	D:\Desktop\putty-en\windows\VS2017\putty\LINK	1	
+```
+
+但是这两个问题都不是源代码的问题(其实用源码内原本就有的解决方案能编译成功，就说明代码没问题了(PS:严格来说也不是没有可能)),对于`错误	CVT1100	资源重复。类型: MANIFEST，名称: 1，语言: 0x0409	putty	D:\Desktop\putty-en\windows\VS2017\putty\CVTRES	1	`，右击项目，点击属性，点击清单工具，选中输入和输出，将嵌入清单改成“否”
+
+{% asset_img 16.png %}
+
+再次生成解决方案，错误变成了
+
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	LNK2019	无法解析的外部符号 _ImmGetContext@4，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
+错误	LNK2019	无法解析的外部符号 _ImmReleaseContext@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
+错误	LNK2019	无法解析的外部符号 _ImmGetCompositionStringW@16，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
+错误	LNK2019	无法解析的外部符号 _ImmSetCompositionFontA@8，该符号在函数 _WndProc@16 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
+错误	LNK2019	无法解析的外部符号 _ImmSetCompositionWindow@8，该符号在函数 _sys_cursor_update 中被引用	putty	D:\Desktop\putty-en\windows\VS2017\putty\window.obj	1	
+错误	LNK1120	5 个无法解析的外部命令	putty	D:\Desktop\putty-en\windows\VS2017\Debug\putty.exe	1	
+```
+
+{% asset_img 17.png %}
+
+熟悉的话，很容易就知道这个是因为缺了静态库
+右击项目，点击属性，点击链接器，选中输入，点击附加依赖项右边的下拉箭头，点击编辑，
+
+{% asset_img 18.png %}
+
+填入imm32.lib，它看起来就是这样子的
+
+{% asset_img 19.png %}
+
+再次编译，哈哈哈，终于成功了
+
+{% asset_img 20.png %}
+
+{% asset_img 21.png %}
+
+## 其他可能遇到的问题
+
+### cannot open include file 'version.h'
+
+不过你也有可能遇到这个问题
+```
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	RC1015	cannot open include file 'version.h'.	putty	D:\Desktop\putty-en\windows\version.rc2	9	
+```
+{% asset_img 22.png %}
+如果你在[第一步](#%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80%E5%8C%85%E6%8B%AC%E6%96%87%E4%BB%B6-%E2%80%9Cunix-h%E2%80%9D)中，填写附加包含目录的时候，填在了`VC++目录`里面，则不会遇到此问题，若是填到了`C/C++`则会遇到，一个办法是更改到`VC++`目录去，另外一个办法是在项目属性的资源选项下面，附加目录里面填上`..\..\..\./;`
+
+{% asset_img 23.png %}
+
+### 关于依赖库
+
+在putty原本带的解决方案内的附加依赖项是下面这些
+
+```
+advapi32.lib
+comdlg32.lib
+gdi32.lib
+imm32.lib
+ole32.lib
+shell32.lib
+user32.lib
+```
+
+在Windows 10 1803上，Visual Studio 2017 的预先包含的静态库里面已经包含了除去`imm32.lib`之外的所有今天库，所以我只添加了它。有关Visual Studio的各种报错，查看巨硬(微软)的文档是一个好办法，百度得到的办法虽说更为简洁明了一些，但是因为复现环境不一样，有时候并没有效果。
+
+### 调整项目属性之后不生效
+
+PS：若是调整项目属性之后不生效，请留意调整的项目和生成解决方案的是否是同一个编译选项
+{% asset_img 24.png %}
+
+### 让其他项目用同样的属性
+
+按照上一个描述的问题，对于一个工程，在win32和x86的Release和Debug模式都需要调整属性，就整整四个了，整个PuTTY解决方案其实包括了 `pageant plink pscp psftp putty puttygen puttytel testbn`,其它七个再来一次，简直爽歪歪，这个时候项目属性表就有用了，可以参考[https://www.cnblogs.com/haomiao/p/5812860.html](https://www.cnblogs.com/haomiao/p/5812860.html)，若是找不到属性管理器，可以点击视图下的其他窗口的“属性管理器”。
+
+### 懒人包
+GitHub上有已经汉化完成的版本——[https://github.com/larryli/PuTTY](https://github.com/larryli/PuTTY)
+下载搭建好的PuTTY的Visual Studio 2017解决方案，可以前往[https://github.com/BDZNH/PuTTY](https://github.com/BDZNH/PuTTY)
+]]></content>
+  </entry>
+  <entry>
     <title>手动编译shadowsocks-libev</title>
     <url>/2018/03/16/build-shadowsocks-libev/</url>
     <content><![CDATA[
@@ -6016,51 +6016,6 @@ service docker start
 ```
 
 启动docker，然后到Shaodwoskcs的`docker/mingw`目录下面运行make命令，等待完成就好，优势在于可以在VPS上运行，不用顾及网络。
-]]></content>
-  </entry>
-  <entry>
-    <title>关闭Chrome的“推荐的文章”</title>
-    <url>/2017/08/31/close-suggested-article/</url>
-    <content><![CDATA[
-{% asset_img 1.png %}
-
-<!-- more -->
-
-手机版的Chrome打开会显示`推荐的文章`，`下载的内容`，`最近使用的书签`，作为资深强迫症，肯定是要把它去掉的。先放解决办法，在地址栏分别输入以下内容：
-
-{% cq %}
-
-~~chrome://flags/#enable-ntp-popular-sites~~
-
-chrome://flags/#enable-ntp-remote-suggestions
-
-{% endcq %}
-
-然后改成“禁用”或者“disable”，Chrome会提示重启，重启后就没有了。
-
-{% asset_img 2.png chrome://flags/#enable-ntp-popular-sites %}
-
-{% asset_img 3.png chrome://flags/#enable-ntp-remote-suggestions %}
-
-如上图，若要把`最近使用的书签`，`下载内容`也去掉，就在地址栏输入:
-
-{% cq %}
-
-chrome://flags/#enable-ntp-bookmark-suggestion
-
-chrome://flags/#enable-ntp-offline-page-download-suggestions
-
-chrome://flags/#enable-ntp-asset-download-suggetons
-
-{% endcq %}
-
-本来没有必要说的，百度一搜一大把，然而`其实百度得到的解决办法都是同一个，而且不生效`，或者说百度的办法已经失效，比如[此文](https://www.anfensi.com/news/127700.html)。默默的吐槽一下，转人家的文章转就转吧，不验证是否有用就算吧，还不标明文章出处，翻遍百度无果，求助谷歌，参考`https://www.reddit.com/r/Android/comments/6b3ubd/how_to_disable_in_chrome_58_new_tab_page_ntp/`，然而，其实此文也有误，去掉下载的内容的办法也不生效，所以写下此文。
-
-都去掉之后，chrome打开就变成这样了
-
-{% asset_img 4.png %}
-
-{% cq %}生命重在折腾{% endcq %}
 ]]></content>
   </entry>
   <entry>
@@ -6164,6 +6119,51 @@ ERROR opening V4L interface: No such file or directory
 
 对于两种命令的更多使用方法，查看文档咯。
 {% cq %}生命重在折腾{% endcq %}]]></content>
+  </entry>
+  <entry>
+    <title>关闭Chrome的“推荐的文章”</title>
+    <url>/2017/08/31/close-suggested-article/</url>
+    <content><![CDATA[
+{% asset_img 1.png %}
+
+<!-- more -->
+
+手机版的Chrome打开会显示`推荐的文章`，`下载的内容`，`最近使用的书签`，作为资深强迫症，肯定是要把它去掉的。先放解决办法，在地址栏分别输入以下内容：
+
+{% cq %}
+
+~~chrome://flags/#enable-ntp-popular-sites~~
+
+chrome://flags/#enable-ntp-remote-suggestions
+
+{% endcq %}
+
+然后改成“禁用”或者“disable”，Chrome会提示重启，重启后就没有了。
+
+{% asset_img 2.png chrome://flags/#enable-ntp-popular-sites %}
+
+{% asset_img 3.png chrome://flags/#enable-ntp-remote-suggestions %}
+
+如上图，若要把`最近使用的书签`，`下载内容`也去掉，就在地址栏输入:
+
+{% cq %}
+
+chrome://flags/#enable-ntp-bookmark-suggestion
+
+chrome://flags/#enable-ntp-offline-page-download-suggestions
+
+chrome://flags/#enable-ntp-asset-download-suggetons
+
+{% endcq %}
+
+本来没有必要说的，百度一搜一大把，然而`其实百度得到的解决办法都是同一个，而且不生效`，或者说百度的办法已经失效，比如[此文](https://www.anfensi.com/news/127700.html)。默默的吐槽一下，转人家的文章转就转吧，不验证是否有用就算吧，还不标明文章出处，翻遍百度无果，求助谷歌，参考`https://www.reddit.com/r/Android/comments/6b3ubd/how_to_disable_in_chrome_58_new_tab_page_ntp/`，然而，其实此文也有误，去掉下载的内容的办法也不生效，所以写下此文。
+
+都去掉之后，chrome打开就变成这样了
+
+{% asset_img 4.png %}
+
+{% cq %}生命重在折腾{% endcq %}
+]]></content>
   </entry>
   <entry>
     <title>CSGO联机的小事儿</title>
@@ -6641,54 +6641,6 @@ More info: [Deployment](https://hexo.io/docs/deployment.html)
 ]]></content>
   </entry>
   <entry>
-    <title>在 Ubuntu 内如何更改 Chrome 的语言</title>
-    <url>/2021/09/22/how-to-change-chrome-language-in-ubuntu/</url>
-    <content><![CDATA[
-在 Ubuntu(20.04) 内更改 Chrome 的语言时，并没有像是 Windows 的`以这种语言显示 Google Chrome`的选项。最多也只能修改提示翻译的优先语言。没有严格意义上的“更改显示语言”的选项。
-在 Ubuntu 上，Chrome的显示语言可以根据系统语言变化，一种办法是将系统语言设置成你想要显示的语言，但是对于中文用户来说，更多的场景可能是系统语言是英文，应用语言是中文，比如这里的Chrome。如果你是我所说的这种情况，那么本文的内容可能对你有帮助。
-
-{% asset_img 1.png %}
-
-<!-- more -->
-
-在你的终端尝试以下命令
-```bash
-LANGUAGE=zh_cn google-chrome
-```
-
-此时如果启动 Chrome 能显示中文的话，我们的需求已经满足一大半了。如果使用命令行即可满足需求的话，就截至这里就可以了。
-
-Ubuntu 的任务栏可以将常用的 APP 钉在这里(Ubuntu 称为 favorite)，那么如何更改从这里启动的 Chrome的语言呢？ 
-通过搜索引擎可以知道，这个 favorite 对应的文件在 `/usr/share/applications` ，我们找到 Chrome 对应的文件 `/usr/share/applications/google-chrome.desktop`，查看其内容
-```bash
-[Desktop Entry]
-Version=1.0
-Name=Google Chrome
-# Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
-# From Ubuntu's language-pack-kde-XX-base packages, version 9.04-20090413.
-GenericName=Web Browser
-......
-Exec=/usr/bin/google-chrome-stable %U
-StartupNotify=true
-Terminal=false
-Icon=google-chrome
-Type=Application
-Categories=Network;WebBrowser;
-......
-```
-如果你注意到了 `Exec=/usr/bin/google-chrome-stable` 字段，那么你肯定能猜到，我们可以为这个可执行程序添加命令行参数`LANGUAGE=zh_cn`来让Chrome启动时以中文启动。遗憾的是，这里不行。直接加在这里不仅无法使用，而且还会导致 GNOME 桌面找不到 Chrome 了。
-下面是我的解决办法
-```
-touch chrome_cn.sh
-echo "#!/bin/bash" > chrome_cn.sh
-echo "LANGUAGE=zh_cn /usr/bin/google-chrome-stable $@" >> chrome_cn.sh
-sudo cp -f chrome_cn.sh /usr/bin/chrome_cn.sh
-```
-然后将 `/usr/share/applications/google-chrome.desktop` 里的所有 `/usr/bin/google-chrome-stable` 换成 `/usr/bin/chrome_cn.sh` 。让我们点击图标的时候，实际执行的是一个 sh 脚本，然后把 `LANGUAGE=zh_cn` 写在脚本里，让脚本去启动 Chrome ，这样就可以让桌面上任务栏启动的 Chrome 变成中文了。
-
-最好不要直接更改 `LANGUAGE` 这个环境变量的值，这个值与系统语言相关。]]></content>
-  </entry>
-  <entry>
     <title>安卓应用崩溃的时候发生了什么</title>
     <url>/2021/03/27/how-does-android-app-crash/</url>
     <content><![CDATA[
@@ -6861,6 +6813,54 @@ void android_os_Process_sendSignal(JNIEnv* env, jobject clazz, jint pid, jint si
 
 native调用时的崩溃与Linux上的C/C++程序崩溃的行为很像，我们写这样一个简单的jni调用来让安卓应用崩溃
 ]]></content>
+  </entry>
+  <entry>
+    <title>在 Ubuntu 内如何更改 Chrome 的语言</title>
+    <url>/2021/09/22/how-to-change-chrome-language-in-ubuntu/</url>
+    <content><![CDATA[
+在 Ubuntu(20.04) 内更改 Chrome 的语言时，并没有像是 Windows 的`以这种语言显示 Google Chrome`的选项。最多也只能修改提示翻译的优先语言。没有严格意义上的“更改显示语言”的选项。
+在 Ubuntu 上，Chrome的显示语言可以根据系统语言变化，一种办法是将系统语言设置成你想要显示的语言，但是对于中文用户来说，更多的场景可能是系统语言是英文，应用语言是中文，比如这里的Chrome。如果你是我所说的这种情况，那么本文的内容可能对你有帮助。
+
+{% asset_img 1.png %}
+
+<!-- more -->
+
+在你的终端尝试以下命令
+```bash
+LANGUAGE=zh_cn google-chrome
+```
+
+此时如果启动 Chrome 能显示中文的话，我们的需求已经满足一大半了。如果使用命令行即可满足需求的话，就截至这里就可以了。
+
+Ubuntu 的任务栏可以将常用的 APP 钉在这里(Ubuntu 称为 favorite)，那么如何更改从这里启动的 Chrome的语言呢？ 
+通过搜索引擎可以知道，这个 favorite 对应的文件在 `/usr/share/applications` ，我们找到 Chrome 对应的文件 `/usr/share/applications/google-chrome.desktop`，查看其内容
+```bash
+[Desktop Entry]
+Version=1.0
+Name=Google Chrome
+# Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
+# From Ubuntu's language-pack-kde-XX-base packages, version 9.04-20090413.
+GenericName=Web Browser
+......
+Exec=/usr/bin/google-chrome-stable %U
+StartupNotify=true
+Terminal=false
+Icon=google-chrome
+Type=Application
+Categories=Network;WebBrowser;
+......
+```
+如果你注意到了 `Exec=/usr/bin/google-chrome-stable` 字段，那么你肯定能猜到，我们可以为这个可执行程序添加命令行参数`LANGUAGE=zh_cn`来让Chrome启动时以中文启动。遗憾的是，这里不行。直接加在这里不仅无法使用，而且还会导致 GNOME 桌面找不到 Chrome 了。
+下面是我的解决办法
+```
+touch chrome_cn.sh
+echo "#!/bin/bash" > chrome_cn.sh
+echo "LANGUAGE=zh_cn /usr/bin/google-chrome-stable $@" >> chrome_cn.sh
+sudo cp -f chrome_cn.sh /usr/bin/chrome_cn.sh
+```
+然后将 `/usr/share/applications/google-chrome.desktop` 里的所有 `/usr/bin/google-chrome-stable` 换成 `/usr/bin/chrome_cn.sh` 。让我们点击图标的时候，实际执行的是一个 sh 脚本，然后把 `LANGUAGE=zh_cn` 写在脚本里，让脚本去启动 Chrome ，这样就可以让桌面上任务栏启动的 Chrome 变成中文了。
+
+最好不要直接更改 `LANGUAGE` 这个环境变量的值，这个值与系统语言相关。]]></content>
   </entry>
   <entry>
     <title>how to control Yeelight</title>
@@ -7046,6 +7046,128 @@ int main()
 在台灯开启的情况下，输入1或者2进行亮度调节，输入3退出。
 
 更多更详细的控制信息可以阅读[官方文档](https://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf)。]]></content>
+  </entry>
+  <entry>
+    <title>如何部署 perfetto ui</title>
+    <url>/2024/07/29/how-to-deploy-own-perfetto-ui/</url>
+    <content><![CDATA[
+perfetto 是从安卓9.0开始可用的安卓系统性能监测相关的一个工具，可以参考官网： [perfetto](https://developer.android.google.cn/studio/command-line/perfetto?hl=zh_cn)
+通常我们使用 ui.perfetto.dev 来查看从系统里面抓取到的信息，这个网站是可以离线使用的，但是某些时候，我们需要将这个网站离线或者部署到内网使用，这里我们主要参考 [Perfetto build instruction](https://perfetto.dev/docs/contributing/build-instructions#ui-development)。p.s: 官网是更加详细的，这里只是简单总结一下步骤。
+
+<!-- more -->
+
+# 下载源码
+你可以通过这样一条命令下载到源码
+```bash
+git clone https://android.googlesource.com/platform/external/perfetto/
+```
+做Android Framework或者固件的人一样就能看出来了，这条命令下载了AOSP源码下的`platform/external/perfetto`，下载到源码的方式还有很多，例如Github上 [perfetto](https://github.com/google/perfetto)。
+
+# 下载依赖
+下载需要外网环境和Linux系统
+```bash
+cd perfetto
+tools/install-build-deps --ui
+```
+这里最好使用Ubuntu环境，并且需要安装 3.7 版本以上的 python3，如果不想破坏宿主机环境，可以用虚拟机或者docker来解决。
+这一步视网络环境，下载时间在 10min~30min 左右。
+
+# 编译运行
+p.s 这一步可能需要 16GB 内存，我用12GB内存的虚拟机是跑不起来的
+执行下面的命令即可编译并运行
+```bash
+ui/run-dev-server
+```
+成功运行之后，你会看到类似下图的信息，如果你是在本地编译运行，这个时候通过浏览器访问 [http://127.0.0.1:10000](http://127.0.0.1:10000) 应该可以正常看到网页了。
+
+{% asset_img run_ui.png %}
+
+如果你不是在本地编译运行，可以用类似
+```bash
+./ui/build -s --serve-host 0.0.0.0 -w
+```
+的命令来运行，然后浏览器直接访问编译和运行perfetto的设备的IP地址，端口为 10000来访问它。下面我是在局域网运行的样例
+
+{% asset_img 2.png %}
+
+# 离线部署
+第三步有提及，编译运行需要12GB上内存，这个条件直接劝退VPS内存小的人。`ui.perfetto.dev` 实际上是一堆js/html文件，编译运行之后，对应的网页文件在源码路径 `out/ui/ui/dist` 里面能找到，dist 目录里面的文件大概是这些（p.s: 如果你编译出来没有 service_worker.js ，使用命令编译运行不要停掉，用浏览器访问一次服务就会生成出来）
+```bash
+dist
+├── index.html
+├── service_worker.js
+├── service_worker.js.map
+└── v36.1-127c77716
+    ├── assets
+    │   ├── brand.png
+    │   ├── catapult_trace_viewer.html
+    │   ├── catapult_trace_viewer.js
+    │   ├── favicon.png
+    │   ├── logo-128.png
+    │   ├── logo-3d.png
+    │   ├── MaterialSymbolsOutlined.woff2
+    │   ├── rec_atrace.png
+    │   ├── rec_battery_counters.png
+    │   ├── rec_board_voltage.png
+    │   ├── rec_cpu_coarse.png
+    │   ├── rec_cpu_fine.png
+    │   ├── rec_cpu_freq.png
+    │   ├── rec_cpu_voltage.png
+    │   ├── rec_frame_timeline.png
+    │   ├── rec_ftrace.png
+    │   ├── rec_gpu_mem_total.png
+    │   ├── rec_java_heap_dump.png
+    │   ├── rec_lmk.png
+    │   ├── rec_logcat.png
+    │   ├── rec_long_trace.png
+    │   ├── rec_mem_hifreq.png
+    │   ├── rec_meminfo.png
+    │   ├── rec_native_heap_profiler.png
+    │   ├── rec_one_shot.png
+    │   ├── rec_profiling.png
+    │   ├── rec_ps_stats.png
+    │   ├── rec_ring_buf.png
+    │   ├── rec_syscalls.png
+    │   ├── rec_vmstat.png
+    │   ├── Roboto-100.woff2
+    │   ├── Roboto-300.woff2
+    │   ├── Roboto-400.woff2
+    │   ├── Roboto-500.woff2
+    │   ├── RobotoCondensed-Light.woff2
+    │   ├── RobotoCondensed-Regular.woff2
+    │   ├── RobotoMono-Regular.woff2
+    │   └── scheduling_latency.png
+    ├── engine_bundle.js
+    ├── engine_bundle.js.map
+    ├── frontend_bundle.js
+    ├── frontend_bundle.js.map
+    ├── index.html
+    ├── manifest.json
+    ├── perfetto.css
+    ├── perfetto.css.map
+    ├── traceconv_bundle.js
+    ├── traceconv_bundle.js.map
+    ├── traceconv.wasm
+    └── trace_processor.wasm
+
+2 directories, 53 files
+```
+
+# 移掉 is_internal_us.js 的访问
+访问官网 [ui.perfetto.dev](https://ui.perfetto.dev/) 的时候，明明说是可以离线运行并且UI都出来了，但是每次访问官网，浏览器还是得转半天，打开浏览器得调试页面可以看到还访问了`https://storage.cloud.google.com/perfetto-ui-internal/is_internal_user.js`，如下图所示
+
+{% asset_img 3.png %}
+{% asset_img 4.png %}
+
+这个链接即使在外网也是访问不到的，这里提供两种办法。
+ - 如果自己没有需要访问谷歌云的需求，可以直接改本机的hosts，把 storage.cloud.google.com 指向 127.0.0.1 在，这样它访问失败的速度比较快。
+ - 编译运行之前，修改源码的 `ui/src/frontend/index.ts`，按照下图所示把对应的位置注释掉，然后重新编译运行、部署。
+{% asset_img 5.png %}
+
+# 支持USB调试
+官网是支持在网页上直接通过usb adb来连接安卓设备直接抓取trace的，离线部署的话只需要添加 https 支持就可以了。下面是我本地搭的示例
+
+{% asset_img 6.png %}]]></content>
   </entry>
   <entry>
     <title>在 Centos 7.4 上安装Gcc 7.3</title>
@@ -7543,6 +7665,44 @@ PS：上面的操作只是做一个示范，启动容器之后需要像在Ubuntu
 ]]></content>
   </entry>
   <entry>
+    <title>如何打开安卓的 screencap 命令生成的 raw 图片</title>
+    <url>/2023/05/23/open-android-screencap-raw-img/</url>
+    <content><![CDATA[
+以 Android 9.0 为例，screencap 的实现可以查看 [http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp](http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp) 。
+screencap 的命令格式是
+`screencap <imgpath>` 或者 `screencap -p <imgpath>`。
+如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。
+```cpp
+    } else {
+        uint32_t c = dataSpaceToInt(d);
+        write(fd, &w, 4);
+        write(fd, &h, 4);
+        write(fd, &f, 4);
+        write(fd, &c, 4);
+        size_t Bpp = bytesPerPixel(f);
+        for (size_t y=0 ; y<h ; y++) {
+            write(fd, base, w*Bpp);
+            base = (void *)((char *)base + s*Bpp);
+        }
+    }
+```
+从上面的实现可以看到，文件头是 16 字节，分别是图像宽，图像高，像素格式，reserved。然后是一个 RGBA 格式保存的图像数据（它为什么不保存为bitmap呢!）。
+将文件名后缀改为 .raw 使用 Photoshop 即可打开文件查看。可以参考下图填写参数
+
+{% asset_img pssample.png %}
+
+如果不知道图像宽度和高度，可以将图像当作二进制打开。看前 8 个字节即可。
+本文示例中，前 16 字节为
+```
+38 04 00 00 70 08 00 00 01 00 00 00 01 00 00 00
+```
+小端序存储，转换成整数为
+```
+0x0438 = 1080
+0x0870 = 2160
+```]]></content>
+  </entry>
+  <entry>
     <title>Nginx的一点点小折腾</title>
     <url>/2017/01/27/nginx-skill/</url>
     <content><![CDATA[{% asset_img 3.jpg Nginx %}
@@ -7763,44 +7923,6 @@ http {
       <tags>
         <tag>nginx</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>如何打开安卓的 screencap 命令生成的 raw 图片</title>
-    <url>/2023/05/23/open-android-screencap-raw-img/</url>
-    <content><![CDATA[
-以 Android 9.0 为例，screencap 的实现可以查看 [http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp](http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp) 。
-screencap 的命令格式是
-`screencap <imgpath>` 或者 `screencap -p <imgpath>`。
-如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。
-```cpp
-    } else {
-        uint32_t c = dataSpaceToInt(d);
-        write(fd, &w, 4);
-        write(fd, &h, 4);
-        write(fd, &f, 4);
-        write(fd, &c, 4);
-        size_t Bpp = bytesPerPixel(f);
-        for (size_t y=0 ; y<h ; y++) {
-            write(fd, base, w*Bpp);
-            base = (void *)((char *)base + s*Bpp);
-        }
-    }
-```
-从上面的实现可以看到，文件头是 16 字节，分别是图像宽，图像高，像素格式，reserved。然后是一个 RGBA 格式保存的图像数据（它为什么不保存为bitmap呢!）。
-将文件名后缀改为 .raw 使用 Photoshop 即可打开文件查看。可以参考下图填写参数
-
-{% asset_img pssample.png %}
-
-如果不知道图像宽度和高度，可以将图像当作二进制打开。看前 8 个字节即可。
-本文示例中，前 16 字节为
-```
-38 04 00 00 70 08 00 00 01 00 00 00 01 00 00 00
-```
-小端序存储，转换成整数为
-```
-0x0438 = 1080
-0x0870 = 2160
-```]]></content>
   </entry>
   <entry>
     <title>树莓派折腾记——Samba</title>
@@ -8245,126 +8367,6 @@ int main()
       <tags>
         <tag>C</tag>
         <tag>C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>本站建立</title>
-    <url>/2016/04/26/start/</url>
-    <content><![CDATA[## 建站分享
-遵循大家都默认的一个规则——建立好站点之后，分享自己建立站点的过程。
-
-<!-- more -->
-
-### 租用服务器
-首先我在租用了搬瓦工的VPS，VPS运行cent os 6.系统环境对于个人站点来说不是非常重要，ubuntu，debian，甚至red hat都可以，看个人习惯。
-
-### 安装nginx
-nginx就是一个软件，它监听着计算机的80端口，当检测到有浏览器访问当前计算机的IP地址的时候（浏览器访问一台计算机默认访问80端口），nginx就会返回用户之前写好的网页给浏览器，完成了一个网站的访问过程。在linux下安装nginx还是非常简单的。
-debian/ubuntu通过以下命令来安装nginx：
-``` bash
-$ sudo apt-get install nginx
-```
-cent os/red hat 通过以下命令
-``` bash
-$ sudo yum install nginx
-```
-首次安装还nginx之后它默认启动了，但是计算机重启之后，nginx不会随系统启动，可以手动启动nginx
-``` bash
-$ sudo service nginx start
-```
-或者让nginx随系统启动
-``` bash
-$ cat sudo service nginx start >> /etc/profile
-```
-注意“>>”是两个，如果提示权限不足，就切换到root用户，使用：
-``` bash
-$ su root
-```
-输入root用户密码
-
-### 安装hexo
-nginx给浏览器返回网页，这个网页就得自己来弄了，nginx可不会帮你，但是不会写网页代码怎么办？用来生成网页的工具很多，这里我使用了hexo，这个是一个台湾的大学生开发的用来生成静态网页的软件，真的佩服人家。
-hexo依赖于node.js，首先在电脑上安装node.js，linux端可以这样
-``` bash
-$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh
-```
-或者
-``` bash
-$ wget -q0- https://raw.github.com/creationix/master/install.sh | sh
-```
-然后重启终端，输入：
-``` bash
-$ nvm install 4
-$ npm install -g hexo-cli
-$ npm install hexo-deployer-rsync --save
-```
-完成node.js 和部署插件rsync的安装
-windows端可以到node.js的官网下载msi包安装后，在cmd输入：
-``` bash
-$ npm install -g hexo-cli
-$ npm install hexo-deployer-rsync --save
-```
-现在可以输入：
-``` bash
-$ hexo init blog
-```
-来新建一个名为blog的文件夹，这个文件夹的名字自己取，进入这个文件夹，输入
-``` bash
-$ hexo s --debug
-```
-看到
-``` bash
-15:14:02.409 INFO  Hexo is running at http://localhost:4000/. Press Ctrl+C to stop.
-15:14:02.432 DEBUG Database saved
-```
-的字样后，打开浏览器，访问localhost:4000,看看能否打开一个hexo的网页,能打开的话，证明hexo已经能在电脑上运行了。
-然后编辑blog文件夹下的"_config.yml_"文件,在大约73行，"theme"后面的就是hexo生成静态网页的时候所使用的主题，本站所使用的主题是[next](https://github.com/iissnan/hexo-them-next),主题存在于blog文件夹下的them文件夹内。
-在约80行左右，会有"deploy:"字样，这里填写的是部署网站的时候所用的一些组件需要的参数，如果按照本博客所说来安装hexo的话，可以参照以下填写方法：
-```bash
-deploy:
-    type: rsync
-    host: 0.0.0.0   //这里填写服务器的IP地址
-    user: root   //这里填写部署网站是登陆服务器所用的用户
-    root: /usr/share/nginx/html/     //这里是nginx默认的服务器站点目录，文末细说
-    port: 26487     //这里是登陆服务器所用的端口，也就是ssh所用的端口
-    delete: false   //下面三个可以参照我的填法，也可以自己更改
-    verbose: true
-    ignore_errors: false
-```
-
-
-### 在本地生成网页静态文件并部署到网站
-切换到blog文件夹内(windows可以使用cmd，linux使用终端)，输入命令
-```bash
-$  hexo new "blog"
-```
-然后在source的_posts_文件夹下面就会生成一个blog.md的文件，使用任何一个文本编辑器编辑这个文件，把想要写在博客上的东西直接编辑到这个文件内，就可以了。
-然后切换到blog文件夹，输入：
-```bash
-$  hexo g
-```
-就可以生成网页静态文件了，生成的网页静态文件在public文件夹内，然后使用：
-```bash
-$  hexo d
-```
-就可以将网页文件部署到服务器，打开浏览器，就能看到做好的网站了。
-
-
-## 一些小总结
-
-先说一下nginx，nginx会向浏览器返回网站的网页文件，这些网页文件默认在“/usr/share/nginx/www/”下面，有时候不一定在“www”下，可能是“html”文件夹，我自己的服务器就是“html”。
-部署便是讲已经做好的网页文件上传到服务器的这个文件夹下，浏览器便能正常访问到做好的网页。
-
-
-然后说一下config.yml文件的"root:",冒号后面是nginx的工作目录，nginx安装后默认一般都是"/usr/share/nginx/XXX/"下面，hexo部署的时候，便会将网页部署岛这个文件夹下面。
-
-PS：我尝试在windows部署网站，但是遇到一些问题，第一次是环境错误，各种百度之后，可以成功部署，但部署之后无法访问，提示“403 forbidden”，便要手动将“/usr/share/nginx/XXX/”目录下面的所有文件夹(包括子文件夹)的属性改为775，文件属性改成664，才可以访问。
-
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-        <tag>hexo</tag>
-        <tag>Technology</tag>
       </tags>
   </entry>
   <entry>
@@ -9107,6 +9109,126 @@ if(p1x[i]=='+'||p1x[i]=='-')//遇到一个±号的时候，这个时候这个单
 {% cq %} 生命重在折腾 {% endcq %}]]></content>
       <tags>
         <tag>C</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>本站建立</title>
+    <url>/2016/04/26/start/</url>
+    <content><![CDATA[## 建站分享
+遵循大家都默认的一个规则——建立好站点之后，分享自己建立站点的过程。
+
+<!-- more -->
+
+### 租用服务器
+首先我在租用了搬瓦工的VPS，VPS运行cent os 6.系统环境对于个人站点来说不是非常重要，ubuntu，debian，甚至red hat都可以，看个人习惯。
+
+### 安装nginx
+nginx就是一个软件，它监听着计算机的80端口，当检测到有浏览器访问当前计算机的IP地址的时候（浏览器访问一台计算机默认访问80端口），nginx就会返回用户之前写好的网页给浏览器，完成了一个网站的访问过程。在linux下安装nginx还是非常简单的。
+debian/ubuntu通过以下命令来安装nginx：
+``` bash
+$ sudo apt-get install nginx
+```
+cent os/red hat 通过以下命令
+``` bash
+$ sudo yum install nginx
+```
+首次安装还nginx之后它默认启动了，但是计算机重启之后，nginx不会随系统启动，可以手动启动nginx
+``` bash
+$ sudo service nginx start
+```
+或者让nginx随系统启动
+``` bash
+$ cat sudo service nginx start >> /etc/profile
+```
+注意“>>”是两个，如果提示权限不足，就切换到root用户，使用：
+``` bash
+$ su root
+```
+输入root用户密码
+
+### 安装hexo
+nginx给浏览器返回网页，这个网页就得自己来弄了，nginx可不会帮你，但是不会写网页代码怎么办？用来生成网页的工具很多，这里我使用了hexo，这个是一个台湾的大学生开发的用来生成静态网页的软件，真的佩服人家。
+hexo依赖于node.js，首先在电脑上安装node.js，linux端可以这样
+``` bash
+$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh
+```
+或者
+``` bash
+$ wget -q0- https://raw.github.com/creationix/master/install.sh | sh
+```
+然后重启终端，输入：
+``` bash
+$ nvm install 4
+$ npm install -g hexo-cli
+$ npm install hexo-deployer-rsync --save
+```
+完成node.js 和部署插件rsync的安装
+windows端可以到node.js的官网下载msi包安装后，在cmd输入：
+``` bash
+$ npm install -g hexo-cli
+$ npm install hexo-deployer-rsync --save
+```
+现在可以输入：
+``` bash
+$ hexo init blog
+```
+来新建一个名为blog的文件夹，这个文件夹的名字自己取，进入这个文件夹，输入
+``` bash
+$ hexo s --debug
+```
+看到
+``` bash
+15:14:02.409 INFO  Hexo is running at http://localhost:4000/. Press Ctrl+C to stop.
+15:14:02.432 DEBUG Database saved
+```
+的字样后，打开浏览器，访问localhost:4000,看看能否打开一个hexo的网页,能打开的话，证明hexo已经能在电脑上运行了。
+然后编辑blog文件夹下的"_config.yml_"文件,在大约73行，"theme"后面的就是hexo生成静态网页的时候所使用的主题，本站所使用的主题是[next](https://github.com/iissnan/hexo-them-next),主题存在于blog文件夹下的them文件夹内。
+在约80行左右，会有"deploy:"字样，这里填写的是部署网站的时候所用的一些组件需要的参数，如果按照本博客所说来安装hexo的话，可以参照以下填写方法：
+```bash
+deploy:
+    type: rsync
+    host: 0.0.0.0   //这里填写服务器的IP地址
+    user: root   //这里填写部署网站是登陆服务器所用的用户
+    root: /usr/share/nginx/html/     //这里是nginx默认的服务器站点目录，文末细说
+    port: 26487     //这里是登陆服务器所用的端口，也就是ssh所用的端口
+    delete: false   //下面三个可以参照我的填法，也可以自己更改
+    verbose: true
+    ignore_errors: false
+```
+
+
+### 在本地生成网页静态文件并部署到网站
+切换到blog文件夹内(windows可以使用cmd，linux使用终端)，输入命令
+```bash
+$  hexo new "blog"
+```
+然后在source的_posts_文件夹下面就会生成一个blog.md的文件，使用任何一个文本编辑器编辑这个文件，把想要写在博客上的东西直接编辑到这个文件内，就可以了。
+然后切换到blog文件夹，输入：
+```bash
+$  hexo g
+```
+就可以生成网页静态文件了，生成的网页静态文件在public文件夹内，然后使用：
+```bash
+$  hexo d
+```
+就可以将网页文件部署到服务器，打开浏览器，就能看到做好的网站了。
+
+
+## 一些小总结
+
+先说一下nginx，nginx会向浏览器返回网站的网页文件，这些网页文件默认在“/usr/share/nginx/www/”下面，有时候不一定在“www”下，可能是“html”文件夹，我自己的服务器就是“html”。
+部署便是讲已经做好的网页文件上传到服务器的这个文件夹下，浏览器便能正常访问到做好的网页。
+
+
+然后说一下config.yml文件的"root:",冒号后面是nginx的工作目录，nginx安装后默认一般都是"/usr/share/nginx/XXX/"下面，hexo部署的时候，便会将网页部署岛这个文件夹下面。
+
+PS：我尝试在windows部署网站，但是遇到一些问题，第一次是环境错误，各种百度之后，可以成功部署，但部署之后无法访问，提示“403 forbidden”，便要手动将“/usr/share/nginx/XXX/”目录下面的所有文件夹(包括子文件夹)的属性改为775，文件属性改成664，才可以访问。
+
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+        <tag>hexo</tag>
+        <tag>Technology</tag>
       </tags>
   </entry>
   <entry>
@@ -9968,66 +10090,6 @@ int main ()
 {% cq %}生命重在折腾{% endcq %}]]></content>
   </entry>
   <entry>
-    <title>在Linux终端使用代理</title>
-    <url>/2017/01/25/use-proxy-in-terminal/</url>
-    <content><![CDATA[{% asset_img 1.jpg Fuck GFW %}
-用linux的都能体会到，如果用国外的软件源，更新软件将是极其痛苦的事情————速度慢啊！
-但是如果使用国内的软件源，如果某些软件国内软件源没有，还是会从国外的软件源下载，于是纠结了一下，使出下面的办法:
-<!-- more -->
-# 思路
-即使clowwindy大神被请喝茶，他的项目仍然被持续更新。
-
-用影梭能很方便的开启socks5代理，并且速度还不赖，于是朝着这个方向走。
-
-更新软件，就要让'apt-get'走代理通道，而不是正常的http/https/ftp。
-
-有了目标好办事，下面是具体实施步骤。
-
-
-# 实战
-
-劫持apt-get到socks5，我用了这个软件————Proxychains
-
-## 安装Proxychains
-
-使用root权限(其实只有第四个和第五个命令需要root权限)
-```bash
-$ git clone https://github.com/rofl0r/proxychains-ng.git
-$ cd proxychains-ng
-$ ./configure
-$ make && make install
-$ cp ./src/proxychains.conf /etc/proxychains.conf
-$ cd .. && rm -rf proxychains-ng
-```
-
-然后，编辑`/etc/proxychains.conf`，到最后一行，把`socks4 127.0.0.1 9095`改成`socks5 127.0.0.1 1080`(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)
-去掉49行`quiet_mode`前面的`#`号，这样运行的时候proxychains4就不会输出大量log了。
-
-然后，启动Shadosocks后(它默认会开启一个本地1080的socks5端口)，在任意命令前面加上`proxychains4`，若有需要联网的操作，就会被自动劫持到socks5代理去，这样下载国外的资源速度会快一些。
-
-## 示范
-使用`proxychains4`更新软件源的一个小示范
-{% asset_img demo.jpg 一个小示范 %}
-
-# 一点点说明
-虽然此类文章百度一搜一大把，但是还是要把我参考的原文贴出来[http://www.jianshu.com/p/8e7d7f57bf59](http://www.jianshu.com/p/8e7d7f57bf59),感谢原博主。
-
-原文中提及好几种在终端使用代理的办法，我只取了一种，因为proxychains可以针对任何联网的软件，而不需要记住某些环境配置，一次配置，终身方便。
-
-有一个大前提，就是你需要能`Fuck GFW`。
-
-## 其他的玩法
-将代码clone到本地之后，可以编辑项目目录里面的`src`文件夹内的`main.c`，把71行的`int quiet = 0;`改成`int quiet = 1;`，这样运行的时候就不会输出大量log了。
-
-悠哉的一天>_<
-
-{% cq %}生命重在折腾{% endcq %}
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>在Ubuntu中使用IPv6</title>
     <url>/2017/03/16/use-ipv6-on-Ubuntu/</url>
     <content><![CDATA[我的电脑上装了Ubuntu 14.04 LTS 系统，学校的校园网需要拨号才能使用，并且在拨号之后获得IPv6地址。
@@ -10113,6 +10175,66 @@ wlan0     Link encap:Ethernet  HWaddr 94:65:9c:4e:02:dc
 {% cq %}生命重在折腾{% endcq %}]]></content>
   </entry>
   <entry>
+    <title>在Linux终端使用代理</title>
+    <url>/2017/01/25/use-proxy-in-terminal/</url>
+    <content><![CDATA[{% asset_img 1.jpg Fuck GFW %}
+用linux的都能体会到，如果用国外的软件源，更新软件将是极其痛苦的事情————速度慢啊！
+但是如果使用国内的软件源，如果某些软件国内软件源没有，还是会从国外的软件源下载，于是纠结了一下，使出下面的办法:
+<!-- more -->
+# 思路
+即使clowwindy大神被请喝茶，他的项目仍然被持续更新。
+
+用影梭能很方便的开启socks5代理，并且速度还不赖，于是朝着这个方向走。
+
+更新软件，就要让'apt-get'走代理通道，而不是正常的http/https/ftp。
+
+有了目标好办事，下面是具体实施步骤。
+
+
+# 实战
+
+劫持apt-get到socks5，我用了这个软件————Proxychains
+
+## 安装Proxychains
+
+使用root权限(其实只有第四个和第五个命令需要root权限)
+```bash
+$ git clone https://github.com/rofl0r/proxychains-ng.git
+$ cd proxychains-ng
+$ ./configure
+$ make && make install
+$ cp ./src/proxychains.conf /etc/proxychains.conf
+$ cd .. && rm -rf proxychains-ng
+```
+
+然后，编辑`/etc/proxychains.conf`，到最后一行，把`socks4 127.0.0.1 9095`改成`socks5 127.0.0.1 1080`(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)
+去掉49行`quiet_mode`前面的`#`号，这样运行的时候proxychains4就不会输出大量log了。
+
+然后，启动Shadosocks后(它默认会开启一个本地1080的socks5端口)，在任意命令前面加上`proxychains4`，若有需要联网的操作，就会被自动劫持到socks5代理去，这样下载国外的资源速度会快一些。
+
+## 示范
+使用`proxychains4`更新软件源的一个小示范
+{% asset_img demo.jpg 一个小示范 %}
+
+# 一点点说明
+虽然此类文章百度一搜一大把，但是还是要把我参考的原文贴出来[http://www.jianshu.com/p/8e7d7f57bf59](http://www.jianshu.com/p/8e7d7f57bf59),感谢原博主。
+
+原文中提及好几种在终端使用代理的办法，我只取了一种，因为proxychains可以针对任何联网的软件，而不需要记住某些环境配置，一次配置，终身方便。
+
+有一个大前提，就是你需要能`Fuck GFW`。
+
+## 其他的玩法
+将代码clone到本地之后，可以编辑项目目录里面的`src`文件夹内的`main.c`，把71行的`int quiet = 0;`改成`int quiet = 1;`，这样运行的时候就不会输出大量log了。
+
+悠哉的一天>_<
+
+{% cq %}生命重在折腾{% endcq %}
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>启动jar文件时使用代理</title>
     <url>/2017/02/12/use-proxy-when-start-run-a-jar-file/</url>
     <content><![CDATA[{% asset_img 3.jpg %}
@@ -10129,24 +10251,6 @@ _记于2017.2.12 10:17_
       <tags>
         <tag>java</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 作为无线显示器无法被搜索到</title>
-    <url>/2017/05/20/wirless-display/</url>
-    <content><![CDATA[{% asset_img 1.jpg  啊哈哈 %}
-<!-- more -->
-> 开始菜单的“连接应用打开后”，在无线显示设备页面，其它设备无法搜索到这台电脑。
-
-## 解决办法
-> 在设备管理器启用“Microsoft Wi-Fi Direct Virtual Adapter”
-
-## 连接展示
-{% asset_img 2.png %}
-{% asset_img 3.png %}
-{% asset_img 4.png %}
-{% asset_img 5.png %}
-{% cq %} 生命重在折腾 {% endcq %}
-]]></content>
   </entry>
   <entry>
     <title>C++容器</title>
@@ -10195,6 +10299,24 @@ using nmaespace std;
       <tags>
         <tag>C++</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 作为无线显示器无法被搜索到</title>
+    <url>/2017/05/20/wirless-display/</url>
+    <content><![CDATA[{% asset_img 1.jpg  啊哈哈 %}
+<!-- more -->
+> 开始菜单的“连接应用打开后”，在无线显示设备页面，其它设备无法搜索到这台电脑。
+
+## 解决办法
+> 在设备管理器启用“Microsoft Wi-Fi Direct Virtual Adapter”
+
+## 连接展示
+{% asset_img 2.png %}
+{% asset_img 3.png %}
+{% asset_img 4.png %}
+{% asset_img 5.png %}
+{% cq %} 生命重在折腾 {% endcq %}
+]]></content>
   </entry>
   <entry>
     <title>从获取微信小程序码说起</title>
@@ -11029,11 +11151,6 @@ NINTENDO SWITCH和史诗图形包
 ]]></content>
   </entry>
   <entry>
-    <title>tags</title>
-    <url>/tags/index.html</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
     <title>一些小工具和项目</title>
     <url>/app/index.html</url>
     <content><![CDATA[
@@ -11074,5 +11191,10 @@ Windows上的ssh客户端——[https://www.chiark.greenend.org.uk/~sgtatham/put
 ## Fluter 教程
 翻译和制作中的 Flutter 教程(书): [https://github.com/flutterchina/flutter-in-action](https://github.com/flutterchina/flutter-in-action)
 ]]></content>
+  </entry>
+  <entry>
+    <title>tags</title>
+    <url>/tags/index.html</url>
+    <content><![CDATA[]]></content>
   </entry>
 </search>
