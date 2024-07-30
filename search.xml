@@ -12264,6 +12264,117 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 ]]></content>
   </entry>
   <entry>
+    <title>使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密</title>
+    <url>/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/</url>
+    <content><![CDATA[
+使用 `java` 进行 `RSA/ECB/PKCS1PADDING` 是非常方便的，例如下面的示例
+
+<!-- more -->
+
+```java
+    public static String publicDecrypt(PublicKey publicKey,String encrypted) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE,publicKey);
+        byte[] data = cipher.doFinal(Base64.getDecoder().decode(encrypted.getBytes(StandardCharsets.UTF_8)));
+        return new String(data);
+    }
+
+    public static String publicEncrypt(PublicKey publicKey,String encrypted) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE,publicKey);
+        byte[] data = cipher.doFinal(encrypted.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(data);
+    }
+    public static String privateEncrypt(PrivateKey privateKey,String toEncrypt) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE,privateKey);
+        byte[] data = cipher.doFinal(toEncrypt.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(data);
+    }
+
+    public static String privateDecrypt(PrivateKey privateKey,String toEncrypt) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.DECRYPT_MODE,privateKey);
+        byte[] data = cipher.doFinal(Base64.getDecoder().decode(toEncrypt.getBytes(StandardCharsets.UTF_8)));
+        return new String(data);
+    }
+```
+公钥加密的内容用私钥解密，私钥加密的内容用公钥解密。（严格来说，私钥加密的另外一种名称是“签名”）
+使用 C/C++ 来实现的时候，没有java那么方便，下面是低版本openssl api的调用示范
+```cpp
+#include<openssl/pem.h>
+#include<openssl/rsa.h>
+#include<openssl/bio.h>
+...
+    BIO* keybio = BIO_new_mem_buf(key.c_str(), (int)key.size());
+    if (!keybio)
+    {
+        spdlog::error("new bio failed");
+        return ;
+    }
+    RSA* rsa = PEM_read_bio_RSAPrivateKey(keybio, NULL, NULL, NULL);
+    if (!rsa)
+    {
+        return ;
+    }
+    spdlog::info("rsa: {} ", fmt::ptr(rsa));
+    uint8_t buffer[2048];
+    int ret = RSA_private_encrypt((int)plaintext.size(), (const unsigned char*)plaintext.c_str(), buffer, rsa, RSA_PKCS1_PADDING);
+    if (ret > 0)
+    {
+        std::string result = Base64Encode(buffer, ret);
+        spdlog::info("encrypted:\n{}", result);
+    }
+    RSA_free(rsa);
+...
+```
+其中，key是 pem 格式的字符串。上面的内容是使用私钥进行加密的例子。
+大致的流程是使用 pem 格式的密钥，创建BIO对象，使用BIO对象创建密钥对象，使用密钥对象进行加密或者解密。
+相应的，我们可以总结出以下内容
+ - 私钥加密 PEM_read_bio_RSAPrivateKey,RSA_private_encrypt
+ - 私钥解密 PEM_read_bio_RSAPrivateKey,RSA_private_decrypt
+ - 公钥加密 PEM_read_bio_RSAPublicKey, RSA_public_encrypt
+ - 公钥解密 PEM_read_bio_RSAPublicKey, RSA_public_decrypt
+
+以上4种接口在低版本的 openssl 上使用是没有问题的，但是在 openssl 3.0 齐，以上接口标记为弃用状态了。
+下面是高版本 openssl 使用公钥解密的例子
+```cpp
+#include<openssl/pem.h>
+#include<openssl/rsa.h>
+#include<openssl/bio.h>
+#include<openssl/evp.h>
+#include<memory>
+...
+    const unsigned char* in;
+    size_t inlen;
+    std::string pemKey;
+    //这里假设我们通过一系列操作得到了要加密的内容和pem格式的密钥....
+    std::vector<unsigned char> out;
+    int ret = 0;
+    std::shared_ptr<BIO> keybio(BIO_new_mem_buf(pemKey.c_str(), (int)pemKey.size()), BIO_free);
+    std::shared_ptr<EVP_PKEY> key(PEM_read_bio_PUBKEY(keybio.get(), nullptr, nullptr, nullptr), EVP_PKEY_free);
+    std::shared_ptr<EVP_PKEY_CTX> ctx(EVP_PKEY_CTX_new(key.get(), nullptr), EVP_PKEY_CTX_free);
+    EVP_PKEY_encrypt_init(ctx.get());
+    EVP_PKEY_CTX_set_rsa_padding(ctx.get(), RSA_PKCS1_PADDING);
+    size_t outlen = 0;
+    ret = EVP_PKEY_encrypt(ctx.get(), nullptr, &outlen, in, inlen);
+    out.resize(outlen);
+    ret = EVP_PKEY_encrypt(ctx.get(), out.data(), &outlen, in, inlen);
+```
+大致步骤如下
+1. 通过pem格式的密钥创建一个BIO对象 BIO_new_mem_buf
+2. 通过BIO对象创建一个EVP_PKEY对象 PEM_read_bio_PUBKEY
+3. 通过EVP_PKEY创建一个EVP_PKEY_CTX对象 EVP_PKEY_CTX_new
+4. 通过EVP_PKEY_encrypt_init声明需要进行公钥加密
+5. 通过EVP_PKEY_encrypt进行加密操作
+
+高版本 openssl 的接口替换如下
+ - 私钥加密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_sign_init, EVP_PKEY_sign
+ - 私钥解密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_decrypt_init, EVP_PKEY_decrypt
+ - 公钥加密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_encrypt_init, EVP_PKEY_encrypt
+ - 公钥解密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_verify_recover_init, EVP_PKEY_verify_recover]]></content>
+  </entry>
+  <entry>
     <title>Minecraft专题</title>
     <url>/Minecraft/index.html</url>
     <content><![CDATA[## Minecraft 介绍

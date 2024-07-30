@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="使用 java 进行 RSA&#x2F;ECB&#x2F;PKCS1PADDING 是非常方便的，例如下面的示例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 openssl 进行 RSA&#x2F;ECB&#x2F;PKCS1PADDING 加解密">
+<meta property="og:url" content="http://example.com/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="使用 java 进行 RSA&#x2F;ECB&#x2F;PKCS1PADDING 是非常方便的，例如下面的示例">
+<meta property="og:locale">
+<meta property="article:published_time" content="2024-07-30T15:01:25.000Z">
+<meta property="article:modified_time" content="2024-07-30T15:05:10.438Z">
+<meta property="article:author" content="SupperMary">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh'
+  };
+</script>
+
+  <title>使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-07-30 15:01:25 / Modified: 15:05:10" itemprop="dateCreated datePublished" datetime="2024-07-30T15:01:25+00:00">2024-07-30</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>679</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>使用 <code>java</code> 进行 <code>RSA/ECB/PKCS1PADDING</code> 是非常方便的，例如下面的示例</p>
+<span id="more"></span>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">publicDecrypt</span><span class="params">(PublicKey publicKey,String encrypted)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(<span class="string">&quot;RSA/ECB/PKCS1Padding&quot;</span>);</span><br><span class="line">    cipher.init(Cipher.DECRYPT_MODE,publicKey);</span><br><span class="line">    <span class="type">byte</span>[] data = cipher.doFinal(Base64.getDecoder().decode(encrypted.getBytes(StandardCharsets.UTF_8)));</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">publicEncrypt</span><span class="params">(PublicKey publicKey,String encrypted)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(<span class="string">&quot;RSA/ECB/PKCS1Padding&quot;</span>);</span><br><span class="line">    cipher.init(Cipher.ENCRYPT_MODE,publicKey);</span><br><span class="line">    <span class="type">byte</span>[] data = cipher.doFinal(encrypted.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">    <span class="keyword">return</span> Base64.getEncoder().encodeToString(data);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">privateEncrypt</span><span class="params">(PrivateKey privateKey,String toEncrypt)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(<span class="string">&quot;RSA/ECB/PKCS1Padding&quot;</span>);</span><br><span class="line">    cipher.init(Cipher.ENCRYPT_MODE,privateKey);</span><br><span class="line">    <span class="type">byte</span>[] data = cipher.doFinal(toEncrypt.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">    <span class="keyword">return</span> Base64.getEncoder().encodeToString(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">privateDecrypt</span><span class="params">(PrivateKey privateKey,String toEncrypt)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">    <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(<span class="string">&quot;RSA/ECB/PKCS1Padding&quot;</span>);</span><br><span class="line">    cipher.init(Cipher.DECRYPT_MODE,privateKey);</span><br><span class="line">    <span class="type">byte</span>[] data = cipher.doFinal(Base64.getDecoder().decode(toEncrypt.getBytes(StandardCharsets.UTF_8)));</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>公钥加密的内容用私钥解密，私钥加密的内容用公钥解密。（严格来说，私钥加密的另外一种名称是“签名”）<br>使用 C&#x2F;C++ 来实现的时候，没有java那么方便，下面是低版本openssl api的调用示范</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/pem.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/rsa.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/bio.h&gt;</span></span></span><br><span class="line">...</span><br><span class="line">    BIO* keybio = <span class="built_in">BIO_new_mem_buf</span>(key.<span class="built_in">c_str</span>(), (<span class="type">int</span>)key.<span class="built_in">size</span>());</span><br><span class="line">    <span class="keyword">if</span> (!keybio)</span><br><span class="line">    &#123;</span><br><span class="line">        spdlog::<span class="built_in">error</span>(<span class="string">&quot;new bio failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    RSA* rsa = <span class="built_in">PEM_read_bio_RSAPrivateKey</span>(keybio, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">if</span> (!rsa)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    spdlog::<span class="built_in">info</span>(<span class="string">&quot;rsa: &#123;&#125; &quot;</span>, fmt::<span class="built_in">ptr</span>(rsa));</span><br><span class="line">    <span class="type">uint8_t</span> buffer[<span class="number">2048</span>];</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">RSA_private_encrypt</span>((<span class="type">int</span>)plaintext.<span class="built_in">size</span>(), (<span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span>*)plaintext.<span class="built_in">c_str</span>(), buffer, rsa, RSA_PKCS1_PADDING);</span><br><span class="line">    <span class="keyword">if</span> (ret &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        std::string result = <span class="built_in">Base64Encode</span>(buffer, ret);</span><br><span class="line">        spdlog::<span class="built_in">info</span>(<span class="string">&quot;encrypted:\n&#123;&#125;&quot;</span>, result);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">RSA_free</span>(rsa);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>其中，key是 pem 格式的字符串。上面的内容是使用私钥进行加密的例子。<br>大致的流程是使用 pem 格式的密钥，创建BIO对象，使用BIO对象创建密钥对象，使用密钥对象进行加密或者解密。<br>相应的，我们可以总结出以下内容</p>
+<ul>
+<li>私钥加密 PEM_read_bio_RSAPrivateKey,RSA_private_encrypt</li>
+<li>私钥解密 PEM_read_bio_RSAPrivateKey,RSA_private_decrypt</li>
+<li>公钥加密 PEM_read_bio_RSAPublicKey, RSA_public_encrypt</li>
+<li>公钥解密 PEM_read_bio_RSAPublicKey, RSA_public_decrypt</li>
+</ul>
+<p>以上4种接口在低版本的 openssl 上使用是没有问题的，但是在 openssl 3.0 齐，以上接口标记为弃用状态了。<br>下面是高版本 openssl 使用公钥解密的例子</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/pem.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/rsa.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/bio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;openssl/evp.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;memory&gt;</span></span></span><br><span class="line">...</span><br><span class="line">    <span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span>* in;</span><br><span class="line">    <span class="type">size_t</span> inlen;</span><br><span class="line">    std::string pemKey;</span><br><span class="line">    <span class="comment">//这里假设我们通过一系列操作得到了要加密的内容和pem格式的密钥....</span></span><br><span class="line">    std::vector&lt;<span class="type">unsigned</span> <span class="type">char</span>&gt; out;</span><br><span class="line">    <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;BIO&gt; <span class="title">keybio</span><span class="params">(BIO_new_mem_buf(pemKey.c_str(), (<span class="type">int</span>)pemKey.size()), BIO_free)</span></span>;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;EVP_PKEY&gt; <span class="title">key</span><span class="params">(PEM_read_bio_PUBKEY(keybio.get(), <span class="literal">nullptr</span>, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>), EVP_PKEY_free)</span></span>;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;EVP_PKEY_CTX&gt; <span class="title">ctx</span><span class="params">(EVP_PKEY_CTX_new(key.get(), <span class="literal">nullptr</span>), EVP_PKEY_CTX_free)</span></span>;</span><br><span class="line">    <span class="built_in">EVP_PKEY_encrypt_init</span>(ctx.<span class="built_in">get</span>());</span><br><span class="line">    <span class="built_in">EVP_PKEY_CTX_set_rsa_padding</span>(ctx.<span class="built_in">get</span>(), RSA_PKCS1_PADDING);</span><br><span class="line">    <span class="type">size_t</span> outlen = <span class="number">0</span>;</span><br><span class="line">    ret = <span class="built_in">EVP_PKEY_encrypt</span>(ctx.<span class="built_in">get</span>(), <span class="literal">nullptr</span>, &amp;outlen, in, inlen);</span><br><span class="line">    out.<span class="built_in">resize</span>(outlen);</span><br><span class="line">    ret = <span class="built_in">EVP_PKEY_encrypt</span>(ctx.<span class="built_in">get</span>(), out.<span class="built_in">data</span>(), &amp;outlen, in, inlen);</span><br></pre></td></tr></table></figure>
+<p>大致步骤如下</p>
+<ol>
+<li>通过pem格式的密钥创建一个BIO对象 BIO_new_mem_buf</li>
+<li>通过BIO对象创建一个EVP_PKEY对象 PEM_read_bio_PUBKEY</li>
+<li>通过EVP_PKEY创建一个EVP_PKEY_CTX对象 EVP_PKEY_CTX_new</li>
+<li>通过EVP_PKEY_encrypt_init声明需要进行公钥加密</li>
+<li>通过EVP_PKEY_encrypt进行加密操作</li>
+</ol>
+<p>高版本 openssl 的接口替换如下</p>
+<ul>
+<li>私钥加密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_sign_init, EVP_PKEY_sign</li>
+<li>私钥解密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_decrypt_init, EVP_PKEY_decrypt</li>
+<li>公钥加密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_encrypt_init, EVP_PKEY_encrypt</li>
+<li>公钥解密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_verify_recover_init, EVP_PKEY_verify_recover</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/30/how-to-down-load-simple-aosp-project/" rel="prev" title="如何下载AOSP的单个仓库">
+      <i class="fa fa-chevron-left"></i> 如何下载AOSP的单个仓库
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="Symbols count total">109k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">6:37</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
