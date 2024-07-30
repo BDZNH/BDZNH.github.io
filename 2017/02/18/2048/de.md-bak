@@ -1,0 +1,325 @@
+---
+title: INVcode
+date: 2016-07-05 17:03:18
+tags: 
+ - Technology
+ - C++
+---
+
+<!-- more -->
+
+哈哈哈
+```C++
+#include <iostream>
+#include <cstdio>
+using namespace std;
+int main ()
+{
+    int n,m,i=0,ans=0,command_1,command_2,flag,x=0;
+    scanf("%d%d",&n,&m);
+    int pan[n];
+    char job[n][10];
+    while(i<n)
+    {
+        scanf("%d%s",&pan[i],job[i]);
+        i++;
+    }
+    i=0;
+    while(i<m)
+    {
+        scanf("%d%d",&command_1,&command_2);
+        flag=1;
+        if(pan[x]==command_1)
+        {
+            flag=-1;
+            ans+=command_2*(-1);
+        }
+        else
+            ans+=command_2;
+        x=(x+command_2*flag)%n;
+        if(x<0)
+            x=n+x;
+        i++;
+    }
+    ans=ans%n;
+    if(ans<0)
+        ans=n+ans;
+    printf("%s",job[ans]);
+}
+```
+
+代码高亮不对啊
+
+```C++
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
+#include <cstring>
+using namespace std;
+char my2Darray[20][20];
+int coord_record[5][3];//用来记录程序产生的随机位置
+
+char category[25][10]=
+{
+    {"CHIKEN"},{"PIG"},{"DOG"},{"SHEEP"},{"CATTLE"},
+    {"APPLE"},{"PEAR"},{"ORANGE"},{"BANANA"},{"PITAYA"},
+};//初始化分类数组，储存了需要展示的单词
+
+int myownRand(int min,int max); //这个是用来获取随机坐标的函数
+
+void creat2Darray(); //这个是用来初始化一个随机的字符数组的函数
+
+int compare(char *str); //这个函数是用来对比用户输入的字符串和程序储存的字符串是否相同的函数
+
+int head();
+
+void show_my_2Darray(); //这个是用来吧随机字符数组打印出来的函数
+
+void solve(int n); //这个是处理用户输入的数据的函数
+```
+int apartinput_word(char str1,char (str2)[10]);//
+
+int Word_Compared(char (*str)[10],int the_number_of_words,int n);//
+
+int Word_search(int n);
+
+int myown_gets(char *str)
+{
+    int i=0;
+    char c;
+    while(scanf("%c",&c)&&(c=='\0'||c=='\n'));
+    str[i++]=c;
+    while(scanf("%c",&c)&&(c!='\0'&&c!='\n'))
+    {
+        str[i++]=c;
+        c=0;
+    }
+    str[i]=0;
+    return i;
+}
+
+void turn_letter(char *str)
+{
+    int i,length;
+    length=strlen(str);
+    for(i=0;i<length;i++)
+    {
+        if(str[i]>='a'&&str[i]<='z')
+            str[i]-=32;
+    }
+}
+
+int main()
+{
+    //freopen("data.txt","r",stdin);
+    srand(time(NULL));
+    int i;
+    i=head();
+    creat2Darray();
+    solve(i);
+    if(Word_search(i))
+        cout<<endl<<"You have find all words. Game over."<<endl;
+    cout<<endl;
+    return 0;
+}
+
+int myownRand(int min,int max)
+{
+    //srand(time(0));
+    return rand()%(max-min)+min;
+}
+
+void creat2Darray()
+{
+    int i,j;
+    for(i=0;i<20;i++)
+    {
+        for(j=0;j<20;j++)
+        {
+            my2Darray[i][j]=myownRand(65,90);
+            //printf("%c ",my2Darray[i][j]);
+        }
+        //cout<<endl;
+    }
+}
+
+void show_my2Darray()
+{
+    cout<<endl;
+    int i,j;
+    for(i=0;i<20;i++)
+        printf("%-3d",i);
+    cout<<endl;
+    for(i=0;i<20;i++)
+    {
+        for(j=0;j<20;j++)
+        {
+            printf("%c  ",my2Darray[i][j]);
+        }
+        cout<<i<<endl;
+    }
+}
+
+void solve(int n)
+{
+    int word_length,i,j,x1,y1;
+    //static int count_circle=0;
+    for(i=1;i<=5;i++)
+    {
+        word_length=strlen(category[n*5-i]);
+        x1=myownRand(0,19-word_length);
+        y1=myownRand(0,19-word_length);
+        //cout<<"x="<<x1<<"  y="<<y1<<"  word="<<category[n*5-i]<<endl;
+        coord_record[i][0]=x1;
+        coord_record[i][1]=y1;
+        for(j=0;j<word_length;j++)
+        {
+            my2Darray[x1][y1]=category[n*5-i][j];
+            if(i==1||i==2)
+                y1++;
+            else
+            if(i==2||i==3)
+                x1++;
+            else
+                {
+                    x1++;
+                    y1++;
+                }
+        }
+    }
+    show_my2Darray();
+}
+
+int head()
+{
+    int ans;
+    char player_name[20],chosed_category[20];
+    cout<<"-------------------------------"<<endl;
+    cout<<"|                             |"<<endl;
+    cout<<"| welcome to Word search 3000 |"<<endl;
+    cout<<"|                             |"<<endl;
+    cout<<"-------------------------------"<<endl;
+    cout<<endl;
+    cout<<"what is your name? ";
+    myown_gets(player_name);
+    cout<<"Hi "<<player_name<<"! Which category do you like?"<<endl;
+    cout<<"-------------------------------"<<endl;
+    cout<<"1.Animals"<<endl<<"2.Fruits"<<endl;
+    cout<<"-------------------------------"<<endl;
+    cout<<"Category: ";
+    loop: myown_gets(chosed_category);
+    turn_letter(chosed_category);
+    ans=compare(chosed_category);
+    switch(ans)
+    {
+        case 1: return(1);break;
+        case 2: return(2);break;
+        case 3: return(3);break;
+        case 4: return(4);break;
+        case 5: return(5);break;
+        default: cout<<"The category you have chosed isn't exist, please chose another:";goto loop;
+    }
+}
+
+int compare(char *str)
+{
+    if(strcmp(str,"ANIMALS")==0)
+        return 1;
+    if(strcmp(str,"FRUITS")==0)
+        return 2;
+    if(strcmp(str,"GAMES")==0)
+        return 3;
+    if(strcmp(str,"STAR WARS")==0||strcmp(str,"STAR_WARS")==0)
+        return 4;
+    if(strcmp(str,"GREMLINS"))
+        return 5;
+    else
+        return 0;
+}
+
+int apart_input_word(char (*str1),char (*str2)[10])
+{
+    int length;
+    length=strlen(str1);
+    int i,j=0,k=0,word=0,ans=0;
+    for(i=0;i<=length;i++)
+    {
+        if(str1[i]==' ')
+            word=0;
+        else if(word==0)
+        {
+            for(i=i;i<=length;i++)
+            {
+                if(str1[i]!=' ')
+                {
+                    str2[j][k++]=str1[i];
+                }
+                else
+                {
+                    j++;
+                    k=0;
+                    i--;
+                    break;
+                }
+            }
+            ans++;
+            word=1;
+        }
+    }
+    return ans;
+}
+
+void clear_category(int n)
+{
+    int length,i;
+    length=strlen(category[n]);
+    for(i=0;i<length;i++)
+    {
+        category[n][i]=0;
+    }
+    category[n][i]=0;
+}
+
+int Word_Compared(char (*str)[10],int the_number_of_words,int n)
+{
+    int i=0,j,ans=0;
+    for(i=0;i<the_number_of_words;i++)
+    {
+        for(j=1;j<=5;j++)
+        {
+            if(strcmp(str[i],category[n*5-j])==0)
+            {
+                ans++;
+                clear_category(n*5-j);
+            }
+        }
+    }
+    return ans;
+}
+
+int Word_search(int n)
+{
+    char input_word[100],input_category[5][10]={0};
+    int remaining_words=5,the_number_of_words;
+    cout<<"Now, you have 2 minutes to find 5 words that hide in the array."<<endl<<"type the word that you have found here(you must use space to apart them):";
+    //cin>>qiguai;
+    while(remaining_words!=0)
+    {
+        myown_gets(input_word);
+        turn_letter(input_word);
+        the_number_of_words=apart_input_word(input_word,input_category);
+        remaining_words-=Word_Compared(input_category,the_number_of_words,n);
+        if(remaining_words==0)
+            break;
+        cout<<"there are "<<remaining_words<<" words is remained, go on :";
+    }
+    return 1;
+}
+
+```
+
+
+{% asset_img 1.jpg 运行示范1 %}
+
+{% asset_img 2.jpg 运行示范2 %}

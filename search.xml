@@ -10938,6 +10938,128 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 ]]></content>
   </entry>
   <entry>
+    <title>仿Hexdump的实现</title>
+    <url>/2024/07/30/Hexdump-sample/</url>
+    <content><![CDATA[
+编码过程中我们有时候需要将数据的十六进制值打出来看看，这里做一下记录
+
+<!-- more -->
+
+```cpp
+#include <ctype.h>
+#include <unistd.h>
+#include <sstream>
+#include <string>
+#include <iomanip>
+
+std::string pretty_string(uint8_t* ret,size_t size)
+{
+    if(size == 0)
+    {
+        return "";
+    }
+    std::stringstream out;
+    for (size_t i = 0; i < size; i++)
+    {
+        size_t c = i;
+        out << std::hex << std::setw(2*sizeof(size_t)) << std::setfill('0') << i << "  ";
+        for (size_t j = 0; j < 8; j++, c++)
+        {
+            if (c < size)
+            {
+                // printf("%02X ", ret[c]);
+                out << std::hex << std::setw(2) << std::setfill('0') << (int)ret[c] << " ";
+            }
+            else
+            {
+                out << "   ";
+            }
+        }
+        out << " ";
+        for (size_t j = 0; j < 8; j++, c++)
+        {
+            if (c < size)
+            {
+                out << std::hex << std::setw(2)  << std::setfill('0') << (int)ret[c] << " ";
+            }
+            else
+            {
+                out << "   ";
+            }
+        }
+        c = i;
+        out << "   |";
+        size_t count = 0;
+        for (size_t j = 0; j < 16 && c < size; j++, c++, count++)
+        {
+            if (isprint(ret[c]) && ret[c])
+            {
+                out << (char)ret[c];
+            }
+            else
+            {
+                out << ".";
+            }
+        }
+        i = i + count - 1;
+        out <<"|\n";
+    }
+    out << std::hex << std::setw(2*sizeof(size_t)) << std::setfill('0') << size << std::endl;
+    return out.str();
+}
+
+void pretty_print(uint8_t* ret,size_t size)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        size_t c = i;
+        printf("%0.*zx  ",(int)sizeof(size_t)*2,i);
+        for (size_t j = 0; j < 8; j++, c++)
+        {
+            if (c < size)
+            {
+                printf("%02X ", ret[c]);
+            }
+            else
+            {
+                printf("   ");
+            }
+        }
+        printf(" ");
+        for (size_t j = 0; j < 8; j++, c++)
+        {
+            if (c < size)
+            {
+                printf("%02X ", ret[c]);
+            }
+            else
+            {
+                printf("   ");
+            }
+        }
+        c = i;
+        printf("   |");
+        size_t count = 0;
+        for (size_t j = 0; j < 16 && c < size; j++, c++, count++)
+        {
+            if (isprint(ret[c]) && ret[c])
+            {
+                printf("%c", ret[c]);
+            }
+            else
+            {
+                printf(".");
+            }
+        }
+        i = i + count - 1;
+        printf("|\n");
+    }
+    printf("%0.*zx\n",(int)sizeof(size_t)*2,size);
+}
+```
+]]></content>
+  </entry>
+  <entry>
     <title>Minecraft专题</title>
     <url>/Minecraft/index.html</url>
     <content><![CDATA[## Minecraft 介绍
