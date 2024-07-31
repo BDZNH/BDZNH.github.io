@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="某日上班，登服务器后编译Android ROM,增量编译时间比平时长了 3~4 倍，htop 看一下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次服务器被黑用于挖矿的处理记录">
+<meta property="og:url" content="http://example.com/2024/07/31/yayaya-miner/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="某日上班，登服务器后编译Android ROM,增量编译时间比平时长了 3~4 倍，htop 看一下">
+<meta property="og:locale">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/1.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/2.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/3.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/4.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/5.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/6.png">
+<meta property="og:image" content="http://example.com/2024/07/31/yayaya-miner/7.png">
+<meta property="article:published_time" content="2024-07-31T14:36:17.000Z">
+<meta property="article:modified_time" content="2024-07-31T14:46:18.284Z">
+<meta property="article:author" content="SupperMary">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/07/31/yayaya-miner/1.png">
+
+<link rel="canonical" href="http://example.com/2024/07/31/yayaya-miner/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh'
+  };
+</script>
+
+  <title>记一次服务器被黑用于挖矿的处理记录 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/07/31/yayaya-miner/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次服务器被黑用于挖矿的处理记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-07-31 14:36:17 / Modified: 14:46:18" itemprop="dateCreated datePublished" datetime="2024-07-31T14:36:17+00:00">2024-07-31</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>1.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>某日上班，登服务器后编译Android ROM,增量编译时间比平时长了 3~4 倍，htop 看一下</p>
+<span id="more"></span>
+
+<img src="/2024/07/31/yayaya-miner/1.png" class="">
+
+<p>好奇怪，怎么前 36 个核是满的，过了半个小时看，还是这样。有点预感不妙。遂登录另外一个同配置用户只有两三个的服务器，也是前 36 个核被占满，并且看不到什么进程占用了CPU多半是中招了。<br>查了netstat，有两个奇怪的连接，但是不显示进程名和PID。通过网络搜索和供应商的数据得知，这两个IP是矿池的IP。确认是中挖矿病毒了。</p>
+<img src="/2024/07/31/yayaya-miner/2.png" class="">
+
+<p>看一下开机启动项</p>
+<img src="/2024/07/31/yayaya-miner/3.png" class="">
+
+<p>确认有一个奇怪启动项，遂以root权限编辑之，提示Read only，无法强行保存，以root权限移除 &#x2F;usr&#x2F;bin&#x2F;52657500，奇了怪了，我这root权限是假的？<br>由于平时工作是做安卓的，这种状态我以为我的权限被动了，不是真正的 root 权限了。于是到清华软件源下了 ubuntu 22.04 desktop 镜像，做成启动盘直奔机房，从U盘启动服务器，尝试编辑 <code>rc.local</code> ，仍然是 read only，rm -f 也是提示操作不允许。遂翻了翻自己的脑袋，想起来以前看过一篇文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/HWfSdwfYnknJEhfaTPOhyw">CPU深夜狂飙，一帮大佬都傻眼了</a>···</p>
+<p>遂得知一个命令 <code>unhide</code>，输入 <code>api install unhide</code> ， root 权限跑 <code>unhide proc</code> 一看，确实有不少隐藏进程（几十个）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Found HIDDEN PID: 27589</span><br><span class="line">        Cmdline: <span class="string">&quot;usr/sbin/httpd&quot;</span></span><br><span class="line">        Executable: <span class="string">&quot;/usr/bin/perl&quot;</span></span><br><span class="line">        Command: <span class="string">&quot;usr/sbin/httpd&quot;</span></span><br><span class="line">        <span class="variable">$USER</span>=&lt;undefined&gt;</span><br><span class="line">        <span class="variable">$PWD</span>=&lt;undefined&gt;</span><br><span class="line"></span><br><span class="line">Found HIDDEN PID: 27787</span><br><span class="line">        Cmdline: <span class="string">&quot;/1c03a5f9&quot;</span></span><br><span class="line">        Executable: <span class="string">&quot;/1c03a5f9 (deleted)&quot;</span></span><br><span class="line">        Command: <span class="string">&quot;1c03a5f9&quot;</span></span><br><span class="line">        <span class="variable">$USER</span>=root</span><br><span class="line">        <span class="variable">$PWD</span>=/</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>咨询另外一个同事，再结合百度搜索“root 权限无法编辑文件”，得知2个命令 <code>lsattr</code> 和 <code>chattr</code> 可以用于禁止文件修改。敲进去提示没有此命令，需要安装e2fsprogs，然后输入 <code>apt install e2fsprogs</code> 提示已安装，遂推得命令被删掉了，于是找另外一个正常运行的服务器拷了命令过来（当时脑袋宕机了，如果有网络的话，其实这里可以直接<code>apt install --reinstall e2fsprogs</code>的）。然后root权限输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">chattr -i /etc/rc.local</span><br><span class="line">chattr -e /etc/rc.local</span><br><span class="line">chattr -a /etc/rc.local</span><br><span class="line">chattr -i /usr/bin/52657500</span><br><span class="line">chattr -a /usr/bin/52657500</span><br><span class="line">chattr -e /usr/bin/52657500</span><br></pre></td></tr></table></figure>
+
+<p>之后终于可以编辑 <code>rc.local</code> 了，删除启动项，重启。吧唧，还是占满 36 个核。看起来病毒还有别的启动方式。<br>看一下服务<code>sudo systemctl list-unit-files</code>，没看到可疑的东西，看一下 <code>cron crontab -l</code>，也没有计划任务，奇了怪了，这进程怎么启动的。到这里线索就断了，一直在网上看查找开机启动项和CPU挖矿的信息。看到这篇推文 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/o4hcP16ZMPoaK2nfJbcqgw">实战|又一起挖矿木马排查</a> 的时候留意到一个信息</p>
+<img src="/2024/07/31/yayaya-miner/4.png" class="">
+
+<p>这里用<code>systemctl status $pid</code>查看到了这个进程的服务信息，遂用同样的方式，用上面查到的隐藏进程，输进去，好家伙，终于出来了：</p>
+<img src="/2024/07/31/yayaya-miner/5.png" class="">
+
+<p>这里看到服务在 <code>/lib/systemd/system/yayaya9fdf90d8</code> ，进程在 <code>/usr/lib/x86_64-linux-gnu/yayaya8e658d04</code>。删进程之前备份一下，奇怪的事情又来了。明明存在的文件，但是 ls 看不到它。</p>
+<img src="/2024/07/31/yayaya-miner/6.png" class="">
+
+<p>把服务和进程备份好，删掉重启。CPU终于安静下来了。并且重启前不显示的文件也能显示了。<br>以关键字<code>yayaya 病毒</code>搜到了几乎是中文互联网上唯一的记录：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/UYdze4yt2OoWoTcK0qY3Mw">yayaya Miner挖矿木马分析</a>。</p>
+<img src="/2024/07/31/yayaya-miner/7.png" class="">
+
+<p>根据<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/UYdze4yt2OoWoTcK0qY3Mw">yayaya Miner挖矿木马分析</a>和我们的处理记录，总结如下</p>
+<ol>
+<li>使用 chattr 来让不可修改的文件变得可修改，并清理 rc.local 里面的奇怪启动项；</li>
+<li>sudo rmmod nonono（移除用于隐藏前缀的内核模块）；</li>
+<li>查看 &#x2F;lib&#x2F;systemd&#x2F;system&#x2F; 里面以 yayaya 开头的service；</li>
+<li>sudo systemctl stop yayayaxxxxx.service；</li>
+<li>sudo systemctl disable yayayaxxxxx.service；</li>
+<li>清理 crontab 里面奇怪的定时任务；</li>
+<li>删除 &#x2F;etc&#x2F;sysconfig&#x2F;yayaya；<br>后续继续改进的地方：</li>
+<li>修改 root 及有管理员权限的用户密码,并禁止设置弱密码（被感染的服务器都有大量的来自局域网的登录失败记录，与上面推文中的ssh爆破行为一致）；</li>
+<li>禁用 ssh 密码登录；</li>
+<li>可以不连接外网的服务器断开外网连接（排查初期，是通过断开网络外网让病毒不再占用CPU的）；<br>本次排查病毒从 2023.07.26 下午开始，到 2023&#x2F;07.28 早上确认到原因。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/" rel="prev" title="使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密">
+      <i class="fa fa-chevron-left"></i> 使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">6:41</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
