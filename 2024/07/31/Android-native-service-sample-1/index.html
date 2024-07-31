@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。由于运行在 SystemServer 进程或者运行在app进程，某些特殊操作就面临权限不足的问题，比如操作kernel的节点，这个时候就需要使用使用 root 权限运行的进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Native Service 示例">
+<meta property="og:url" content="http://example.com/2024/07/31/Android-native-service-sample-1/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。由于运行在 SystemServer 进程或者运行在app进程，某些特殊操作就面临权限不足的问题，比如操作kernel的节点，这个时候就需要使用使用 root 权限运行的进">
+<meta property="og:locale">
+<meta property="article:published_time" content="2024-07-31T15:03:50.000Z">
+<meta property="article:modified_time" content="2024-07-31T15:06:05.899Z">
+<meta property="article:author" content="SupperMary">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/07/31/Android-native-service-sample-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh'
+  };
+</script>
+
+  <title>Android Native Service 示例 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/07/31/Android-native-service-sample-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Native Service 示例
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-07-31 15:03:50 / Modified: 15:06:05" itemprop="dateCreated datePublished" datetime="2024-07-31T15:03:50+00:00">2024-07-31</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>11 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。<br>由于运行在 SystemServer 进程或者运行在app进程，某些特殊操作就面临权限不足的问题，比如操作kernel的节点，这个时候就需要使用使用 root 权限运行的进程了。（当然严格来说，通过java实现的服务，同样可以以 root 权限运行，比如将相应的代码编译成 jar，开机之后通过 appprocess 运行）。</p>
+<span id="more"></span>
+
+<p>native service 需要定义一个接口类，下面的示例作为参考</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// INativeServiceSample.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _I_NATIVES_ERVICE_SAMPLE_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _I_NATIVES_ERVICE_SAMPLE_H_</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IPCThreadState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IServiceManager.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/MemoryBase.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/MemoryHeapBase.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/PermissionController.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/ProcessInfoService.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IResultReceiver.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utils/String8.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utils/String16.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;android/log.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TAG <span class="string">&quot;NativeService&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NATIVESERVICE_NAME <span class="string">&quot;nativeservice&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE,TAG ,__VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGE(...) __android_log_print(ANDROID_LOG_ERROR,TAG ,__VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> android &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">STATUS</span> &#123;</span><br><span class="line">        SUCCESS = NO_ERROR,</span><br><span class="line">        FAILED = UNKNOWN_TRANSACTION</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">INativeServiceSample</span> : <span class="keyword">public</span> IInterface &#123;</span><br><span class="line">        <span class="keyword">public</span>:</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> <span class="type">int</span> <span class="title">invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data, Parcel* reply, <span class="type">uint32_t</span> flags)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">DECLARE_META_INTERFACE</span>(NativeServiceSample);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">BnNativeServiceSample</span> : <span class="keyword">public</span> BnInterface&lt;INativeServiceSample&gt;</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="function"><span class="type">status_t</span> <span class="title">onTransact</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">status_t</span> <span class="title">dump</span><span class="params">(<span class="type">int</span> fd, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">onShellCommand</span><span class="params">(<span class="type">int</span> in, <span class="type">int</span> out, <span class="type">int</span> err, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> <span class="type">int</span> <span class="title">invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data, Parcel* reply, <span class="type">uint32_t</span> flags)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">shellCommand</span><span class="params">(<span class="type">int</span> in, <span class="type">int</span> out, <span class="type">int</span> err, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span>;</span><br><span class="line">        </span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这里的主要工作是定义一个 server 端和 client 端都需要实现的函数， invoke ，以及 DECLARE_META_INTERFACE 这一行，DECLARE_META_INTERFACE 是一个宏定义，后面的小括号里面的 NativeServiceSample 则是当前类 INativeServiceSample 中的 NativeServiceSample 。之类会为这个类默认声明好相应的一个service需要是实现的函数。这里有严格的命名规范。</p>
+<p>然后实现客户端和服务端，也即一个 Bp(客户端) 一个 Bn(服务端)<br>下面是相应的定义</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//INativeServiceSample.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;INativeServiceSample.h&quot;</span></span></span><br><span class="line"><span class="keyword">namespace</span> android</span><br><span class="line">&#123;</span><br><span class="line">        <span class="keyword">class</span> <span class="title class_">BpNativeServiceSample</span> : <span class="keyword">public</span> BpInterface&lt;INativeServiceSample&gt;</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">BpNativeServiceSample</span>(<span class="type">const</span> sp&lt;IBinder&gt; &amp;impl) : <span class="built_in">BpInterface</span>&lt;INativeServiceSample&gt;(impl) &#123;&#125;</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            Parcel send;</span><br><span class="line">            send.<span class="built_in">writeInterfaceToken</span>(<span class="built_in">getInterfaceDescriptor</span>());</span><br><span class="line">            send.<span class="built_in">appendFrom</span>(&amp;data, <span class="number">0</span>, data.<span class="built_in">dataSize</span>());</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">remote</span>()-&gt;<span class="built_in">transact</span>(code, send, reply);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">IMPLEMENT_META_INTERFACE</span>(NativeServiceSample, NATIVESERVICE_NAME);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">BnNativeServiceSample::onTransact</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(code == SHELL_COMMAND_TRANSACTION)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> in = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> out = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> err = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> argc = data.<span class="built_in">readInt32</span>();</span><br><span class="line">            Vector&lt;String16&gt; args;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; argc &amp;&amp; data.<span class="built_in">dataAvail</span>() &gt; <span class="number">0</span>; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                args.<span class="built_in">add</span>(data.<span class="built_in">readString16</span>());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">status_t</span> result = <span class="number">0</span>;</span><br><span class="line">            sp&lt;IBinder&gt; unusedCallback;</span><br><span class="line">            sp&lt;IResultReceiver&gt; resultReceiver;</span><br><span class="line">            <span class="keyword">if</span> ((result = data.<span class="built_in">readNullableStrongBinder</span>(&amp;unusedCallback)) != NO_ERROR)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> ((result = data.<span class="built_in">readNullableStrongBinder</span>(&amp;resultReceiver)) != NO_ERROR)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">            result = <span class="built_in">shellCommand</span>(in, out, err, args);</span><br><span class="line">            <span class="keyword">if</span> (resultReceiver != <span class="literal">nullptr</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                resultReceiver-&gt;<span class="built_in">send</span>(result);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(IBinder::FIRST_CALL_TRANSACTION &lt;= code &amp;&amp; code &lt;= IBinder::LAST_CALL_TRANSACTION)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">CHECK_INTERFACE</span>(INativeServiceSample, data, reply);</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">invoke</span>(code, data, reply, flags);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> BBinder::<span class="built_in">onTransact</span>(code, data, reply, flags);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">BnNativeServiceSample::shellCommand</span><span class="params">(<span class="type">int</span> in, <span class="type">int</span> out, <span class="type">int</span> err, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">onShellCommand</span>(in, out, err, args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">BnNativeServiceSample::onShellCommand</span><span class="params">(<span class="type">int</span> in, <span class="type">int</span> out, <span class="type">int</span> err, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">LOGI</span>(<span class="string">&quot;onShellCommand not implementation yet&quot;</span>);</span><br><span class="line">        <span class="built_in">write</span>(out, <span class="string">&quot;onShellCommand not implementation yet\n&quot;</span>, <span class="number">38</span>);</span><br><span class="line">        <span class="type">size_t</span> size = args.<span class="built_in">size</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; size; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">LOGI</span>(<span class="string">&quot;Received No.%zu arg: %s&quot;</span>, i, <span class="built_in">String8</span>(args[i]).<span class="built_in">string</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">BnNativeServiceSample::dump</span><span class="params">(<span class="type">int</span> fd, <span class="type">const</span> Vector&lt;String16&gt; &amp;args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">LOGI</span>(<span class="string">&quot;dump not implementation yet&quot;</span>);</span><br><span class="line">        <span class="built_in">write</span>(fd, <span class="string">&quot;dump not implementation yet\n&quot;</span>, <span class="number">28</span>);</span><br><span class="line">        <span class="type">size_t</span> size = args.<span class="built_in">size</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; size; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">LOGI</span>(<span class="string">&quot;Received No.%zu arg: %s&quot;</span>, i, <span class="built_in">String8</span>(args[i]).<span class="built_in">string</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>BpNativeServiceSample : public BpInterface&lt;INativeServiceSample&gt;</code> 是客户端的定义，它的构造函数是固定格式。<br><code>class BnNativeServiceSample : public BnInterface&lt;INativeServiceSample&gt;</code> 则是服务端的定义，它里面有一个用于与其他进程通信最重要的函数<code>onTransact</code>。<br>而 dump 函数则是我们使用 <code>dumpsys servicename args...</code>这样的命令行方式去获取服务的信息时会被调用的函数，我们可以在这和函数里面接收命令行参数，解析命令以及输出内容，其中 fd 命令行传入的一个文件描述符，通常它是 stdout ，后面的 args则是命令行参数，安卓的命令参数是通过 String16 格式传入。<br>对于客户端，我们对调用者提供的接口是 invoke(uint32_t code, const Parcel &amp;data, Parcel *reply, uint32_t flags) 。客户端也可以直接使用 service 的 tract 接口来对服务端进行调用，为了隐藏 <code>getInterfaceDescriptor()</code> ，我将这部分操作预先包含在 invoke 里面，调用者提供 code，data，reply以及 flags 即可（flags这里我实际上没有使用到）<br>这里由一个非常重要的 IMPLEMENT_META_INTERFACE ，这个宏会在这部分展开，将在接口类内声明的内容实现放在此处，同样的，这里也有严格的命名要求。<br>服务端的 onTransact实现如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">status_t</span> <span class="title">BnNativeServiceSample::onTransact</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(code == SHELL_COMMAND_TRANSACTION)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> in = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">        <span class="type">int</span> out = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">        <span class="type">int</span> err = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">        <span class="type">int</span> argc = data.<span class="built_in">readInt32</span>();</span><br><span class="line">        Vector&lt;String16&gt; args;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; argc &amp;&amp; data.<span class="built_in">dataAvail</span>() &gt; <span class="number">0</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            args.<span class="built_in">add</span>(data.<span class="built_in">readString16</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">status_t</span> result = <span class="number">0</span>;</span><br><span class="line">        sp&lt;IBinder&gt; unusedCallback;</span><br><span class="line">        sp&lt;IResultReceiver&gt; resultReceiver;</span><br><span class="line">        <span class="keyword">if</span> ((result = data.<span class="built_in">readNullableStrongBinder</span>(&amp;unusedCallback)) != NO_ERROR)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ((result = data.<span class="built_in">readNullableStrongBinder</span>(&amp;resultReceiver)) != NO_ERROR)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        result = <span class="built_in">shellCommand</span>(in, out, err, args);</span><br><span class="line">        <span class="keyword">if</span> (resultReceiver != <span class="literal">nullptr</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            resultReceiver-&gt;<span class="built_in">send</span>(result);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(IBinder::FIRST_CALL_TRANSACTION &lt;= code &amp;&amp; code &lt;= IBinder::LAST_CALL_TRANSACTION)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">CHECK_INTERFACE</span>(INativeServiceSample, data, reply);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">invoke</span>(code, data, reply, flags);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> BBinder::<span class="built_in">onTransact</span>(code, data, reply, flags);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里进来之后，我们受限检查 code 是否是 SHELL_COMMAND_TRANSACTION,这个 code 表示本次IPC调用是通过 cmd servicename args… 的方式调用的，这里把 stdin,stdout,stderr,args 封装好传给新增的 shellCommand ，shellCommand 里面调用 onShellCommand 。<br>然后判断是code是否是Binder为开发者预留的范围，如果是这个范围，就交给我们自己实现的 invoke 处理 ，首先是一个 CHECK_INTERFACE(INativeServiceSample, data, reply); 这里主要作用是检查调用 service 时，传递给服务端的 parcel 的 interface 是否正确。<br>如果code不是以上几种情况，那么就交给父类处理。可以查看 aosp&#x2F;frameworks&#x2F;native&#x2F;libs&#x2F;binder&#x2F;Binder.cpp</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NOLINTNEXTLINE(google-default-arguments)</span></span><br><span class="line"><span class="function"><span class="type">status_t</span> <span class="title">BBinder::onTransact</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data, Parcel* reply, <span class="type">uint32_t</span> <span class="comment">/*flags*/</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (code) &#123;</span><br><span class="line">        <span class="keyword">case</span> INTERFACE_TRANSACTION:</span><br><span class="line">            reply-&gt;<span class="built_in">writeString16</span>(<span class="built_in">getInterfaceDescriptor</span>());</span><br><span class="line">            <span class="keyword">return</span> NO_ERROR;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> DUMP_TRANSACTION: &#123;</span><br><span class="line">            <span class="type">int</span> fd = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> argc = data.<span class="built_in">readInt32</span>();</span><br><span class="line">            Vector&lt;String16&gt; args;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; argc &amp;&amp; data.<span class="built_in">dataAvail</span>() &gt; <span class="number">0</span>; i++) &#123;</span><br><span class="line">               args.<span class="built_in">add</span>(data.<span class="built_in">readString16</span>());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">dump</span>(fd, args);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> SHELL_COMMAND_TRANSACTION: &#123;</span><br><span class="line">            <span class="type">int</span> in = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> out = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> err = data.<span class="built_in">readFileDescriptor</span>();</span><br><span class="line">            <span class="type">int</span> argc = data.<span class="built_in">readInt32</span>();</span><br><span class="line">            Vector&lt;String16&gt; args;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; argc &amp;&amp; data.<span class="built_in">dataAvail</span>() &gt; <span class="number">0</span>; i++) &#123;</span><br><span class="line">               args.<span class="built_in">add</span>(data.<span class="built_in">readString16</span>());</span><br><span class="line">            &#125;</span><br><span class="line">            sp&lt;IShellCallback&gt; shellCallback = IShellCallback::<span class="built_in">asInterface</span>(</span><br><span class="line">                    data.<span class="built_in">readStrongBinder</span>());</span><br><span class="line">            sp&lt;IResultReceiver&gt; resultReceiver = IResultReceiver::<span class="built_in">asInterface</span>(</span><br><span class="line">                    data.<span class="built_in">readStrongBinder</span>());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// XXX can&#x27;t add virtuals until binaries are updated.</span></span><br><span class="line">            <span class="comment">//return shellCommand(in, out, err, args, resultReceiver);</span></span><br><span class="line">            (<span class="type">void</span>)in;</span><br><span class="line">            (<span class="type">void</span>)out;</span><br><span class="line">            (<span class="type">void</span>)err;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (resultReceiver != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">                resultReceiver-&gt;<span class="built_in">send</span>(INVALID_OPERATION);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> NO_ERROR;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> SYSPROPS_TRANSACTION: &#123;</span><br><span class="line">            <span class="built_in">report_sysprop_change</span>();</span><br><span class="line">            <span class="keyword">return</span> NO_ERROR;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> UNKNOWN_TRANSACTION;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里我们就知道 dump 其实也是一个特殊的 code 。</p>
+<p>p.s: 这里我们当然可以在接口定义的时候就生命客户端和服务端都共有的相同实现的接口，可是这样做每次新增接口都需要在双方一起增加实现，我用一个 invoke 来中转调用。<br>p.s: code 是服务端用来区分客户端想调用哪个函数的。</p>
+<p>下面来看看真正的服务端的声明和实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NativeServiceSampleService.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _NATIVE_SERVICE_SAMPLE_SERVICE_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _NATIVE_SERVICE_SAMPLE_SERVICE_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;INativeServiceSample.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;map&gt;</span></span></span><br><span class="line"><span class="keyword">namespace</span> android</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">NativeServiceSampleService</span> : <span class="keyword">public</span> BnNativeServiceSample</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="function"><span class="keyword">typedef</span> <span class="title">status_t</span> <span class="params">(NativeServiceSampleService::*local_method)</span><span class="params">(<span class="type">const</span> Parcel &amp;data, Parcel *reply)</span></span>;</span><br><span class="line">        <span class="built_in">NativeServiceSampleService</span>()&#123;<span class="built_in">loadMethods</span>();&#125;;</span><br><span class="line">        ~<span class="built_in">NativeServiceSampleService</span>()&#123;&#125;;</span><br><span class="line">        <span class="function"><span class="type">status_t</span> <span class="title">sampleCallFunction</span><span class="params">(<span class="type">const</span> Parcel &amp;data, Parcel *reply)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">status_t</span> <span class="title">sampleGetFunction</span><span class="params">(<span class="type">const</span> Parcel &amp;data, Parcel *reply)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">status_t</span> <span class="title">getMacByInterfaceName</span><span class="params">(<span class="type">const</span> Parcel &amp;data, Parcel *reply)</span></span>;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span>;</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">getCallingUid</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="function"><span class="type">int</span> <span class="title">getCallingPid</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">loadMethods</span><span class="params">()</span></span>;</span><br><span class="line">        std::map&lt;<span class="type">uint32_t</span>,local_method&gt; methods;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>这里定义了三个功能函数，sampleCallFunction,sampleGetFunction,getMacByInterfaceName，我将这几个函数的输入参数统一了，然后用一个 map 去保存 code 和指向这几个函数的函数指针。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//NativeServiceSampleService.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;NativeServiceSampleService.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Cmdid.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IPCThreadState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;hwbinder/IPCThreadState.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> android &#123;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">NativeServiceSampleService::loadMethods</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        methods[SAMPLE_CALL] = &amp;NativeServiceSampleService::sampleCallFunction;</span><br><span class="line">        methods[SAMPLE_GET] = &amp;NativeServiceSampleService::sampleGetFunction;</span><br><span class="line">        methods[SAMPLE_GET_MAC] = &amp;NativeServiceSampleService::getMacByInterfaceName;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">NativeServiceSampleService::invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data, Parcel* reply, <span class="type">uint32_t</span> flags)</span></span>&#123;</span><br><span class="line">        std::map&lt;<span class="type">uint32_t</span>, local_method&gt;::iterator iter = methods.<span class="built_in">find</span>(code);</span><br><span class="line">        <span class="built_in">LOGV</span>(<span class="string">&quot;uid:%d pid:%d called method %u&quot;</span>,<span class="built_in">getCallingUid</span>(),<span class="built_in">getCallingPid</span>(),code);</span><br><span class="line">        <span class="keyword">if</span> (iter != methods.<span class="built_in">end</span>())</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> (<span class="keyword">this</span>-&gt;*(iter-&gt;second))(data, reply);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">LOGE</span>(<span class="string">&quot;can&#x27;t find such a method whose cmdid is %u&quot;</span>, code);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">NativeServiceSampleService::sampleCallFunction</span><span class="params">(<span class="type">const</span> Parcel&amp;data, Parcel* reply)</span></span>&#123;</span><br><span class="line">        String8 str = <span class="built_in">String8</span>(data.<span class="built_in">readString16</span>());</span><br><span class="line">        <span class="built_in">LOGD</span>(<span class="string">&quot;call funcion with %s&quot;</span>,str.<span class="built_in">string</span>());</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">NativeServiceSampleService::sampleGetFunction</span><span class="params">(<span class="type">const</span> Parcel&amp;data, Parcel* reply)</span></span>&#123;</span><br><span class="line">        <span class="built_in">LOGD</span>(<span class="string">&quot;get function &quot;</span>);</span><br><span class="line">        String16 hello = <span class="built_in">String16</span>(<span class="string">&quot;this is message from service&quot;</span>);</span><br><span class="line">        reply-&gt;<span class="built_in">writeString16</span>(hello);</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">status_t</span> <span class="title">NativeServiceSampleService::getMacByInterfaceName</span><span class="params">(<span class="type">const</span> Parcel &amp;data, Parcel *reply)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        String16 ifname = data.<span class="built_in">readString16</span>();</span><br><span class="line">        <span class="built_in">LOGV</span>(<span class="string">&quot;get mac of ifname: %s&quot;</span>,<span class="built_in">String8</span>(ifname).<span class="built_in">string</span>());</span><br><span class="line">        String8 path = <span class="built_in">String8</span>(<span class="string">&quot;/sys/class/net/&quot;</span>);</span><br><span class="line">        path += <span class="built_in">String8</span>(ifname);</span><br><span class="line">        path += <span class="built_in">String8</span>(<span class="string">&quot;/address&quot;</span>);</span><br><span class="line">        FILE* fp = <span class="built_in">fopen</span>(path.<span class="built_in">string</span>(),<span class="string">&quot;ro&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span>(fp == <span class="literal">NULL</span>)&#123;</span><br><span class="line">            <span class="built_in">LOGE</span>(<span class="string">&quot;open %s failed(%d): %s&quot;</span>,path.<span class="built_in">string</span>(),errno,<span class="built_in">strerror</span>(errno));</span><br><span class="line">            <span class="keyword">return</span> FAILED;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">char</span> mac[<span class="number">18</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">        <span class="type">size_t</span> readsize = <span class="built_in">fread</span>(mac,<span class="number">1</span>,<span class="number">17</span>,fp);</span><br><span class="line">        <span class="keyword">if</span>(readsize != <span class="number">17</span>)&#123;</span><br><span class="line">            <span class="built_in">LOGE</span>(<span class="string">&quot;read mac failed&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> FAILED;</span><br><span class="line">        &#125;</span><br><span class="line">        String16 result = <span class="built_in">String16</span>(mac);</span><br><span class="line">        reply-&gt;<span class="built_in">writeString16</span>(result);</span><br><span class="line">        <span class="built_in">fclose</span>(fp);</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">NativeServiceSampleService::getCallingPid</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">isServingCall</span>()) &#123;</span><br><span class="line">            <span class="keyword">return</span> IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">getCallingPid</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">getCallingPid</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">NativeServiceSampleService::getCallingUid</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">isServingCall</span>()) &#123;</span><br><span class="line">            <span class="keyword">return</span> IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">getCallingUid</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">getCallingUid</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我在服务端初始化的时候将唯一的 code 和唯一的函数指针保存进 map ，在 invoke 里面判断如果有相应的 code 存在，则调用相应的函数，没有则直接返回。</p>
+<p>这里的 code 则是一个枚举，实际上是双方约定的相同的正整数就可以。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Cmdid.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _CMDID_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _CMDID_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;INativeServiceSample.h&quot;</span></span></span><br><span class="line"><span class="keyword">namespace</span> android&#123;</span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">ENUME_CMD</span>&#123;</span><br><span class="line">        SAMPLE_CALL = IBinder::FIRST_CALL_TRANSACTION,</span><br><span class="line">        SAMPLE_GET,</span><br><span class="line">        SAMPLE_GET_MAC</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h1 id="开启服务"><a href="#开启服务" class="headerlink" title="开启服务"></a>开启服务</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//server.cpp</span><br><span class="line">#include &quot;NativeServiceSampleService.h&quot;</span><br><span class="line">#include &lt;binder/ProcessState.h&gt;</span><br><span class="line">#include &lt;binder/IServiceManager.h&gt;</span><br><span class="line">#include &lt;binder/IPCThreadState.h&gt;</span><br><span class="line">#include &lt;utils/String8.h&gt;</span><br><span class="line">#include &lt;utils/String16.h&gt;</span><br><span class="line"></span><br><span class="line">int main(int argc, char **argv)</span><br><span class="line">&#123;</span><br><span class="line">    LOGI(&quot;start DeviceMacService&quot;);</span><br><span class="line">    android::defaultServiceManager()-&gt;addService(android::String16(NATIVESERVICE_NAME), new android::NativeServiceSampleService());</span><br><span class="line">    android::ProcessState::self()-&gt;startThreadPool();</span><br><span class="line">    android::IPCThreadState::self()-&gt;joinThreadPool();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="客户端调用服务"><a href="#客户端调用服务" class="headerlink" title="客户端调用服务"></a>客户端调用服务</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">//client.cpp</span><br><span class="line">#include &quot;NativeServiceSampleService.h&quot;</span><br><span class="line">#include &quot;EnumeCmdid.h&quot;</span><br><span class="line">#include &lt;binder/ProcessState.h&gt;</span><br><span class="line">#include &lt;binder/IServiceManager.h&gt;</span><br><span class="line">#include &lt;binder/IPCThreadState.h&gt;</span><br><span class="line">#include &lt;utils/String8.h&gt;</span><br><span class="line">#include &lt;utils/String16.h&gt;</span><br><span class="line"></span><br><span class="line">using namespace android;</span><br><span class="line"></span><br><span class="line">sp&lt;INativeServiceSample&gt; getService() &#123;</span><br><span class="line">    sp&lt;IServiceManager&gt; sm = defaultServiceManager();</span><br><span class="line">    if (sm == NULL) &#123;</span><br><span class="line">        LOGE(&quot;can not get service manager&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    sp&lt;IBinder&gt; binder = sm-&gt;getService(String16(NATIVESERVICE_NAME));</span><br><span class="line">    if (binder == NULL) &#123;</span><br><span class="line">        LOGE(&quot;can not get service&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    sp&lt;INativeServiceSample&gt; service = interface_cast&lt;INativeServiceSample&gt;(binder);</span><br><span class="line">    if (service == NULL) &#123;</span><br><span class="line">        LOGE(&quot;can not cast interface&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return service;</span><br><span class="line">    return nullptr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc,char** argv)&#123;</span><br><span class="line">    sp&lt;INativeServiceSample&gt; service = getService();</span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        Parcel data, reply;</span><br><span class="line">        String16 str = String16(&quot;str from client&quot;);</span><br><span class="line">        data.writeString16(str);</span><br><span class="line">        int ret = service-&gt;invoke(android::SAMPLE_CALL, data, &amp;reply,0);</span><br><span class="line">        if(ret == 0)&#123;</span><br><span class="line">            LOGI(&quot;invoke value 0&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        Parcel data, reply;</span><br><span class="line">        int ret = service-&gt;invoke(android::SAMPLE_GET, data, &amp;reply,0);</span><br><span class="line">        if(ret == 0)&#123;</span><br><span class="line">            LOGI(&quot;invoke value 0&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        String8 str = String8(reply.readString16());</span><br><span class="line">        LOGI(&quot;from str %s&quot;,str.string());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        if (argc &gt;= 2)</span><br><span class="line">        &#123;</span><br><span class="line">            Parcel data, reply;</span><br><span class="line">            data.writeString16(String16(argv[1]));</span><br><span class="line">            int ret = service-&gt;invoke(android::SAMPLE_GET_MAC, data, &amp;reply, 0);</span><br><span class="line">            if (ret == 0)</span><br><span class="line">            &#123;</span><br><span class="line">                LOGI(&quot;get mac %s&#x27;s mac address is %s&quot;, argv[1], String8(reply.readString16()).string());</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                LOGE(&quot;call get mac function failed&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>使用下面的 Android.bp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">cc_defaults&#123;</span><br><span class="line">    name: &quot;nativeservicesample_defaults&quot;,</span><br><span class="line">    srcs:[</span><br><span class="line">        &quot;INativeServiceSample.cpp&quot;</span><br><span class="line">    ],</span><br><span class="line">    shared_libs: [</span><br><span class="line">        &quot;libutils&quot;,</span><br><span class="line">        &quot;libcutils&quot;,</span><br><span class="line">        &quot;libbinder&quot;,</span><br><span class="line">        &quot;libhardware&quot;,</span><br><span class="line">        &quot;liblog&quot;</span><br><span class="line">    ],</span><br><span class="line"></span><br><span class="line">    include_dirs: [</span><br><span class="line">        &quot;frameworks/native/include&quot;,</span><br><span class="line">        &quot;system/core/include&quot;,</span><br><span class="line">        &quot;system/libhwbinder/include&quot;</span><br><span class="line">    ],</span><br><span class="line">    cflags: [</span><br><span class="line">        &quot;-Wall&quot;,</span><br><span class="line">        &quot;-Wextra&quot;,</span><br><span class="line">        &quot;-Werror&quot;,</span><br><span class="line">        &quot;-Wno-ignored-qualifiers&quot;,</span><br><span class="line">        &quot;-Wno-unused-parameter&quot;,</span><br><span class="line">    ],</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cc_binary&#123;</span><br><span class="line">    name: &quot;server&quot;,</span><br><span class="line">    defaults: [</span><br><span class="line">        &quot;nativeservicesample_defaults&quot;,</span><br><span class="line">    ],</span><br><span class="line">    srcs: [</span><br><span class="line">        &quot;NativeServiceSampleService.cpp&quot;,</span><br><span class="line">        &quot;server.cpp&quot;,</span><br><span class="line">    ],</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cc_binary&#123;</span><br><span class="line">    name: &quot;client&quot;,</span><br><span class="line">    defaults: [</span><br><span class="line">        &quot;nativeservicesample_defaults&quot;,</span><br><span class="line">    ],</span><br><span class="line">    srcs: [</span><br><span class="line">        &quot;client.cpp&quot;,</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译完成之后，将 out&#x2F;xxxx&#x2F;system&#x2F;bin&#x2F; 里面的 server 和 client ，推到 Android 设备上（Android studio里面的虚拟机也可以），执行server，然后执行 client ，通过 logcat -s NativeService 就可以看见相应的打印了。</p>
+<h1 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h1><h2 id="安卓-app-如何调用服务？"><a href="#安卓-app-如何调用服务？" class="headerlink" title="安卓 app 如何调用服务？"></a>安卓 app 如何调用服务？</h2><p>由于native层定义的 invoke 交给 java 层调用有些麻烦，我们可以直接获取到 Binder 对象之后，调用 Binder 对象的 transcat 函数，将需要的参数传入即可。<br>下面是一个示范</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NativeService.java</span></span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.os.Parcel;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.os.ServiceManager;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NativeService</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SERVICE_NAME</span> <span class="operator">=</span> <span class="string">&quot;nativeservice&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">invoke</span><span class="params">(<span class="type">int</span> code,Parcel data,Parcel reply)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        <span class="type">IBinder</span> <span class="variable">service</span> <span class="operator">=</span> ServiceManager.getService(SERVICE_NAME);</span><br><span class="line">        <span class="keyword">if</span>(service != <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="type">Parcel</span> <span class="variable">send</span> <span class="operator">=</span> Parcel.obtain();</span><br><span class="line">            send.writeInterfaceToken(SERVICE_NAME);</span><br><span class="line">            send.appendFrom(data,<span class="number">0</span>,data.dataSize());</span><br><span class="line">            <span class="type">boolean</span> <span class="variable">result</span> <span class="operator">=</span> service.transact(code,send,reply,<span class="number">0</span>);</span><br><span class="line">            send.recycle();</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line">        Log.e(<span class="string">&quot;shell&quot;</span>,<span class="string">&quot;service not running&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>code 的值与 native 层定义的 cmdid 一致，从 1 开始。</p>
+<h2 id="onTransact-的返回值有什么讲究吗，如果service仅仅由C-层的函数调用，例如示例里的-invoke"><a href="#onTransact-的返回值有什么讲究吗，如果service仅仅由C-层的函数调用，例如示例里的-invoke" class="headerlink" title="onTransact 的返回值有什么讲究吗，如果service仅仅由C++层的函数调用，例如示例里的 invoke"></a>onTransact 的返回值有什么讲究吗，如果service仅仅由C++层的函数调用，例如示例里的 invoke</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">invoke</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel &amp;data, Parcel *reply, <span class="type">uint32_t</span> flags)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Parcel send;</span><br><span class="line">    send.<span class="built_in">writeInterfaceToken</span>(<span class="built_in">getInterfaceDescriptor</span>());</span><br><span class="line">    send.<span class="built_in">appendFrom</span>(&amp;data, <span class="number">0</span>, data.<span class="built_in">dataSize</span>());</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">remote</span>()-&gt;<span class="built_in">transact</span>(code, send, reply);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样的话，我们可以直接拿到 onTransact 的返回值，返回值的意义取决于双方的约定，如果 service 还准备给 Java 层调用，则不可以随意返回，原因是通过 IBinder.transact(…) 的方式调用service，返回值已经被 BinderProxy处理过了，看下面这一段</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//frameworks/base/core/jni/android_util_Binder.cpp</span></span><br><span class="line"><span class="function"><span class="type">static</span> jboolean <span class="title">android_os_BinderProxy_transact</span><span class="params">(JNIEnv* env, jobject obj,</span></span></span><br><span class="line"><span class="params"><span class="function">        jint code, jobject dataObj, jobject replyObj, jint flags)</span> <span class="comment">// throws RemoteException</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    <span class="comment">//printf(&quot;Transact from Java code to %p sending: &quot;, target); data-&gt;print();</span></span><br><span class="line">    <span class="type">status_t</span> err = target-&gt;<span class="built_in">transact</span>(code, *data, reply, flags);</span><br><span class="line">    <span class="comment">//if (reply) printf(&quot;Transact from Java code to %p received: &quot;, target); reply-&gt;print();</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (kEnableBinderSample) &#123;</span><br><span class="line">        <span class="keyword">if</span> (time_binder_calls) &#123;</span><br><span class="line">            <span class="built_in">conditionally_log_binder_call</span>(start_millis, target, code);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (err == NO_ERROR) &#123;</span><br><span class="line">        <span class="keyword">return</span> JNI_TRUE;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (err == UNKNOWN_TRANSACTION) &#123;</span><br><span class="line">        <span class="keyword">return</span> JNI_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signalExceptionForError</span>(env, obj, err, <span class="literal">true</span> <span class="comment">/*canThrowRemoteException*/</span>, data-&gt;<span class="built_in">dataSize</span>());</span><br><span class="line">    <span class="keyword">return</span> JNI_FALSE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里可以看到，为 NO_ERROR 时返回了 true，为 UNKNOWN_TRANSACTION 时返回了false，都不是时将走到 signalExceptionForError(…)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">signalExceptionForError</span><span class="params">(JNIEnv* env, jobject obj, <span class="type">status_t</span> err,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="type">bool</span> canThrowRemoteException, <span class="type">int</span> parcelSize)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (err) &#123;</span><br><span class="line">        <span class="keyword">case</span> UNKNOWN_ERROR:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/RuntimeException&quot;</span>, <span class="string">&quot;Unknown error&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> NO_MEMORY:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/OutOfMemoryError&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> INVALID_OPERATION:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/UnsupportedOperationException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> BAD_VALUE:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/IllegalArgumentException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> BAD_INDEX:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/IndexOutOfBoundsException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> BAD_TYPE:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/IllegalArgumentException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> NAME_NOT_FOUND:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/util/NoSuchElementException&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> PERMISSION_DENIED:</span><br><span class="line">            <span class="built_in">jniThrowException</span>(env, <span class="string">&quot;java/lang/SecurityException&quot;</span>, <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+<p>走到这里来之后，调用service的app将发生异常。当然 service 可以根据调用方的不同的参数来返回相应的值来让调用方进入不同的状态。</p>
+<p>一个肥肠完整的示例： <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/46dfce294a4f">https://www.jianshu.com/p/46dfce294a4f</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/31/ini-impl-in-cpp/" rel="prev" title="C++ ini 实现">
+      <i class="fa fa-chevron-left"></i> C++ ini 实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/07/31/Android-native-service-sample-2/" rel="next" title="Android Native Service 示例 第二篇">
+      Android Native Service 示例 第二篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">开启服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">客户端调用服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">3.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FAQ"><span class="nav-number">4.</span> <span class="nav-text">FAQ</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%8D%93-app-%E5%A6%82%E4%BD%95%E8%B0%83%E7%94%A8%E6%9C%8D%E5%8A%A1%EF%BC%9F"><span class="nav-number">4.1.</span> <span class="nav-text">安卓 app 如何调用服务？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#onTransact-%E7%9A%84%E8%BF%94%E5%9B%9E%E5%80%BC%E6%9C%89%E4%BB%80%E4%B9%88%E8%AE%B2%E7%A9%B6%E5%90%97%EF%BC%8C%E5%A6%82%E6%9E%9Cservice%E4%BB%85%E4%BB%85%E7%94%B1C-%E5%B1%82%E7%9A%84%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%EF%BC%8C%E4%BE%8B%E5%A6%82%E7%A4%BA%E4%BE%8B%E9%87%8C%E7%9A%84-invoke"><span class="nav-number">4.2.</span> <span class="nav-text">onTransact 的返回值有什么讲究吗，如果service仅仅由C++层的函数调用，例如示例里的 invoke</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="Symbols count total">118k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">7:09</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
