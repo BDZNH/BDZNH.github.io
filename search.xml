@@ -9369,119 +9369,6 @@ void IniParser::addNewRecord(const char* section, const char* key, const char* v
 ```]]></content>
   </entry>
   <entry>
-    <title>在 Centos 7.4 上安装Gcc 7.3</title>
-    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
-    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
-下面记录一下安装过程。
-
-<!--more -->
-
-## 描述
-
-系统为Cent OS7.4，全新安装，更新全部软件至最新版。
-
-## 安装准备
-
-```bash
-yum update -y
-yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
-```
-
-安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
-
-```bash
-configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
-```
-
-网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
-
-## 动手
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
-tar -zxf gcc-7.3.0.tar.gz
-cd gcc-7.3.0
-./contrib/download_prerequisites
-mkdir builddir && cd builddir
-../configure
-make && sudo make install
-```
-
-编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
-需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
-
-```bash
-2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
-2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
-2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
-2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
-gmp-6.1.0.tar.bz2: OK
-mpfr-3.1.4.tar.bz2: OK
-mpc-1.0.3.tar.gz: OK
-isl-0.16.1.tar.bz2: OK
-All prerequisites downloaded successfully.
-```
-
-这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
-
-另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
-
-```bash
-../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
-```
-
-选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
-
-## 安装gdb
-
-在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
-tar -zxf gdb-8.1.tar.gz
-cd gdb-8.1
-mkdir builddir && cd builddir
-../configure
-make && make install
-```
-
-## 碎碎念
-
-有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
-
-```bash
-WARNING: 'makeinfo' is missing on your system.
-         You should only need it if you modified a '.texi' file, or
-         any other file indirectly affecting the aspect of the manual.
-         You might want to install the Texinfo package:
-         <http://www.gnu.org/software/texinfo/>
-         The spurious makeinfo call might also be the consequence of
-         using a buggy 'make' (AIX, DU, IRIX), in which case you might
-         want to install GNU make:
-         <http://www.gnu.org/software/make/>
-make[5]: *** [gdb.info] Error 127
-make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
-make[4]: *** [subdir_do] Error 1
-make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[3]: *** [install-only] Error 2
-make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[2]: *** [install] Error 2
-make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[1]: *** [install-gdb] Error 2
-make[1]: Leaving directory `/root/gdb-8.1/build'
-make: *** [install] Error 2
-```
-
-需要`yum install texinfo`，然后再执行`make install`。
-至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
-安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
-自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
-建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
-Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
-{% asset_img 1.jpg 来张合影 %}
-]]></content>
-  </entry>
-  <entry>
     <title>如何下载AOSP的单个仓库</title>
     <url>/2024/07/30/how-to-down-load-simple-aosp-project/</url>
     <content><![CDATA[AOSP 使用 repo 来组织代码的，有时候我们只需要下载其中一部分代码。下面是具体的操作方式
@@ -10686,6 +10573,119 @@ Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动�
 把这里的 name 取出来，拼上`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/`得到一个链接`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`，用`git clone https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`的形式就可以下载到对应的代码了。]]></content>
   </entry>
   <entry>
+    <title>在 Centos 7.4 上安装Gcc 7.3</title>
+    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
+    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
+下面记录一下安装过程。
+
+<!--more -->
+
+## 描述
+
+系统为Cent OS7.4，全新安装，更新全部软件至最新版。
+
+## 安装准备
+
+```bash
+yum update -y
+yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
+```
+
+安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
+
+```bash
+configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
+```
+
+网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
+
+## 动手
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
+tar -zxf gcc-7.3.0.tar.gz
+cd gcc-7.3.0
+./contrib/download_prerequisites
+mkdir builddir && cd builddir
+../configure
+make && sudo make install
+```
+
+编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
+需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
+
+```bash
+2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
+2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
+2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
+2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
+gmp-6.1.0.tar.bz2: OK
+mpfr-3.1.4.tar.bz2: OK
+mpc-1.0.3.tar.gz: OK
+isl-0.16.1.tar.bz2: OK
+All prerequisites downloaded successfully.
+```
+
+这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
+
+另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
+
+```bash
+../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+```
+
+选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
+
+## 安装gdb
+
+在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
+tar -zxf gdb-8.1.tar.gz
+cd gdb-8.1
+mkdir builddir && cd builddir
+../configure
+make && make install
+```
+
+## 碎碎念
+
+有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
+
+```bash
+WARNING: 'makeinfo' is missing on your system.
+         You should only need it if you modified a '.texi' file, or
+         any other file indirectly affecting the aspect of the manual.
+         You might want to install the Texinfo package:
+         <http://www.gnu.org/software/texinfo/>
+         The spurious makeinfo call might also be the consequence of
+         using a buggy 'make' (AIX, DU, IRIX), in which case you might
+         want to install GNU make:
+         <http://www.gnu.org/software/make/>
+make[5]: *** [gdb.info] Error 127
+make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
+make[4]: *** [subdir_do] Error 1
+make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[3]: *** [install-only] Error 2
+make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[2]: *** [install] Error 2
+make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[1]: *** [install-gdb] Error 2
+make[1]: Leaving directory `/root/gdb-8.1/build'
+make: *** [install] Error 2
+```
+
+需要`yum install texinfo`，然后再执行`make install`。
+至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
+安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
+自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
+建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
+Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
+{% asset_img 1.jpg 来张合影 %}
+]]></content>
+  </entry>
+  <entry>
     <title>在Linux上安装node.js</title>
     <url>/2017/01/08/install-node-js-on-a-Linux-OS/</url>
     <content><![CDATA[在之前的文章中提及，使用“Hexo”，需要安装`node.js`,Windows上安装很方便，在其官网下载安装包之后，按照正常的步骤安装即可食用。
@@ -11294,6 +11294,9 @@ http {
     <url>/2023/05/23/open-android-screencap-raw-img/</url>
     <content><![CDATA[
 以 Android 9.0 为例，screencap 的实现可以查看 [http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp](http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp) 。
+
+<!-- more -->
+
 screencap 的命令格式是
 `screencap <imgpath>` 或者 `screencap -p <imgpath>`。
 如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。
@@ -11325,7 +11328,8 @@ screencap 的命令格式是
 ```
 0x0438 = 1080
 0x0870 = 2160
-```]]></content>
+```
+]]></content>
   </entry>
   <entry>
     <title>树莓派折腾记——Samba</title>
