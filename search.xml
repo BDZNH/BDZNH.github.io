@@ -8714,6 +8714,774 @@ dist
 {% asset_img 6.png %}]]></content>
   </entry>
   <entry>
+    <title>C++ ini 实现</title>
+    <url>/2024/07/31/ini-impl-in-cpp/</url>
+    <content><![CDATA[首先是从 https://github.com/benhoyt/inih 取用的 ini 读取类头文件
+
+<!-- more -->
+
+```cpp
+//file ini.h
+/* inih -- simple .INI file parser
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Copyright (C) 2009-2020, Ben Hoyt
+
+inih is released under the New BSD license (see LICENSE.txt). Go to the project
+home page for more info:
+
+https://github.com/benhoyt/inih
+
+*/
+
+#ifndef INI_H
+#define INI_H
+
+/* Make this header file easier to include in C++ code */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+
+    /* Nonzero if ini_handler callback should accept lineno parameter. */
+#ifndef INI_HANDLER_LINENO
+#define INI_HANDLER_LINENO 0
+#endif
+
+/* Visibility symbols, required for Windows DLLs */
+#ifndef INI_API
+#if defined _WIN32 || defined __CYGWIN__
+#	ifdef INI_SHARED_LIB
+#		ifdef INI_SHARED_LIB_BUILDING
+#			define INI_API __declspec(dllexport)
+#		else
+#			define INI_API __declspec(dllimport)
+#		endif
+#	else
+#		define INI_API
+#	endif
+#else
+#	if defined(__GNUC__) && __GNUC__ >= 4
+#		define INI_API __attribute__ ((visibility ("default")))
+#	else
+#		define INI_API
+#	endif
+#endif
+#endif
+
+/* Typedef for prototype of handler function. */
+#if INI_HANDLER_LINENO
+    typedef int (*ini_handler)(void* user, const char* section,
+        const char* name, const char* value,
+        int lineno);
+#else
+    typedef int (*ini_handler)(void* user, const char* section,
+        const char* name, const char* value);
+#endif
+
+    /* Typedef for prototype of fgets-style reader function. */
+    typedef char* (*ini_reader)(char* str, int num, void* stream);
+
+    /* Parse given INI-style file. May have [section]s, name=value pairs
+       (whitespace stripped), and comments starting with ';' (semicolon). Section
+       is "" if name=value pair parsed before any section heading. name:value
+       pairs are also supported as a concession to Python's configparser.
+
+       For each name=value pair parsed, call handler function with given user
+       pointer as well as section, name, and value (data only valid for duration
+       of handler call). Handler should return nonzero on success, zero on error.
+
+       Returns 0 on success, line number of first error on parse error (doesn't
+       stop on first error), -1 on file open error, or -2 on memory allocation
+       error (only when INI_USE_STACK is zero).
+    */
+    INI_API int ini_parse(const char* filename, ini_handler handler, void* user);
+
+    /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
+       close the file when it's finished -- the caller must do that. */
+    INI_API int ini_parse_file(FILE* file, ini_handler handler, void* user);
+
+    /* Same as ini_parse(), but takes an ini_reader function pointer instead of
+       filename. Used for implementing custom or string-based I/O (see also
+       ini_parse_string). */
+    INI_API int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+        void* user);
+
+    /* Same as ini_parse(), but takes a zero-terminated string with the INI data
+    instead of a file. Useful for parsing INI data from a network socket or
+    already in memory. */
+    INI_API int ini_parse_string(const char* string, ini_handler handler, void* user);
+
+    /* Nonzero to allow multi-line value parsing, in the style of Python's
+       configparser. If allowed, ini_parse() will call the handler with the same
+       name for each subsequent line parsed. */
+#ifndef INI_ALLOW_MULTILINE
+#define INI_ALLOW_MULTILINE 1
+#endif
+
+       /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
+          the file. See https://github.com/benhoyt/inih/issues/21 */
+#ifndef INI_ALLOW_BOM
+#define INI_ALLOW_BOM 1
+#endif
+
+          /* Chars that begin a start-of-line comment. Per Python configparser, allow
+             both ; and # comments at the start of a line by default. */
+#ifndef INI_START_COMMENT_PREFIXES
+#define INI_START_COMMENT_PREFIXES ";#"
+#endif
+
+             /* Nonzero to allow inline comments (with valid inline comment characters
+                specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
+                Python 3.2+ configparser behaviour. */
+#ifndef INI_ALLOW_INLINE_COMMENTS
+#define INI_ALLOW_INLINE_COMMENTS 1
+#endif
+#ifndef INI_INLINE_COMMENT_PREFIXES
+#define INI_INLINE_COMMENT_PREFIXES ";"
+#endif
+
+                /* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
+#ifndef INI_USE_STACK
+#define INI_USE_STACK 1
+#endif
+
+/* Maximum line length for any line in INI file (stack or heap). Note that
+   this must be 3 more than the longest line (due to '\r', '\n', and '\0'). */
+#ifndef INI_MAX_LINE
+#define INI_MAX_LINE 200
+#endif
+
+   /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
+      fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
+      zero. */
+#ifndef INI_ALLOW_REALLOC
+#define INI_ALLOW_REALLOC 0
+#endif
+
+      /* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
+         is zero. */
+#ifndef INI_INITIAL_ALLOC
+#define INI_INITIAL_ALLOC 200
+#endif
+
+         /* Stop parsing on first error (default is to keep parsing). */
+#ifndef INI_STOP_ON_FIRST_ERROR
+#define INI_STOP_ON_FIRST_ERROR 0
+#endif
+
+/* Nonzero to call the handler at the start of each new section (with
+   name and value NULL). Default is to only call the handler on
+   each name=value pair. */
+#ifndef INI_CALL_HANDLER_ON_NEW_SECTION
+#define INI_CALL_HANDLER_ON_NEW_SECTION 0
+#endif
+
+   /* Nonzero to allow a name without a value (no '=' or ':' on the line) and
+      call the handler with value NULL in this case. Default is to treat
+      no-value lines as an error. */
+#ifndef INI_ALLOW_NO_VALUE
+#define INI_ALLOW_NO_VALUE 0
+#endif
+
+      /* Nonzero to use custom ini_malloc, ini_free, and ini_realloc memory
+         allocation functions (INI_USE_STACK must also be 0). These functions must
+         have the same signatures as malloc/free/realloc and behave in a similar
+         way. ini_realloc is only needed if INI_ALLOW_REALLOC is set. */
+#ifndef INI_CUSTOM_ALLOCATOR
+#define INI_CUSTOM_ALLOCATOR 0
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* INI_H */
+```
+
+和对应的 ini 读取实现
+
+```cpp
+//file ini.c
+/* inih -- simple .INI file parser
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Copyright (C) 2009-2020, Ben Hoyt
+
+inih is released under the New BSD license (see LICENSE.txt). Go to the project
+home page for more info:
+
+https://github.com/benhoyt/inih
+
+*/
+
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#include "ini.h"
+
+#if !INI_USE_STACK
+#if INI_CUSTOM_ALLOCATOR
+#include <stddef.h>
+void* ini_malloc(size_t size);
+void ini_free(void* ptr);
+void* ini_realloc(void* ptr, size_t size);
+#else
+#include <stdlib.h>
+#define ini_malloc malloc
+#define ini_free free
+#define ini_realloc realloc
+#endif
+#endif
+
+#define MAX_SECTION 50
+#define MAX_NAME 50
+
+/* Used by ini_parse_string() to keep track of string parsing state. */
+typedef struct {
+    const char* ptr;
+    size_t num_left;
+} ini_parse_string_ctx;
+
+/* Strip whitespace chars off end of given string, in place. Return s. */
+static char* rstrip(char* s)
+{
+    char* p = s + strlen(s);
+    while (p > s && isspace((unsigned char)(*--p)))
+        *p = '\0';
+    return s;
+}
+
+/* Return pointer to first non-whitespace char in given string. */
+static char* lskip(const char* s)
+{
+    while (*s && isspace((unsigned char)(*s)))
+        s++;
+    return (char*)s;
+}
+
+/* Return pointer to first char (of chars) or inline comment in given string,
+   or pointer to NUL at end of string if neither found. Inline comment must
+   be prefixed by a whitespace character to register as a comment. */
+static char* find_chars_or_comment(const char* s, const char* chars)
+{
+#if INI_ALLOW_INLINE_COMMENTS
+    int was_space = 0;
+    while (*s && (!chars || !strchr(chars, *s)) &&
+        !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
+        was_space = isspace((unsigned char)(*s));
+        s++;
+    }
+#else
+    while (*s && (!chars || !strchr(chars, *s))) {
+        s++;
+    }
+#endif
+    return (char*)s;
+}
+
+/* Similar to strncpy, but ensures dest (size bytes) is
+   NUL-terminated, and doesn't pad with NULs. */
+static char* strncpy0(char* dest, const char* src, size_t size)
+{
+    /* Could use strncpy internally, but it causes gcc warnings (see issue #91) */
+    size_t i;
+    for (i = 0; i < size - 1 && src[i]; i++)
+        dest[i] = src[i];
+    dest[i] = '\0';
+    return dest;
+}
+
+/* See documentation in header file. */
+int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+    void* user)
+{
+    /* Uses a fair bit of stack (use heap instead if you need to) */
+#if INI_USE_STACK
+    char line[INI_MAX_LINE];
+    size_t max_line = INI_MAX_LINE;
+#else
+    char* line;
+    size_t max_line = INI_INITIAL_ALLOC;
+#endif
+#if INI_ALLOW_REALLOC && !INI_USE_STACK
+    char* new_line;
+    size_t offset;
+#endif
+    char section[MAX_SECTION] = "";
+    char prev_name[MAX_NAME] = "";
+
+    char* start;
+    char* end;
+    char* name;
+    char* value;
+    int lineno = 0;
+    int error = 0;
+
+#if !INI_USE_STACK
+    line = (char*)ini_malloc(INI_INITIAL_ALLOC);
+    if (!line) {
+        return -2;
+    }
+#endif
+
+#if INI_HANDLER_LINENO
+#define HANDLER(u, s, n, v) handler(u, s, n, v, lineno)
+#else
+#define HANDLER(u, s, n, v) handler(u, s, n, v)
+#endif
+
+    /* Scan through stream line by line */
+    while (reader(line, (int)max_line, stream) != NULL) {
+#if INI_ALLOW_REALLOC && !INI_USE_STACK
+        offset = strlen(line);
+        while (offset == max_line - 1 && line[offset - 1] != '\n') {
+            max_line *= 2;
+            if (max_line > INI_MAX_LINE)
+                max_line = INI_MAX_LINE;
+            new_line = ini_realloc(line, max_line);
+            if (!new_line) {
+                ini_free(line);
+                return -2;
+            }
+            line = new_line;
+            if (reader(line + offset, (int)(max_line - offset), stream) == NULL)
+                break;
+            if (max_line >= INI_MAX_LINE)
+                break;
+            offset += strlen(line + offset);
+        }
+#endif
+
+        lineno++;
+
+        start = line;
+#if INI_ALLOW_BOM
+        if (lineno == 1 && (unsigned char)start[0] == 0xEF &&
+            (unsigned char)start[1] == 0xBB &&
+            (unsigned char)start[2] == 0xBF) {
+            start += 3;
+        }
+#endif
+        start = lskip(rstrip(start));
+
+        if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
+            /* Start-of-line comment */
+        }
+#if INI_ALLOW_MULTILINE
+        else if (*prev_name && *start && start > line) {
+#if INI_ALLOW_INLINE_COMMENTS
+            end = find_chars_or_comment(start, NULL);
+            if (*end)
+                *end = '\0';
+            rstrip(start);
+#endif
+            /* Non-blank line with leading whitespace, treat as continuation
+               of previous name's value (as per Python configparser). */
+            if (!HANDLER(user, section, prev_name, start) && !error)
+                error = lineno;
+        }
+#endif
+        else if (*start == '[') {
+            /* A "[section]" line */
+            end = find_chars_or_comment(start + 1, "]");
+            if (*end == ']') {
+                *end = '\0';
+                strncpy0(section, start + 1, sizeof(section));
+                *prev_name = '\0';
+#if INI_CALL_HANDLER_ON_NEW_SECTION
+                if (!HANDLER(user, section, NULL, NULL) && !error)
+                    error = lineno;
+#endif
+            }
+            else if (!error) {
+                /* No ']' found on section line */
+                error = lineno;
+            }
+        }
+        else if (*start) {
+            /* Not a comment, must be a name[=:]value pair */
+            end = find_chars_or_comment(start, "=:");
+            if (*end == '=' || *end == ':') {
+                *end = '\0';
+                name = rstrip(start);
+                value = end + 1;
+#if INI_ALLOW_INLINE_COMMENTS
+                end = find_chars_or_comment(value, NULL);
+                if (*end)
+                    *end = '\0';
+#endif
+                value = lskip(value);
+                rstrip(value);
+
+                /* Valid name[=:]value pair found, call handler */
+                strncpy0(prev_name, name, sizeof(prev_name));
+                if (!HANDLER(user, section, name, value) && !error)
+                    error = lineno;
+            }
+            else if (!error) {
+                /* No '=' or ':' found on name[=:]value line */
+#if INI_ALLOW_NO_VALUE
+                * end = '\0';
+                name = rstrip(start);
+                if (!HANDLER(user, section, name, NULL) && !error)
+                    error = lineno;
+#else
+                error = lineno;
+#endif
+            }
+        }
+
+#if INI_STOP_ON_FIRST_ERROR
+        if (error)
+            break;
+#endif
+    }
+
+#if !INI_USE_STACK
+    ini_free(line);
+#endif
+
+    return error;
+}
+
+/* See documentation in header file. */
+int ini_parse_file(FILE* file, ini_handler handler, void* user)
+{
+    return ini_parse_stream((ini_reader)fgets, file, handler, user);
+}
+
+/* See documentation in header file. */
+int ini_parse(const char* filename, ini_handler handler, void* user)
+{
+    FILE* file;
+    int error;
+
+    file = fopen(filename, "r");
+    if (!file)
+        return -1;
+    error = ini_parse_file(file, handler, user);
+    fclose(file);
+    return error;
+}
+
+/* An ini_reader function to read the next line from a string buffer. This
+   is the fgets() equivalent used by ini_parse_string(). */
+static char* ini_reader_string(char* str, int num, void* stream) {
+    ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;
+    const char* ctx_ptr = ctx->ptr;
+    size_t ctx_num_left = ctx->num_left;
+    char* strp = str;
+    char c;
+
+    if (ctx_num_left == 0 || num < 2)
+        return NULL;
+
+    while (num > 1 && ctx_num_left != 0) {
+        c = *ctx_ptr++;
+        ctx_num_left--;
+        *strp++ = c;
+        if (c == '\n')
+            break;
+        num--;
+    }
+
+    *strp = '\0';
+    ctx->ptr = ctx_ptr;
+    ctx->num_left = ctx_num_left;
+    return str;
+}
+
+/* See documentation in header file. */
+int ini_parse_string(const char* string, ini_handler handler, void* user) {
+    ini_parse_string_ctx ctx;
+
+    ctx.ptr = string;
+    ctx.num_left = strlen(string);
+    return ini_parse_stream((ini_reader)ini_reader_string, &ctx, handler,
+        user);
+}
+```
+用CPP封装一下
+```cpp
+//file IniParser.h
+#pragma once
+#include<unordered_map>
+#include<string>
+#include<iostream>
+#include<vector>
+static std::string __EMPTY_STRING = "";
+class IniParser
+{
+public:
+    IniParser(const char* inifile);
+    ~IniParser();
+    std::string GetString(const std::string& section, const std::string& key, const std::string& def = __EMPTY_STRING);
+    double GetDouble(const std::string& section, const std::string& key, double def);
+    bool GetBoolean(const std::string& section, const std::string& key, bool def);
+    std::vector<std::string> GetSections();
+    std::vector<std::string> GetKeysOfSection(const std::string& section);
+    friend int iniHandler(void* user, const char* section, const char* name, const char* value);
+    friend std::ostream& operator<<(std::ostream& out, const IniParser& obj);
+private:
+    void addNewRecord(const char* section, const char* key, const char* value);
+
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mCaches;
+};
+```
+加上对应的实现
+```cpp
+#include "IniParser.h"
+#include "ini.h"
+#include <stdlib.h>
+#include <string.h>
+
+static int iniHandler(void* user, const char* section, const char* name, const char* value)
+{
+    IniParser* parser = (IniParser*)(user);
+    parser->addNewRecord(section, name, value);
+    return 1;
+}
+
+std::ostream& operator<<(std::ostream& out, const IniParser& obj)
+{
+    for (auto& sec : obj.mCaches)
+    {
+        out << "[" << sec.first << "]\n";
+        for (auto& keyValue : sec.second)
+        {
+            out << keyValue.first << " = " << keyValue.second << "\n";
+        }
+    }
+    out << std::flush;
+    return out;
+}
+
+IniParser::IniParser(const char* inifile)
+{
+    int ret = ini_parse(inifile, iniHandler, this);
+}
+
+IniParser::~IniParser()
+{
+}
+
+std::string IniParser::GetString(const std::string& section, const std::string& key, const std::string& def)
+{
+    auto sec = mCaches.find(section);
+    if (sec != mCaches.end())
+    {
+        auto keyValue = sec->second.find(key);
+        if (keyValue != sec->second.end())
+        {
+            return keyValue->second;
+        }
+    }
+    return def;
+}
+
+double IniParser::GetDouble(const std::string& section, const std::string& key, double def)
+{
+    auto ret = GetString(section, key);
+    if (ret.empty())
+    {
+        return def;
+    }
+    try {
+        double result = std::stod(ret);
+        return result;
+    }
+    catch (std::exception& e) {
+        return def;
+    }
+}
+
+bool IniParser::GetBoolean(const std::string& section, const std::string& key, bool def)
+{
+    auto ret = GetString(section, key);
+    if (ret.empty())
+    {
+        return def;
+    }
+    char firstChar = ret.at(0);
+    return firstChar == 'T' || firstChar == 'Y' || firstChar == 'y' || firstChar == '1' || firstChar == 't';
+}
+
+std::vector<std::string> IniParser::GetSections()
+{
+    std::vector<std::string> ret;
+    for (auto& sec : mCaches)
+    {
+        ret.emplace_back(sec.first);
+    }
+    return ret;
+}
+
+std::vector<std::string> IniParser::GetKeysOfSection(const std::string& section)
+{
+    std::vector<std::string> ret;
+    auto sec = mCaches.find(section);
+    if (sec != mCaches.end())
+    {
+        for (auto& keyValues : sec->second)
+        {
+            ret.emplace_back(keyValues.first);
+        }
+    }
+    return ret;
+}
+
+void IniParser::addNewRecord(const char* section, const char* key, const char* value)
+{
+    if (section == nullptr || key == nullptr || value == nullptr) 
+    {
+        return;
+    }
+#define EMPTY(s) (strlen(s) == 0)
+    if (EMPTY(section) || EMPTY(key) || EMPTY(value)) {
+        return;
+    }
+    auto sec = mCaches.find(section);
+    if (sec == mCaches.end())
+    {
+        std::unordered_map<std::string, std::string> tmpMap;
+        tmpMap.emplace(key, value);
+        mCaches.emplace(section, std::move(tmpMap));
+    }
+    else
+    {
+        auto ret = sec->second.try_emplace(key, value);
+        if (!ret.second)
+        {
+            sec->second[key] = value;
+        }
+    }
+}
+```]]></content>
+  </entry>
+  <entry>
+    <title>在 Centos 7.4 上安装Gcc 7.3</title>
+    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
+    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
+下面记录一下安装过程。
+
+<!--more -->
+
+## 描述
+
+系统为Cent OS7.4，全新安装，更新全部软件至最新版。
+
+## 安装准备
+
+```bash
+yum update -y
+yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
+```
+
+安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
+
+```bash
+configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
+```
+
+网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
+
+## 动手
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
+tar -zxf gcc-7.3.0.tar.gz
+cd gcc-7.3.0
+./contrib/download_prerequisites
+mkdir builddir && cd builddir
+../configure
+make && sudo make install
+```
+
+编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
+需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
+
+```bash
+2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
+2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
+2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
+2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
+gmp-6.1.0.tar.bz2: OK
+mpfr-3.1.4.tar.bz2: OK
+mpc-1.0.3.tar.gz: OK
+isl-0.16.1.tar.bz2: OK
+All prerequisites downloaded successfully.
+```
+
+这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
+
+另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
+
+```bash
+../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+```
+
+选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
+
+## 安装gdb
+
+在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
+tar -zxf gdb-8.1.tar.gz
+cd gdb-8.1
+mkdir builddir && cd builddir
+../configure
+make && make install
+```
+
+## 碎碎念
+
+有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
+
+```bash
+WARNING: 'makeinfo' is missing on your system.
+         You should only need it if you modified a '.texi' file, or
+         any other file indirectly affecting the aspect of the manual.
+         You might want to install the Texinfo package:
+         <http://www.gnu.org/software/texinfo/>
+         The spurious makeinfo call might also be the consequence of
+         using a buggy 'make' (AIX, DU, IRIX), in which case you might
+         want to install GNU make:
+         <http://www.gnu.org/software/make/>
+make[5]: *** [gdb.info] Error 127
+make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
+make[4]: *** [subdir_do] Error 1
+make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[3]: *** [install-only] Error 2
+make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[2]: *** [install] Error 2
+make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[1]: *** [install-gdb] Error 2
+make[1]: Leaving directory `/root/gdb-8.1/build'
+make: *** [install] Error 2
+```
+
+需要`yum install texinfo`，然后再执行`make install`。
+至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
+安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
+自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
+建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
+Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
+{% asset_img 1.jpg 来张合影 %}
+]]></content>
+  </entry>
+  <entry>
     <title>如何下载AOSP的单个仓库</title>
     <url>/2024/07/30/how-to-down-load-simple-aosp-project/</url>
     <content><![CDATA[AOSP 使用 repo 来组织代码的，有时候我们只需要下载其中一部分代码。下面是具体的操作方式
@@ -9918,774 +10686,6 @@ dist
 把这里的 name 取出来，拼上`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/`得到一个链接`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`，用`git clone https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`的形式就可以下载到对应的代码了。]]></content>
   </entry>
   <entry>
-    <title>C++ ini 实现</title>
-    <url>/2024/07/31/ini-impl-in-cpp/</url>
-    <content><![CDATA[首先是从 https://github.com/benhoyt/inih 取用的 ini 读取类头文件
-
-<!-- more -->
-
-```cpp
-//file ini.h
-/* inih -- simple .INI file parser
-
-SPDX-License-Identifier: BSD-3-Clause
-
-Copyright (C) 2009-2020, Ben Hoyt
-
-inih is released under the New BSD license (see LICENSE.txt). Go to the project
-home page for more info:
-
-https://github.com/benhoyt/inih
-
-*/
-
-#ifndef INI_H
-#define INI_H
-
-/* Make this header file easier to include in C++ code */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdio.h>
-
-    /* Nonzero if ini_handler callback should accept lineno parameter. */
-#ifndef INI_HANDLER_LINENO
-#define INI_HANDLER_LINENO 0
-#endif
-
-/* Visibility symbols, required for Windows DLLs */
-#ifndef INI_API
-#if defined _WIN32 || defined __CYGWIN__
-#	ifdef INI_SHARED_LIB
-#		ifdef INI_SHARED_LIB_BUILDING
-#			define INI_API __declspec(dllexport)
-#		else
-#			define INI_API __declspec(dllimport)
-#		endif
-#	else
-#		define INI_API
-#	endif
-#else
-#	if defined(__GNUC__) && __GNUC__ >= 4
-#		define INI_API __attribute__ ((visibility ("default")))
-#	else
-#		define INI_API
-#	endif
-#endif
-#endif
-
-/* Typedef for prototype of handler function. */
-#if INI_HANDLER_LINENO
-    typedef int (*ini_handler)(void* user, const char* section,
-        const char* name, const char* value,
-        int lineno);
-#else
-    typedef int (*ini_handler)(void* user, const char* section,
-        const char* name, const char* value);
-#endif
-
-    /* Typedef for prototype of fgets-style reader function. */
-    typedef char* (*ini_reader)(char* str, int num, void* stream);
-
-    /* Parse given INI-style file. May have [section]s, name=value pairs
-       (whitespace stripped), and comments starting with ';' (semicolon). Section
-       is "" if name=value pair parsed before any section heading. name:value
-       pairs are also supported as a concession to Python's configparser.
-
-       For each name=value pair parsed, call handler function with given user
-       pointer as well as section, name, and value (data only valid for duration
-       of handler call). Handler should return nonzero on success, zero on error.
-
-       Returns 0 on success, line number of first error on parse error (doesn't
-       stop on first error), -1 on file open error, or -2 on memory allocation
-       error (only when INI_USE_STACK is zero).
-    */
-    INI_API int ini_parse(const char* filename, ini_handler handler, void* user);
-
-    /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
-       close the file when it's finished -- the caller must do that. */
-    INI_API int ini_parse_file(FILE* file, ini_handler handler, void* user);
-
-    /* Same as ini_parse(), but takes an ini_reader function pointer instead of
-       filename. Used for implementing custom or string-based I/O (see also
-       ini_parse_string). */
-    INI_API int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-        void* user);
-
-    /* Same as ini_parse(), but takes a zero-terminated string with the INI data
-    instead of a file. Useful for parsing INI data from a network socket or
-    already in memory. */
-    INI_API int ini_parse_string(const char* string, ini_handler handler, void* user);
-
-    /* Nonzero to allow multi-line value parsing, in the style of Python's
-       configparser. If allowed, ini_parse() will call the handler with the same
-       name for each subsequent line parsed. */
-#ifndef INI_ALLOW_MULTILINE
-#define INI_ALLOW_MULTILINE 1
-#endif
-
-       /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
-          the file. See https://github.com/benhoyt/inih/issues/21 */
-#ifndef INI_ALLOW_BOM
-#define INI_ALLOW_BOM 1
-#endif
-
-          /* Chars that begin a start-of-line comment. Per Python configparser, allow
-             both ; and # comments at the start of a line by default. */
-#ifndef INI_START_COMMENT_PREFIXES
-#define INI_START_COMMENT_PREFIXES ";#"
-#endif
-
-             /* Nonzero to allow inline comments (with valid inline comment characters
-                specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
-                Python 3.2+ configparser behaviour. */
-#ifndef INI_ALLOW_INLINE_COMMENTS
-#define INI_ALLOW_INLINE_COMMENTS 1
-#endif
-#ifndef INI_INLINE_COMMENT_PREFIXES
-#define INI_INLINE_COMMENT_PREFIXES ";"
-#endif
-
-                /* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
-#ifndef INI_USE_STACK
-#define INI_USE_STACK 1
-#endif
-
-/* Maximum line length for any line in INI file (stack or heap). Note that
-   this must be 3 more than the longest line (due to '\r', '\n', and '\0'). */
-#ifndef INI_MAX_LINE
-#define INI_MAX_LINE 200
-#endif
-
-   /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
-      fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
-      zero. */
-#ifndef INI_ALLOW_REALLOC
-#define INI_ALLOW_REALLOC 0
-#endif
-
-      /* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
-         is zero. */
-#ifndef INI_INITIAL_ALLOC
-#define INI_INITIAL_ALLOC 200
-#endif
-
-         /* Stop parsing on first error (default is to keep parsing). */
-#ifndef INI_STOP_ON_FIRST_ERROR
-#define INI_STOP_ON_FIRST_ERROR 0
-#endif
-
-/* Nonzero to call the handler at the start of each new section (with
-   name and value NULL). Default is to only call the handler on
-   each name=value pair. */
-#ifndef INI_CALL_HANDLER_ON_NEW_SECTION
-#define INI_CALL_HANDLER_ON_NEW_SECTION 0
-#endif
-
-   /* Nonzero to allow a name without a value (no '=' or ':' on the line) and
-      call the handler with value NULL in this case. Default is to treat
-      no-value lines as an error. */
-#ifndef INI_ALLOW_NO_VALUE
-#define INI_ALLOW_NO_VALUE 0
-#endif
-
-      /* Nonzero to use custom ini_malloc, ini_free, and ini_realloc memory
-         allocation functions (INI_USE_STACK must also be 0). These functions must
-         have the same signatures as malloc/free/realloc and behave in a similar
-         way. ini_realloc is only needed if INI_ALLOW_REALLOC is set. */
-#ifndef INI_CUSTOM_ALLOCATOR
-#define INI_CUSTOM_ALLOCATOR 0
-#endif
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* INI_H */
-```
-
-和对应的 ini 读取实现
-
-```cpp
-//file ini.c
-/* inih -- simple .INI file parser
-
-SPDX-License-Identifier: BSD-3-Clause
-
-Copyright (C) 2009-2020, Ben Hoyt
-
-inih is released under the New BSD license (see LICENSE.txt). Go to the project
-home page for more info:
-
-https://github.com/benhoyt/inih
-
-*/
-
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-
-#include "ini.h"
-
-#if !INI_USE_STACK
-#if INI_CUSTOM_ALLOCATOR
-#include <stddef.h>
-void* ini_malloc(size_t size);
-void ini_free(void* ptr);
-void* ini_realloc(void* ptr, size_t size);
-#else
-#include <stdlib.h>
-#define ini_malloc malloc
-#define ini_free free
-#define ini_realloc realloc
-#endif
-#endif
-
-#define MAX_SECTION 50
-#define MAX_NAME 50
-
-/* Used by ini_parse_string() to keep track of string parsing state. */
-typedef struct {
-    const char* ptr;
-    size_t num_left;
-} ini_parse_string_ctx;
-
-/* Strip whitespace chars off end of given string, in place. Return s. */
-static char* rstrip(char* s)
-{
-    char* p = s + strlen(s);
-    while (p > s && isspace((unsigned char)(*--p)))
-        *p = '\0';
-    return s;
-}
-
-/* Return pointer to first non-whitespace char in given string. */
-static char* lskip(const char* s)
-{
-    while (*s && isspace((unsigned char)(*s)))
-        s++;
-    return (char*)s;
-}
-
-/* Return pointer to first char (of chars) or inline comment in given string,
-   or pointer to NUL at end of string if neither found. Inline comment must
-   be prefixed by a whitespace character to register as a comment. */
-static char* find_chars_or_comment(const char* s, const char* chars)
-{
-#if INI_ALLOW_INLINE_COMMENTS
-    int was_space = 0;
-    while (*s && (!chars || !strchr(chars, *s)) &&
-        !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
-        was_space = isspace((unsigned char)(*s));
-        s++;
-    }
-#else
-    while (*s && (!chars || !strchr(chars, *s))) {
-        s++;
-    }
-#endif
-    return (char*)s;
-}
-
-/* Similar to strncpy, but ensures dest (size bytes) is
-   NUL-terminated, and doesn't pad with NULs. */
-static char* strncpy0(char* dest, const char* src, size_t size)
-{
-    /* Could use strncpy internally, but it causes gcc warnings (see issue #91) */
-    size_t i;
-    for (i = 0; i < size - 1 && src[i]; i++)
-        dest[i] = src[i];
-    dest[i] = '\0';
-    return dest;
-}
-
-/* See documentation in header file. */
-int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-    void* user)
-{
-    /* Uses a fair bit of stack (use heap instead if you need to) */
-#if INI_USE_STACK
-    char line[INI_MAX_LINE];
-    size_t max_line = INI_MAX_LINE;
-#else
-    char* line;
-    size_t max_line = INI_INITIAL_ALLOC;
-#endif
-#if INI_ALLOW_REALLOC && !INI_USE_STACK
-    char* new_line;
-    size_t offset;
-#endif
-    char section[MAX_SECTION] = "";
-    char prev_name[MAX_NAME] = "";
-
-    char* start;
-    char* end;
-    char* name;
-    char* value;
-    int lineno = 0;
-    int error = 0;
-
-#if !INI_USE_STACK
-    line = (char*)ini_malloc(INI_INITIAL_ALLOC);
-    if (!line) {
-        return -2;
-    }
-#endif
-
-#if INI_HANDLER_LINENO
-#define HANDLER(u, s, n, v) handler(u, s, n, v, lineno)
-#else
-#define HANDLER(u, s, n, v) handler(u, s, n, v)
-#endif
-
-    /* Scan through stream line by line */
-    while (reader(line, (int)max_line, stream) != NULL) {
-#if INI_ALLOW_REALLOC && !INI_USE_STACK
-        offset = strlen(line);
-        while (offset == max_line - 1 && line[offset - 1] != '\n') {
-            max_line *= 2;
-            if (max_line > INI_MAX_LINE)
-                max_line = INI_MAX_LINE;
-            new_line = ini_realloc(line, max_line);
-            if (!new_line) {
-                ini_free(line);
-                return -2;
-            }
-            line = new_line;
-            if (reader(line + offset, (int)(max_line - offset), stream) == NULL)
-                break;
-            if (max_line >= INI_MAX_LINE)
-                break;
-            offset += strlen(line + offset);
-        }
-#endif
-
-        lineno++;
-
-        start = line;
-#if INI_ALLOW_BOM
-        if (lineno == 1 && (unsigned char)start[0] == 0xEF &&
-            (unsigned char)start[1] == 0xBB &&
-            (unsigned char)start[2] == 0xBF) {
-            start += 3;
-        }
-#endif
-        start = lskip(rstrip(start));
-
-        if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
-            /* Start-of-line comment */
-        }
-#if INI_ALLOW_MULTILINE
-        else if (*prev_name && *start && start > line) {
-#if INI_ALLOW_INLINE_COMMENTS
-            end = find_chars_or_comment(start, NULL);
-            if (*end)
-                *end = '\0';
-            rstrip(start);
-#endif
-            /* Non-blank line with leading whitespace, treat as continuation
-               of previous name's value (as per Python configparser). */
-            if (!HANDLER(user, section, prev_name, start) && !error)
-                error = lineno;
-        }
-#endif
-        else if (*start == '[') {
-            /* A "[section]" line */
-            end = find_chars_or_comment(start + 1, "]");
-            if (*end == ']') {
-                *end = '\0';
-                strncpy0(section, start + 1, sizeof(section));
-                *prev_name = '\0';
-#if INI_CALL_HANDLER_ON_NEW_SECTION
-                if (!HANDLER(user, section, NULL, NULL) && !error)
-                    error = lineno;
-#endif
-            }
-            else if (!error) {
-                /* No ']' found on section line */
-                error = lineno;
-            }
-        }
-        else if (*start) {
-            /* Not a comment, must be a name[=:]value pair */
-            end = find_chars_or_comment(start, "=:");
-            if (*end == '=' || *end == ':') {
-                *end = '\0';
-                name = rstrip(start);
-                value = end + 1;
-#if INI_ALLOW_INLINE_COMMENTS
-                end = find_chars_or_comment(value, NULL);
-                if (*end)
-                    *end = '\0';
-#endif
-                value = lskip(value);
-                rstrip(value);
-
-                /* Valid name[=:]value pair found, call handler */
-                strncpy0(prev_name, name, sizeof(prev_name));
-                if (!HANDLER(user, section, name, value) && !error)
-                    error = lineno;
-            }
-            else if (!error) {
-                /* No '=' or ':' found on name[=:]value line */
-#if INI_ALLOW_NO_VALUE
-                * end = '\0';
-                name = rstrip(start);
-                if (!HANDLER(user, section, name, NULL) && !error)
-                    error = lineno;
-#else
-                error = lineno;
-#endif
-            }
-        }
-
-#if INI_STOP_ON_FIRST_ERROR
-        if (error)
-            break;
-#endif
-    }
-
-#if !INI_USE_STACK
-    ini_free(line);
-#endif
-
-    return error;
-}
-
-/* See documentation in header file. */
-int ini_parse_file(FILE* file, ini_handler handler, void* user)
-{
-    return ini_parse_stream((ini_reader)fgets, file, handler, user);
-}
-
-/* See documentation in header file. */
-int ini_parse(const char* filename, ini_handler handler, void* user)
-{
-    FILE* file;
-    int error;
-
-    file = fopen(filename, "r");
-    if (!file)
-        return -1;
-    error = ini_parse_file(file, handler, user);
-    fclose(file);
-    return error;
-}
-
-/* An ini_reader function to read the next line from a string buffer. This
-   is the fgets() equivalent used by ini_parse_string(). */
-static char* ini_reader_string(char* str, int num, void* stream) {
-    ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;
-    const char* ctx_ptr = ctx->ptr;
-    size_t ctx_num_left = ctx->num_left;
-    char* strp = str;
-    char c;
-
-    if (ctx_num_left == 0 || num < 2)
-        return NULL;
-
-    while (num > 1 && ctx_num_left != 0) {
-        c = *ctx_ptr++;
-        ctx_num_left--;
-        *strp++ = c;
-        if (c == '\n')
-            break;
-        num--;
-    }
-
-    *strp = '\0';
-    ctx->ptr = ctx_ptr;
-    ctx->num_left = ctx_num_left;
-    return str;
-}
-
-/* See documentation in header file. */
-int ini_parse_string(const char* string, ini_handler handler, void* user) {
-    ini_parse_string_ctx ctx;
-
-    ctx.ptr = string;
-    ctx.num_left = strlen(string);
-    return ini_parse_stream((ini_reader)ini_reader_string, &ctx, handler,
-        user);
-}
-```
-用CPP封装一下
-```cpp
-//file IniParser.h
-#pragma once
-#include<unordered_map>
-#include<string>
-#include<iostream>
-#include<vector>
-static std::string __EMPTY_STRING = "";
-class IniParser
-{
-public:
-    IniParser(const char* inifile);
-    ~IniParser();
-    std::string GetString(const std::string& section, const std::string& key, const std::string& def = __EMPTY_STRING);
-    double GetDouble(const std::string& section, const std::string& key, double def);
-    bool GetBoolean(const std::string& section, const std::string& key, bool def);
-    std::vector<std::string> GetSections();
-    std::vector<std::string> GetKeysOfSection(const std::string& section);
-    friend int iniHandler(void* user, const char* section, const char* name, const char* value);
-    friend std::ostream& operator<<(std::ostream& out, const IniParser& obj);
-private:
-    void addNewRecord(const char* section, const char* key, const char* value);
-
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mCaches;
-};
-```
-加上对应的实现
-```cpp
-#include "IniParser.h"
-#include "ini.h"
-#include <stdlib.h>
-#include <string.h>
-
-static int iniHandler(void* user, const char* section, const char* name, const char* value)
-{
-    IniParser* parser = (IniParser*)(user);
-    parser->addNewRecord(section, name, value);
-    return 1;
-}
-
-std::ostream& operator<<(std::ostream& out, const IniParser& obj)
-{
-    for (auto& sec : obj.mCaches)
-    {
-        out << "[" << sec.first << "]\n";
-        for (auto& keyValue : sec.second)
-        {
-            out << keyValue.first << " = " << keyValue.second << "\n";
-        }
-    }
-    out << std::flush;
-    return out;
-}
-
-IniParser::IniParser(const char* inifile)
-{
-    int ret = ini_parse(inifile, iniHandler, this);
-}
-
-IniParser::~IniParser()
-{
-}
-
-std::string IniParser::GetString(const std::string& section, const std::string& key, const std::string& def)
-{
-    auto sec = mCaches.find(section);
-    if (sec != mCaches.end())
-    {
-        auto keyValue = sec->second.find(key);
-        if (keyValue != sec->second.end())
-        {
-            return keyValue->second;
-        }
-    }
-    return def;
-}
-
-double IniParser::GetDouble(const std::string& section, const std::string& key, double def)
-{
-    auto ret = GetString(section, key);
-    if (ret.empty())
-    {
-        return def;
-    }
-    try {
-        double result = std::stod(ret);
-        return result;
-    }
-    catch (std::exception& e) {
-        return def;
-    }
-}
-
-bool IniParser::GetBoolean(const std::string& section, const std::string& key, bool def)
-{
-    auto ret = GetString(section, key);
-    if (ret.empty())
-    {
-        return def;
-    }
-    char firstChar = ret.at(0);
-    return firstChar == 'T' || firstChar == 'Y' || firstChar == 'y' || firstChar == '1' || firstChar == 't';
-}
-
-std::vector<std::string> IniParser::GetSections()
-{
-    std::vector<std::string> ret;
-    for (auto& sec : mCaches)
-    {
-        ret.emplace_back(sec.first);
-    }
-    return ret;
-}
-
-std::vector<std::string> IniParser::GetKeysOfSection(const std::string& section)
-{
-    std::vector<std::string> ret;
-    auto sec = mCaches.find(section);
-    if (sec != mCaches.end())
-    {
-        for (auto& keyValues : sec->second)
-        {
-            ret.emplace_back(keyValues.first);
-        }
-    }
-    return ret;
-}
-
-void IniParser::addNewRecord(const char* section, const char* key, const char* value)
-{
-    if (section == nullptr || key == nullptr || value == nullptr) 
-    {
-        return;
-    }
-#define EMPTY(s) (strlen(s) == 0)
-    if (EMPTY(section) || EMPTY(key) || EMPTY(value)) {
-        return;
-    }
-    auto sec = mCaches.find(section);
-    if (sec == mCaches.end())
-    {
-        std::unordered_map<std::string, std::string> tmpMap;
-        tmpMap.emplace(key, value);
-        mCaches.emplace(section, std::move(tmpMap));
-    }
-    else
-    {
-        auto ret = sec->second.try_emplace(key, value);
-        if (!ret.second)
-        {
-            sec->second[key] = value;
-        }
-    }
-}
-```]]></content>
-  </entry>
-  <entry>
-    <title>在 Centos 7.4 上安装Gcc 7.3</title>
-    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
-    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
-下面记录一下安装过程。
-
-<!--more -->
-
-## 描述
-
-系统为Cent OS7.4，全新安装，更新全部软件至最新版。
-
-## 安装准备
-
-```bash
-yum update -y
-yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
-```
-
-安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
-
-```bash
-configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
-```
-
-网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
-
-## 动手
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
-tar -zxf gcc-7.3.0.tar.gz
-cd gcc-7.3.0
-./contrib/download_prerequisites
-mkdir builddir && cd builddir
-../configure
-make && sudo make install
-```
-
-编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
-需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
-
-```bash
-2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
-2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
-2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
-2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
-gmp-6.1.0.tar.bz2: OK
-mpfr-3.1.4.tar.bz2: OK
-mpc-1.0.3.tar.gz: OK
-isl-0.16.1.tar.bz2: OK
-All prerequisites downloaded successfully.
-```
-
-这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
-
-另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
-
-```bash
-../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
-```
-
-选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
-
-## 安装gdb
-
-在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
-tar -zxf gdb-8.1.tar.gz
-cd gdb-8.1
-mkdir builddir && cd builddir
-../configure
-make && make install
-```
-
-## 碎碎念
-
-有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
-
-```bash
-WARNING: 'makeinfo' is missing on your system.
-         You should only need it if you modified a '.texi' file, or
-         any other file indirectly affecting the aspect of the manual.
-         You might want to install the Texinfo package:
-         <http://www.gnu.org/software/texinfo/>
-         The spurious makeinfo call might also be the consequence of
-         using a buggy 'make' (AIX, DU, IRIX), in which case you might
-         want to install GNU make:
-         <http://www.gnu.org/software/make/>
-make[5]: *** [gdb.info] Error 127
-make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
-make[4]: *** [subdir_do] Error 1
-make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[3]: *** [install-only] Error 2
-make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[2]: *** [install] Error 2
-make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[1]: *** [install-gdb] Error 2
-make[1]: Leaving directory `/root/gdb-8.1/build'
-make: *** [install] Error 2
-```
-
-需要`yum install texinfo`，然后再执行`make install`。
-至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
-安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
-自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
-建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
-Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
-{% asset_img 1.jpg 来张合影 %}
-]]></content>
-  </entry>
-  <entry>
     <title>在Linux上安装node.js</title>
     <url>/2017/01/08/install-node-js-on-a-Linux-OS/</url>
     <content><![CDATA[在之前的文章中提及，使用“Hexo”，需要安装`node.js`,Windows上安装很方便，在其官网下载安装包之后，按照正常的步骤安装即可食用。
@@ -11068,89 +11068,6 @@ PS：上面的操作只是做一个示范，启动容器之后需要像在Ubuntu
 ]]></content>
   </entry>
   <entry>
-    <title>如何打开安卓的 screencap 命令生成的 raw 图片</title>
-    <url>/2023/05/23/open-android-screencap-raw-img/</url>
-    <content><![CDATA[
-以 Android 9.0 为例，screencap 的实现可以查看 [http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp](http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp) 。
-screencap 的命令格式是
-`screencap <imgpath>` 或者 `screencap -p <imgpath>`。
-如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。
-```cpp
-    } else {
-        uint32_t c = dataSpaceToInt(d);
-        write(fd, &w, 4);
-        write(fd, &h, 4);
-        write(fd, &f, 4);
-        write(fd, &c, 4);
-        size_t Bpp = bytesPerPixel(f);
-        for (size_t y=0 ; y<h ; y++) {
-            write(fd, base, w*Bpp);
-            base = (void *)((char *)base + s*Bpp);
-        }
-    }
-```
-从上面的实现可以看到，文件头是 16 字节，分别是图像宽，图像高，像素格式，reserved。然后是一个 RGBA 格式保存的图像数据（它为什么不保存为bitmap呢!）。
-将文件名后缀改为 .raw 使用 Photoshop 即可打开文件查看。可以参考下图填写参数
-
-{% asset_img pssample.png %}
-
-如果不知道图像宽度和高度，可以将图像当作二进制打开。看前 8 个字节即可。
-本文示例中，前 16 字节为
-```
-38 04 00 00 70 08 00 00 01 00 00 00 01 00 00 00
-```
-小端序存储，转换成整数为
-```
-0x0438 = 1080
-0x0870 = 2160
-```]]></content>
-  </entry>
-  <entry>
-    <title>树莓派折腾记——Samba</title>
-    <url>/2017/01/31/raspberry-train/</url>
-    <content><![CDATA[{% asset_img 1.jpg %}
-<!-- more -->
-树莓派用多了，总是要经常树莓派上传文件或者从树莓派下载文件，纵然可以使用putty携带的pscp或者rsync之类的命令行软件，但是总是不如图形界面来的方便，还省得记那些命令。
-于是，有了此文。
-```bash
-$ sudo apt-get install samba
-```
-然后，编辑`/etc/samba/smb.conf`，在文件末尾添加上如下内容
-```
-[public]
-comment = Public Storage
-path = /home/pi  #这里是用于树莓派共享到局域网的目录，这里设置为了pi用户的家目录
-read only = no#任何人都具有了访问修改的权限
-#因为是公共文件夹，所以给了所有用户全部权限，可以自定义
-create mask = 0777#新创建文件的默认属性
-directory mask = 0777#新创建文件夹的默认属性
-guest ok = yes#默认的访问用户名为guest
-browseable = yes
-```
-然后，通过命令``sudo smbd restart``，便可以在Windows的网络邻居里面发现树莓派了，如图
-{% asset_img 2.jpg %}
-此时只能看到树莓派出现在网络邻居里面，要想能正常查看树莓派上的内容，还是得要进行一些配置
-输入如下命令
-```bash
-$ sudo smbpasswd -a pi
-```
-按照提示，输入密码(密码是自定义的)
-```bash
-pi@raspberrypi:/etc/samba $ sudo smbpasswd -a pi
-New SMB password:
-Retype new SMB password:
-Added user pi.
-pi@raspberrypi:/etc/samba $
-```
-然后，在网络邻居里面双击raspberry，会提示需要输入用户名和密码，用户名为`pi`，密码为刚才设置的密码。
-然后，就可以畅快的用网络邻居与树莓派之间互传文件了。
-{% asset_img 3.jpg %}
-{% cq %}生命重在折腾{% endcq %}]]></content>
-      <tags>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Nginx的一点点小折腾</title>
     <url>/2017/01/27/nginx-skill/</url>
     <content><![CDATA[{% asset_img 3.jpg Nginx %}
@@ -11370,6 +11287,89 @@ http {
 {% cq %}生命重在折腾{% endcq %}]]></content>
       <tags>
         <tag>nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何打开安卓的 screencap 命令生成的 raw 图片</title>
+    <url>/2023/05/23/open-android-screencap-raw-img/</url>
+    <content><![CDATA[
+以 Android 9.0 为例，screencap 的实现可以查看 [http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp](http://androidxref.com/9.0.0_r3/xref/frameworks/base/cmds/screencap/screencap.cpp) 。
+screencap 的命令格式是
+`screencap <imgpath>` 或者 `screencap -p <imgpath>`。
+如果第一种命令的 imgpath 以 png 为结尾 或者加了 -p 参数的话，screencap 会将屏幕截图保存为 png 格式。否则screencap会将屏幕截图保存为一个裸 YUV 数据的图像，这个图像会保存所有的像素点信息，图像更为清晰。查看对应的代码实现即可知道如何打开这种 YUV 数据的图像。
+```cpp
+    } else {
+        uint32_t c = dataSpaceToInt(d);
+        write(fd, &w, 4);
+        write(fd, &h, 4);
+        write(fd, &f, 4);
+        write(fd, &c, 4);
+        size_t Bpp = bytesPerPixel(f);
+        for (size_t y=0 ; y<h ; y++) {
+            write(fd, base, w*Bpp);
+            base = (void *)((char *)base + s*Bpp);
+        }
+    }
+```
+从上面的实现可以看到，文件头是 16 字节，分别是图像宽，图像高，像素格式，reserved。然后是一个 RGBA 格式保存的图像数据（它为什么不保存为bitmap呢!）。
+将文件名后缀改为 .raw 使用 Photoshop 即可打开文件查看。可以参考下图填写参数
+
+{% asset_img pssample.png %}
+
+如果不知道图像宽度和高度，可以将图像当作二进制打开。看前 8 个字节即可。
+本文示例中，前 16 字节为
+```
+38 04 00 00 70 08 00 00 01 00 00 00 01 00 00 00
+```
+小端序存储，转换成整数为
+```
+0x0438 = 1080
+0x0870 = 2160
+```]]></content>
+  </entry>
+  <entry>
+    <title>树莓派折腾记——Samba</title>
+    <url>/2017/01/31/raspberry-train/</url>
+    <content><![CDATA[{% asset_img 1.jpg %}
+<!-- more -->
+树莓派用多了，总是要经常树莓派上传文件或者从树莓派下载文件，纵然可以使用putty携带的pscp或者rsync之类的命令行软件，但是总是不如图形界面来的方便，还省得记那些命令。
+于是，有了此文。
+```bash
+$ sudo apt-get install samba
+```
+然后，编辑`/etc/samba/smb.conf`，在文件末尾添加上如下内容
+```
+[public]
+comment = Public Storage
+path = /home/pi  #这里是用于树莓派共享到局域网的目录，这里设置为了pi用户的家目录
+read only = no#任何人都具有了访问修改的权限
+#因为是公共文件夹，所以给了所有用户全部权限，可以自定义
+create mask = 0777#新创建文件的默认属性
+directory mask = 0777#新创建文件夹的默认属性
+guest ok = yes#默认的访问用户名为guest
+browseable = yes
+```
+然后，通过命令``sudo smbd restart``，便可以在Windows的网络邻居里面发现树莓派了，如图
+{% asset_img 2.jpg %}
+此时只能看到树莓派出现在网络邻居里面，要想能正常查看树莓派上的内容，还是得要进行一些配置
+输入如下命令
+```bash
+$ sudo smbpasswd -a pi
+```
+按照提示，输入密码(密码是自定义的)
+```bash
+pi@raspberrypi:/etc/samba $ sudo smbpasswd -a pi
+New SMB password:
+Retype new SMB password:
+Added user pi.
+pi@raspberrypi:/etc/samba $
+```
+然后，在网络邻居里面双击raspberry，会提示需要输入用户名和密码，用户名为`pi`，密码为刚才设置的密码。
+然后，就可以畅快的用网络邻居与树莓派之间互传文件了。
+{% asset_img 3.jpg %}
+{% cq %}生命重在折腾{% endcq %}]]></content>
+      <tags>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -13578,66 +13578,6 @@ wlan0     Link encap:Ethernet  HWaddr 94:65:9c:4e:02:dc
 {% cq %}生命重在折腾{% endcq %}]]></content>
   </entry>
   <entry>
-    <title>在Linux终端使用代理</title>
-    <url>/2017/01/25/use-proxy-in-terminal/</url>
-    <content><![CDATA[{% asset_img 1.jpg Fuck GFW %}
-用linux的都能体会到，如果用国外的软件源，更新软件将是极其痛苦的事情————速度慢啊！
-但是如果使用国内的软件源，如果某些软件国内软件源没有，还是会从国外的软件源下载，于是纠结了一下，使出下面的办法:
-<!-- more -->
-# 思路
-即使clowwindy大神被请喝茶，他的项目仍然被持续更新。
-
-用影梭能很方便的开启socks5代理，并且速度还不赖，于是朝着这个方向走。
-
-更新软件，就要让'apt-get'走代理通道，而不是正常的http/https/ftp。
-
-有了目标好办事，下面是具体实施步骤。
-
-
-# 实战
-
-劫持apt-get到socks5，我用了这个软件————Proxychains
-
-## 安装Proxychains
-
-使用root权限(其实只有第四个和第五个命令需要root权限)
-```bash
-$ git clone https://github.com/rofl0r/proxychains-ng.git
-$ cd proxychains-ng
-$ ./configure
-$ make && make install
-$ cp ./src/proxychains.conf /etc/proxychains.conf
-$ cd .. && rm -rf proxychains-ng
-```
-
-然后，编辑`/etc/proxychains.conf`，到最后一行，把`socks4 127.0.0.1 9095`改成`socks5 127.0.0.1 1080`(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)
-去掉49行`quiet_mode`前面的`#`号，这样运行的时候proxychains4就不会输出大量log了。
-
-然后，启动Shadosocks后(它默认会开启一个本地1080的socks5端口)，在任意命令前面加上`proxychains4`，若有需要联网的操作，就会被自动劫持到socks5代理去，这样下载国外的资源速度会快一些。
-
-## 示范
-使用`proxychains4`更新软件源的一个小示范
-{% asset_img demo.jpg 一个小示范 %}
-
-# 一点点说明
-虽然此类文章百度一搜一大把，但是还是要把我参考的原文贴出来[http://www.jianshu.com/p/8e7d7f57bf59](http://www.jianshu.com/p/8e7d7f57bf59),感谢原博主。
-
-原文中提及好几种在终端使用代理的办法，我只取了一种，因为proxychains可以针对任何联网的软件，而不需要记住某些环境配置，一次配置，终身方便。
-
-有一个大前提，就是你需要能`Fuck GFW`。
-
-## 其他的玩法
-将代码clone到本地之后，可以编辑项目目录里面的`src`文件夹内的`main.c`，把71行的`int quiet = 0;`改成`int quiet = 1;`，这样运行的时候就不会输出大量log了。
-
-悠哉的一天>_<
-
-{% cq %}生命重在折腾{% endcq %}
-]]></content>
-      <tags>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密</title>
     <url>/2024/07/30/use-openssl-RSA-ECB-PKCS1PADDING-to-encrypt-decrypt/</url>
     <content><![CDATA[
@@ -13747,6 +13687,66 @@ $ cd .. && rm -rf proxychains-ng
  - 私钥解密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_decrypt_init, EVP_PKEY_decrypt
  - 公钥加密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_encrypt_init, EVP_PKEY_encrypt
  - 公钥解密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_verify_recover_init, EVP_PKEY_verify_recover]]></content>
+  </entry>
+  <entry>
+    <title>在Linux终端使用代理</title>
+    <url>/2017/01/25/use-proxy-in-terminal/</url>
+    <content><![CDATA[{% asset_img 1.jpg Fuck GFW %}
+用linux的都能体会到，如果用国外的软件源，更新软件将是极其痛苦的事情————速度慢啊！
+但是如果使用国内的软件源，如果某些软件国内软件源没有，还是会从国外的软件源下载，于是纠结了一下，使出下面的办法:
+<!-- more -->
+# 思路
+即使clowwindy大神被请喝茶，他的项目仍然被持续更新。
+
+用影梭能很方便的开启socks5代理，并且速度还不赖，于是朝着这个方向走。
+
+更新软件，就要让'apt-get'走代理通道，而不是正常的http/https/ftp。
+
+有了目标好办事，下面是具体实施步骤。
+
+
+# 实战
+
+劫持apt-get到socks5，我用了这个软件————Proxychains
+
+## 安装Proxychains
+
+使用root权限(其实只有第四个和第五个命令需要root权限)
+```bash
+$ git clone https://github.com/rofl0r/proxychains-ng.git
+$ cd proxychains-ng
+$ ./configure
+$ make && make install
+$ cp ./src/proxychains.conf /etc/proxychains.conf
+$ cd .. && rm -rf proxychains-ng
+```
+
+然后，编辑`/etc/proxychains.conf`，到最后一行，把`socks4 127.0.0.1 9095`改成`socks5 127.0.0.1 1080`(注意: 这里如果直接注释掉该行，然后自己新添一行的话，需要注意缩进)
+去掉49行`quiet_mode`前面的`#`号，这样运行的时候proxychains4就不会输出大量log了。
+
+然后，启动Shadosocks后(它默认会开启一个本地1080的socks5端口)，在任意命令前面加上`proxychains4`，若有需要联网的操作，就会被自动劫持到socks5代理去，这样下载国外的资源速度会快一些。
+
+## 示范
+使用`proxychains4`更新软件源的一个小示范
+{% asset_img demo.jpg 一个小示范 %}
+
+# 一点点说明
+虽然此类文章百度一搜一大把，但是还是要把我参考的原文贴出来[http://www.jianshu.com/p/8e7d7f57bf59](http://www.jianshu.com/p/8e7d7f57bf59),感谢原博主。
+
+原文中提及好几种在终端使用代理的办法，我只取了一种，因为proxychains可以针对任何联网的软件，而不需要记住某些环境配置，一次配置，终身方便。
+
+有一个大前提，就是你需要能`Fuck GFW`。
+
+## 其他的玩法
+将代码clone到本地之后，可以编辑项目目录里面的`src`文件夹内的`main.c`，把71行的`int quiet = 0;`改成`int quiet = 1;`，这样运行的时候就不会输出大量log了。
+
+悠哉的一天>_<
+
+{% cq %}生命重在折腾{% endcq %}
+]]></content>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
   </entry>
   <entry>
     <title>启动jar文件时使用代理</title>
