@@ -5662,6 +5662,18 @@ BiliBili的up主[神游八方](https://space.bilibili.com/614801#/)的作品，�
 但有时夜深人静，也有人讲述不是故事的故事，那是对露珠公主和长帆经历的想象。每个人的想象都不一样，但人们都认为他俩到过无数神奇的国度，还到过像大海一样广阔的陆地，他们永远在航行和旅途中，不管走到哪里，他们总是幸福地生活在一起。]]></content>
   </entry>
   <entry>
+    <title>Visual Code</title>
+    <url>/2017/05/14/Visual-Code/</url>
+    <content><![CDATA[
+{% asset_img 1.jpg 帮巨硬打个广告%}
+<!-- more -->
+Visual Code，一个优秀的编辑器。
+当然了，编辑器很多，从Windows内置的nodepad，到Atom，再到notepad++，都是不错的，但是，我觉得Visual Code好看啊。
+来张照骗
+{% asset_img visual_code.jpg 实时渲染Markdown %}
+当然了，好事做到底，丢一个编辑器的[快捷键表](http://suppermary.cc/src/visual%20code/keyboard-shortcuts-visual-code.pdf)，丢掉鼠标，啪啪啪敲键盘吧！]]></content>
+  </entry>
+  <entry>
     <title>UWP简单教程</title>
     <url>/2021/06/29/UWP-beginner/</url>
     <content><![CDATA[
@@ -5846,18 +5858,6 @@ private void OnSuspending(object sender, SuspendingEventArgs e)
 }
 ```
 已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。]]></content>
-  </entry>
-  <entry>
-    <title>Visual Code</title>
-    <url>/2017/05/14/Visual-Code/</url>
-    <content><![CDATA[
-{% asset_img 1.jpg 帮巨硬打个广告%}
-<!-- more -->
-Visual Code，一个优秀的编辑器。
-当然了，编辑器很多，从Windows内置的nodepad，到Atom，再到notepad++，都是不错的，但是，我觉得Visual Code好看啊。
-来张照骗
-{% asset_img visual_code.jpg 实时渲染Markdown %}
-当然了，好事做到底，丢一个编辑器的[快捷键表](http://suppermary.cc/src/visual%20code/keyboard-shortcuts-visual-code.pdf)，丢掉鼠标，啪啪啪敲键盘吧！]]></content>
   </entry>
   <entry>
     <title>微信小程序码隐私政策</title>
@@ -6685,6 +6685,97 @@ Linux的hosts文件在`/etc/hosts`，同样把上面的地址添加就好，但�
 
 其实吧，说到底，还是为了钱，大陆毕竟是一块大蛋糕，谷歌也想来分一块，不知道什么时候来呢？
 And，和Android 8一块来的，谷歌也带来[Kotlin对安卓的支持](https://www.zhihu.com/topic/20008824/hot)，这是不是对Oracle的一点警示呢。]]></content>
+  </entry>
+  <entry>
+    <title>为 Android 编译 openssl 的注意事项</title>
+    <url>/2024/08/03/attention-of-build-openssl-for-Android/</url>
+    <content><![CDATA[
+以下载链接 https://www.openssl.org/source/openssl-1.1.1o.tar.gz 为例
+下载解压之后，查看根目录的 NOTES.ANDROID，其中有
+```bash
+export ANDROID_NDK_HOME=/home/whoever/Android/android-sdk/ndk/20.0.5594570
+PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HOME/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+./Configure android-arm64 -D__ANDROID_API__=29
+make
+```
+这里就是最直接的编译方式了。但是这样编译之后，会有一个坑
+
+<!-- more -->
+
+```bash
+lrwxrwxrwx  1 ubuntu ubuntu      16 Jun  9 21:23 libcrypto.so -> libcrypto.so.1.1
+-rwxrwxr-x  1 ubuntu ubuntu 2754216 Jun  9 21:23 libcrypto.so.1.1
+lrwxrwxrwx  1 ubuntu ubuntu      13 Jun  9 21:23 libssl.so -> libssl.so.1.1
+-rwxrwxr-x  1 ubuntu ubuntu  596600 Jun  9 21:23 libssl.so.1.1
+```
+编译时尝试链接 `libssl.so` ，实际上会链接到 `libssl.so.1.1` ，但是当你尝试将 `libssl.so.1.1` 集成到 Android studio 工程内时，会发现 `libssl.so.1.1` 这种命名格式so，Android studio 是不会自动将其打包到 apk 内的，即使将 `libssl.so.1.1` 改名为 `libssl.so` 可以集成到 apk ，app运行时仍然会去找 `libssl.so.1.1`。因为 so 内部有其文件名信息
+```bash
+$objdump -p libssl.so | grep SONAME
+  SONAME               libssl.so.1.1
+```
+对于Android来说，我们更希望，编译之后，so 本身名字就叫 libssl.so。
+具体做法是解压 `openssl-1.1.1o.tar.gz` 之后，修改 `15-android.conf`。
+大概 193 行。
+```PERL
+my %targets = (
+    "android" => {
+        inherit_from     => [ "linux-generic32" ],
+        template         => 1,
+        ################################################################
+        # Special note about -pie. The underlying reason is that
+        # Lollipop refuses to run non-PIE. But what about older systems
+        # and NDKs? -fPIC was never problem, so the only concern is -pie.
+        # Older toolchains, e.g. r4, appear to handle it and binaries
+        # turn out mostly functional. "Mostly" means that oldest
+        # Androids, such as Froyo, fail to handle executable, but newer
+        # systems are perfectly capable of executing binaries targeting
+        # Froyo. Keep in mind that in the nutshell Android builds are
+        # about JNI, i.e. shared libraries, not applications.
+        cflags           => add(sub { android_ndk()->{cflags} }),
+        cppflags         => add(sub { android_ndk()->{cppflags} }),
+        cxxflags         => add(sub { android_ndk()->{cflags} }),
+        bn_ops           => sub { android_ndk()->{bn_ops} },
+        bin_cflags       => "-pie",
+        enable           => [ ],
+        shared_extension => ".so",  ### 这一行是新加的
+    },
+```
+这样可以编译出来不带版本后缀的 `libssl.so` 和 `libcrypto.so`。
+可以参考下边的懒人脚本来自行编译: 
+```bash
+#!/bin/bash
+
+function buildopenssl()
+{
+    androidarch=$1
+    toolchain=$2
+    if [ ! -f openssl-1.1.1o.tar.gz ]; then
+        wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
+    fi
+    if [ !-d openssl-1.1.1o ]; then
+        tar -xf openssl-1.1.1o.tar.gz
+    fi
+    if [ -z $ANDROID_NDK_HOME ]; then
+        echo "missing ANDROID_NDK_HOME"
+        exit
+    fi
+    pushd openssl-1.1.1o
+    PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HOME/toolchains/${toolchain}-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+    ./Configure android-$androidarch -D__ANDROID_API__=26
+    make clean
+    make
+    popd
+}
+
+buildopenssl arm64 aarch64
+#buildopenssl arm arm
+#buildopenssl x86 x86
+#buildopenssl x86_64 x86_64
+```]]></content>
+      <tags>
+        <tag>Android</tag>
+        <tag>openssl</tag>
+      </tags>
   </entry>
   <entry>
     <title>在Windows中手动编译Putty</title>
@@ -7711,6 +7802,86 @@ chrome://flags/#enable-ntp-asset-download-suggetons
 
 {% cq %}生命重在折腾{% endcq %}
 ]]></content>
+  </entry>
+  <entry>
+    <title>C/C++ 中，modulus，privateExponent, pulbicExponent 如何转换成 RSA密钥</title>
+    <url>/2024/08/03/convert-RSA-key-with-openssl/</url>
+    <content><![CDATA[
+p.s: 以下内容均以 openssl 实现。
+RSA 密钥的存储方式有很多，某些情况下，我们直接保存密钥的 modulus(n),publicExponent(e),privateExponent(d)，使用的时候再将它们转换成 RSA 密钥。下面来讲讲在 C/C++ 环境中，如何把这几个大整数转换成 RSA 密钥来用。
+根据 openssl 的文档，openssl提供了这样一个函数
+
+<!--more -->
+
+```c
+int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);
+```
+这个参数里面的 n , e , q 对应 RSA 算法里面的参数，实际使用中，它们分别是
+ - n --> modulus
+ - e --> publicExponent
+ - d --> privateExponent
+
+其中，n和e组成了公钥，n和d组成私钥(取自 [RSA算法原理](https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html))，那么，我们想用 modulus(n),publicExponent(e),privateExponent(q) 来生成一个RSA密钥使用的话，可以用下面这样简短的方式
+```c
+RSA* rsa = RSA_new();
+BIGNUM* modulus = BN_new();
+BIGNUM* publicExponent = BN_new();
+BIGNUM* privateExponent = BN_new();
+BN_hex2bn(&modulus,"the_modulus_hex_str");
+BN_hex2bn(&publicExponent,"the_publicexponent_hex_str");
+BN_hex2bn(&privateExponent,"the_privateexponent_hex_str");
+RSA_set0_key(rsa,n,e,d);
+```
+其中，`the_modulus_hex_str` ，`the_publicexponent_hex_str`，`the_privateexponent_hex_str` 是指对应的巨大整数的十六进制字符串。例如
+```
+n: XXXXXX31C433EDD1B99CE2B218C253F46FDFFFB888B6CFC6B2ED7C733454E744BF95369DA3E6648AFB6FB11EF85A5BB25A1F328266844C2E3FAC8EFAAB4B2C45588604BAC6CF8A9B528F0D03E6B56BDE534B0360F1BD9E8B36D4197FE6F058D97DE670C0F178D9633FEEAE94237827A4006BC737344932E8F3E349F62175B7
+e: 010001
+d: XXXXXXX6566B839C1F88C15D1A46771F1E4C3918000787D56016208B758F3E1A33A923226850DA53C288F9CF6753DFBE48750A83B3DE58D5C0B85933C5B92ABCCD60D80992AABA03C3B1A7E58B8289A93383D8DAA4EE23178660D09E0335522EDCEAD84FB34D7A39B7794C905F15883FC8D1F3D57790259B4D51BA25F67D2D211
+```
+上面对应的巨大整数的十进制数为
+```
+n: XXXXXXX9057732971629580498028671059682869498690832625587443656573925941563146104539350008204291144532450083831552937873084816334755400478676505846850294967700928692649221538739009633205352515287702420255727528786212412171786407245232978625501660599119803054000638252479305264674077018562561222430729026237879
+e: 65537
+d: XXXXXXXX041865311331499528401083208041704898325216901065444649537573972168292421030450065823066407208305456734951704373218531670621023627175563960996010664960509836168571614423098404829680294776295068450558648709945648817915783177775326687433116356887666860252766677606932669252345719029413488408688871813075473
+```
+这样，我们就得到了一个RSA密钥。接下来可以使用这个密钥对一些数据加密/解密。
+比如，使用 `RSA/ECB/PKCS1Padding` 填充方式，进行公钥加密，私钥解密例子
+```c
+    char encrypteddata[1024] = { 0 };
+    char originnaldata[1024] = { 0 };
+    const char* testinfo = "this is a sample info to encrypt";
+    int encryptlen = 0;
+    int retlen = 0;
+    encryptlen = RSA_public_encrypt(strlen(testinfo), (const unsigned char*)testinfo, (unsigned char *)encrypteddata, rsa, RSA_PKCS1_PADDING);
+    if (encryptlen > 0)
+    {
+        retlen = RSA_private_decrypt(encryptlen, (const unsigned char*)encrypteddata, (unsigned char*)originnaldata, rsa, RSA_PKCS1_PADDING);
+        if (retlen > 0)
+        {
+            printf("%.*s\n", retlen, originnaldata);
+        }
+    }
+```
+openssl 里面，公钥加密，私钥解密的函数原型是
+```c
+ int RSA_public_encrypt(int flen, const unsigned char *from,
+                        unsigned char *to, RSA *rsa, int padding);
+
+ int RSA_private_decrypt(int flen, const unsigned char *from,
+                         unsigned char *to, RSA *rsa, int padding);
+```
+同样的，还有私钥加密，公钥解密的函数原型是
+```
+ int RSA_private_encrypt(int flen, unsigned char *from,
+                         unsigned char *to, RSA *rsa, int padding);
+
+ int RSA_public_decrypt(int flen, unsigned char *from,
+                        unsigned char *to, RSA *rsa, int padding);
+```]]></content>
+      <tags>
+        <tag>openssl</tag>
+        <tag>RSA</tag>
+      </tags>
   </entry>
   <entry>
     <title>CSGO联机的小事儿</title>
@@ -13480,6 +13651,609 @@ http {
       </tags>
   </entry>
   <entry>
+    <title>安卓 RemoteCallbackList 的使用 （应用篇）</title>
+    <url>/2024/08/03/usage-of-Android-RemoteCallbacckList-APP/</url>
+    <content><![CDATA[
+通过aidl，我们可以实现client（后称客户端）和server（服务端）的双向通信，有时候server和client处于不同的进程当中，如果client意外退出，server再向client发送消息的话，就有可能导致server端也退出。
+
+安卓提供了 RemoteCallbackList 来为我们隐式解决了这种问题。
+
+下面来看一个示范。
+<!-- more -->
+首先我们定义用于客户端向服务端通信的一个 aidl
+```java
+// ICallBackTestInterface.aidl
+package com.callback;
+
+// Declare any non-default types here with import statements
+
+import com.callback.ICallbackTestCallback;
+
+interface ICallBackTestInterface {
+    // 向服务端注册客户端回调
+    void register(ICallbackTestCallback callback);
+    // 向服务端注销客户端回调
+    void unregister(ICallbackTestCallback callback);
+    // 向服务端发送消息
+    void callServer(String msg);
+}
+```
+其内的 ICallbackTestCallback 也是一个 aidl，其内容如下
+```java
+// ICallbackTestCallback.aidl
+package com.callback;
+
+// Declare any non-default types here with import statements
+
+interface ICallbackTestCallback {
+    /**
+     * 服务端调用客户端的回调
+     **/
+    void onReceived(String msg);
+}
+```
+编译之后我们可以看到，实际上 aidl 编译之后就会变成类似这样的内容
+```java
+public interface ICallbackTestCallback extends android.os.IInterface
+{
+    public static abstract class Stub extends android.os.Binder implements com.callback.ICallbackTestCallback{
+...
+```
+这个也是aidl的核心，实际上这个Stub是一个 Binder 的实现，并且还实现了我们定义在 aidl 里面的接口
+
+# 服务端
+服务端比较简单，直接贴代码
+```java
+//callbackserver.java
+package com.callback.server;
+
+import androidx.annotation.Nullable;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
+import android.util.Log;
+
+import com.callback.ICallBackTestInterface;
+import com.callback.ICallbackTestCallback;
+
+public class callbackserver extends Service {
+
+    private final String TAG = "testcallback";
+
+    // 这里的 clients 就是 RemoteCallbackList 的用法了，我们用它来存储注册了的客户端，然后在某些时候向注册了的客户端发送消息。
+    private final RemoteCallbackList<ICallbackTestCallback> clients = new RemoteCallbackList<>();
+
+    CallBackServer server = new CallBackServer();
+
+    private boolean serverRunning = false;
+
+    @Override
+    public void onCreate() {
+        Log.d(TAG,"callback test server create");
+        // service 创建的时候，开一个线程去向注册了的客户端发送消息
+        serverRunning = true;
+        new Thread(serverRunnable).start();
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG,"callback test server destroy");
+        serverRunning = false;
+        super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        // 将一个实现了 ICallBackTestInterface.Stub 的Binder对象返回
+        // 客户端调用 bind service 时会拿到一个返回的 Binder 对象，就是这里的 server，也就是一个
+        // ICallBackTestInterface.Stub 实例
+        return server;
+    }
+
+    /**
+     * 返回给客户端的 Binder 对象的实现
+     */
+    private class CallBackServer extends ICallBackTestInterface.Stub {
+
+        @Override
+        public void register(ICallbackTestCallback callback) throws RemoteException {
+            Log.d(TAG,"register callback from pid=" + Binder.getCallingPid());
+            clients.register(callback);
+        }
+
+        @Override
+        public void unregister(ICallbackTestCallback callback) throws RemoteException {
+            Log.d(TAG,"unregister callback from pid=" + Binder.getCallingPid());
+            clients.unregister(callback);
+        }
+
+        @Override
+        public void callServer(String msg) throws RemoteException {
+            Log.d(TAG,"received msg: " + msg + " . from pid=" + Binder.getCallingPid());
+        }
+    }
+
+    // 向客户端发送消息的具体实现
+    // 简单的做一个自增运算，然后发送回客户端
+    private Runnable serverRunnable = () ->{
+        int count = 0;
+        while(serverRunning){
+            try {
+                Thread.sleep(500);
+                noteClients(Integer.toString(count++));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    /**
+     * 这里就是 RemoteCallbackList 的关键用法了
+     * beginBroadcast 和 finishBroadcast 需要配套使用
+     * beginBroadcast 会返回注册了的客户端数量，然后开一个循环依次取出客户端注册的回调，并调用回调内的
+     * onReceived 函数。这个函数需要客户端实现 ICallbackTestCallback.Stub 之后，注册给服务端
+     * @param msg
+     */
+    private void noteClients(String msg){
+        int cb = clients.beginBroadcast();
+        for(int i=0;i<cb;i++){
+            try {
+                clients.getBroadcastItem(i).onReceived(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        clients.finishBroadcast();
+    }
+}
+```
+服务端对应的 AndroidMenifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.callback.server">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Server">
+        <service android:name=".callbackserver"
+            android:exported="true">
+
+        </service>
+    </application>
+
+</manifest>
+```
+简单的表示有一个service就好，其他的内容和一般的app一样。
+p.s: 这里我是将服务端和客户端分为两个app来实现了。
+
+服务端的文件的结构如下
+```bash
+C:.
+├─aidl
+│  └─com
+│      └─callback
+│            ICallbackTestCallback.aidl
+│            ICallBackTestInterface.aidl
+├─java
+│  └─com
+│      └─callback
+│          └─server
+│                  callbackserver.java
+└─res
+    ├─drawable
+    ├─drawable-v24
+    ├─layout
+    ├─mipmap-anydpi-v26
+    ├─mipmap-hdpi
+    ├─mipmap-mdpi
+    ├─mipmap-xhdpi
+    ├─mipmap-xxhdpi
+    ├─mipmap-xxxhdpi
+    ├─values
+    └─values-night
+```
+服务端的全部内容如上面所示。
+
+# 客户端
+客户端我们使用两个独立的进程（当时在同一个app里面）
+客户端的 AndroidMenifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.callback.client">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Client"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Client">
+        <activity android:name=".ActivityB"
+            android:launchMode="singleInstance"
+            android:process="com.callback.client.ActivityB"
+            android:label="Activityb">
+        </activity>
+
+        <activity
+            android:name=".ActivityA"
+            android:launchMode="singleInstance"
+            android:process="com.callback.client.ActivityA"
+            android:label="ActivityA">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+```
+我定义了两个Activity，一个ActivityA，一个ActivityB。
+ActivityA的实现如下
+```java
+package com.callback.client;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.ICallBackTestInterface;
+
+public class ActivityA extends AppCompatActivity implements View.OnClickListener{
+
+    private final String TAG = "testcallback";
+
+    private boolean bound = false;
+
+    ICallBackTestInterface remoteServer = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Button activityb = findViewById(R.id.startactivity);
+        activityb.setText("open activity b");
+        initClickListener();
+    }
+
+    @Override
+    protected void onResume() {
+        if(bound){
+            registerCallback();
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        if(bound){
+            unregisterCallback();
+        }
+        super.onPause();
+    }
+
+
+
+    private final ServiceConnection serviceConnection = new ServiceConnection(){
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            remoteServer = ICallBackTestInterface.Stub.asInterface(service);
+            registerCallback();
+            bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
+    private ICallbackTestCallback callback = new ICallbackTestCallback.Stub(){
+
+        @Override
+        public void onReceived(String msg) throws RemoteException {
+            Log.d(TAG,"received msg: " + msg + " . from server pid=" + Binder.getCallingPid());
+        }
+    };
+
+    private void initClickListener(){
+        Button button = findViewById(R.id.registerBotton);
+        button.setOnClickListener(this);
+        button=findViewById(R.id.unregisterBotton);
+        button.setOnClickListener(this);
+        button=findViewById(R.id.bindServer);
+        button.setOnClickListener(this);
+        button=findViewById(R.id.startactivity);
+        button.setOnClickListener(this);
+    }
+
+    private void unregisterCallback(){
+        if(remoteServer != null){
+            try {
+                remoteServer.unregister(callback);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG," null remoteServer");
+        }
+    }
+
+    private void callServer(String msg){
+        if(remoteServer != null){
+            try {
+                remoteServer.callServer(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG," null remoteServer");
+        }
+    }
+
+    public void bindServer(){
+        Intent serverIntent = new Intent();
+        // 这里通过包名和class名来Bindservice。
+        serverIntent.setComponent(new ComponentName("com.callback.server","com.callback.server.callbackserver"));
+        bindService(serverIntent,serviceConnection,Context.BIND_AUTO_CREATE);
+    }
+
+    private void startActivity(){
+        Intent intent = new Intent(ActivityA.this,ActivityB.class);
+        startActivity(intent);
+    }
+
+    public void registerCallback() {
+        if(remoteServer != null){
+            try {
+                remoteServer.register(callback);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG," null remoteServer");
+        }
+    }
+
+    // Activity 实现了 View.OnClickListener 的话，需要实现对应的接口 onClick
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id){
+            case R.id.registerBotton:
+                registerCallback();
+                break;
+            case R.id.unregisterBotton:
+                unregisterCallback();
+                break;
+            case R.id.bindServer:
+                bindServer();
+                break;
+            case R.id.startactivity:
+                startActivity();
+                break;
+        }
+    }
+}
+```
+ActivityA对应的资源文件 activity_main.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActivityA">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/registerBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="register"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/unregisterBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/registerBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="unregister"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bindServer"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/unregisterBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="Bind server"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startactivity"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/bindServer"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+ActivityB 的实现和 ActivityA基本一致。
+客户端的文件结构如下
+```bash
+C:.
+├─aidl
+│  └─com
+│      └─callback
+│              ICallbackTestCallback.aidl
+│              ICallBackTestInterface.aidl
+├─java
+│  └─com
+│      └─callback
+│          └─client
+│                  ActivityA.java
+│                  ActivityB.java
+└─res
+    ├─drawable
+    ├─drawable-v24
+    ├─layout
+    │      activity_main.xml
+    ├─mipmap-anydpi-v26
+    ├─mipmap-hdpi
+    ├─mipmap-mdpi
+    ├─mipmap-xhdpi
+    ├─mipmap-xxhdpi
+    ├─mipmap-xxxhdpi
+    ├─values
+    └─values-night
+```
+然后我们可以得到这样一个应用
+{% asset_img 1.png %}
+上面有4个按钮，分别用来向服务端注册和注销自己，绑定服务端，和打开另外一个Activity。
+
+# 使用
+在分屏模式下可以同时打开两个Activity，分别点击两个Activity内的bind server和register。就可以在logcat内看到对应的内容了
+{% asset_img 2.png %}
+```bash
+05-08 12:48:45.938  6671  6671 D testcallback: callback test server create
+05-08 12:48:45.940  6671  6687 D testcallback: register callback from pid=6631
+05-08 12:48:46.439  6631  6653 D testcallback: received msg: 0 . from server pid=6671
+05-08 12:48:46.940  6631  6653 D testcallback: received msg: 1 . from server pid=6671
+05-08 12:48:47.441  6631  6653 D testcallback: received msg: 2 . from server pid=6671
+05-08 12:48:47.944  6631  6653 D testcallback: received msg: 3 . from server pid=6671
+05-08 12:48:48.409  6671  6687 D testcallback: register callback from pid=6597
+05-08 12:48:48.445  6597  6614 D testcallback: received msg: 4 . from server pid=6671
+05-08 12:48:48.446  6631  6648 D testcallback: received msg: 4 . from server pid=6671
+05-08 12:48:48.948  6597  6614 D testcallback: received msg: 5 . from server pid=6671
+05-08 12:48:48.949  6631  6648 D testcallback: received msg: 5 . from server pid=6671
+05-08 12:48:49.451  6597  6614 D testcallback: received msg: 6 . from server pid=6671
+05-08 12:48:49.451  6631  6648 D testcallback: received msg: 6 . from server pid=6671
+05-08 12:48:49.953  6597  6614 D testcallback: received msg: 7 . from server pid=6671
+05-08 12:48:49.954  6631  6648 D testcallback: received msg: 7 . from server pid=6671
+05-08 12:48:50.456  6597  6614 D testcallback: received msg: 8 . from server pid=6671
+05-08 12:48:50.457  6631  6648 D testcallback: received msg: 8 . from server pid=6671
+05-08 12:48:50.958  6597  6614 D testcallback: received msg: 9 . from server pid=6671
+05-08 12:48:50.959  6631  6648 D testcallback: received msg: 9 . from server pid=6671
+05-08 12:48:51.461  6597  6614 D testcallback: received msg: 10 . from server pid=6671
+05-08 12:48:51.461  6631  6648 D testcallback: received msg: 10 . from server pid=6671
+05-08 12:48:51.964  6597  6614 D testcallback: received msg: 11 . from server pid=6671
+05-08 12:48:51.964  6631  6648 D testcallback: received msg: 11 . from server pid=6671
+05-08 12:48:52.465  6597  6614 D testcallback: received msg: 12 . from server pid=6671
+05-08 12:48:52.466  6631  6648 D testcallback: received msg: 12 . from server pid=6671
+05-08 12:48:52.967  6597  6614 D testcallback: received msg: 13 . from server pid=6671
+05-08 12:48:52.967  6631  6648 D testcallback: received msg: 13 . from server pid=6671
+05-08 12:48:53.469  6597  6614 D testcallback: received msg: 14 . from server pid=6671
+05-08 12:48:53.470  6631  6648 D testcallback: received msg: 14 . from server pid=6671
+05-08 12:48:53.972  6597  6614 D testcallback: received msg: 15 . from server pid=6671
+05-08 12:48:53.972  6631  6648 D testcallback: received msg: 15 . from server pid=6671
+05-08 12:48:54.474  6597  6614 D testcallback: received msg: 16 . from server pid=6671
+05-08 12:48:54.475  6631  6648 D testcallback: received msg: 16 . from server pid=6671
+05-08 12:48:54.977  6597  6614 D testcallback: received msg: 17 . from server pid=6671
+05-08 12:48:54.977  6631  6648 D testcallback: received msg: 17 . from server pid=6671
+05-08 12:48:55.478  6597  6614 D testcallback: received msg: 18 . from server pid=6671
+05-08 12:48:55.479  6631  6648 D testcallback: received msg: 18 . from server pid=6671
+05-08 12:48:55.981  6597  6614 D testcallback: received msg: 19 . from server pid=6671
+05-08 12:48:55.982  6631  6648 D testcallback: received msg: 19 . from server pid=6671
+05-08 12:48:56.484  6597  6614 D testcallback: received msg: 20 . from server pid=6671
+05-08 12:48:56.484  6631  6648 D testcallback: received msg: 20 . from server pid=6671
+05-08 12:48:56.987  6597  6614 D testcallback: received msg: 21 . from server pid=6671
+05-08 12:48:56.987  6631  6648 D testcallback: received msg: 21 . from server pid=6671
+05-08 12:48:57.489  6597  6614 D testcallback: received msg: 22 . from server pid=6671
+05-08 12:48:57.489  6631  6648 D testcallback: received msg: 22 . from server pid=6671
+05-08 12:48:57.992  6597  6614 D testcallback: received msg: 23 . from server pid=6671
+05-08 12:48:57.992  6631  6648 D testcallback: received msg: 23 . from server pid=6671
+05-08 12:48:58.494  6597  6614 D testcallback: received msg: 24 . from server pid=6671
+05-08 12:48:58.495  6631  6648 D testcallback: received msg: 24 . from server pid=6671
+05-08 12:48:58.997  6597  6614 D testcallback: received msg: 25 . from server pid=6671
+05-08 12:48:58.998  6631  6648 D testcallback: received msg: 25 . from server pid=6671
+05-08 12:48:59.501  6597  6614 D testcallback: received msg: 26 . from server pid=6671
+05-08 12:48:59.501  6631  6648 D testcallback: received msg: 26 . from server pid=6671
+05-08 12:49:00.003  6597  6614 D testcallback: received msg: 27 . from server pid=6671
+05-08 12:49:00.004  6631  6648 D testcallback: received msg: 27 . from server pid=6671
+05-08 12:49:00.506  6597  6614 D testcallback: received msg: 28 . from server pid=6671
+05-08 12:49:00.506  6631  6648 D testcallback: received msg: 28 . from server pid=6671
+05-08 12:49:01.009  6597  6614 D testcallback: received msg: 29 . from server pid=6671
+05-08 12:49:01.010  6631  6648 D testcallback: received msg: 29 . from server pid=6671
+05-08 12:49:01.511  6597  6614 D testcallback: received msg: 30 . from server pid=6671
+05-08 12:49:01.512  6631  6648 D testcallback: received msg: 30 . from server pid=6671
+05-08 12:49:02.014  6597  6614 D testcallback: received msg: 31 . from server pid=6671
+05-08 12:49:02.014  6631  6648 D testcallback: received msg: 31 . from server pid=6671
+05-08 12:49:02.517  6597  6614 D testcallback: received msg: 32 . from server pid=6671
+05-08 12:49:02.517  6631  6648 D testcallback: received msg: 32 . from server pid=6671
+05-08 12:49:03.019  6597  6614 D testcallback: received msg: 33 . from server pid=6671
+05-08 12:49:03.019  6631  6648 D testcallback: received msg: 33 . from server pid=6671
+05-08 12:49:03.521  6597  6614 D testcallback: received msg: 34 . from server pid=6671
+05-08 12:49:03.522  6631  6648 D testcallback: received msg: 34 . from server pid=6671
+05-08 12:49:04.024  6597  6614 D testcallback: received msg: 35 . from server pid=6671
+05-08 12:49:04.024  6631  6648 D testcallback: received msg: 35 . from server pid=6671
+05-08 12:49:04.527  6597  6614 D testcallback: received msg: 36 . from server pid=6671
+05-08 12:49:04.527  6631  6648 D testcallback: received msg: 36 . from server pid=6671
+05-08 12:49:05.030  6597  6614 D testcallback: received msg: 37 . from server pid=6671
+05-08 12:49:05.030  6631  6648 D testcallback: received msg: 37 . from server pid=6671
+05-08 12:49:05.329  6671  6687 D testcallback: unregister callback from pid=6597
+05-08 12:49:05.533  6631  6648 D testcallback: received msg: 38 . from server pid=6671
+05-08 12:49:06.034  6631  6648 D testcallback: received msg: 39 . from server pid=6671
+05-08 12:49:06.537  6631  6648 D testcallback: received msg: 40 . from server pid=6671
+05-08 12:49:07.039  6631  6648 D testcallback: received msg: 41 . from server pid=6671
+05-08 12:49:07.542  6631  6648 D testcallback: received msg: 42 . from server pid=6671
+05-08 12:49:08.043  6631  6648 D testcallback: received msg: 43 . from server pid=6671
+05-08 12:49:08.545  6631  6648 D testcallback: received msg: 44 . from server pid=6671
+05-08 12:49:09.046  6631  6648 D testcallback: received msg: 45 . from server pid=6671
+05-08 12:49:09.548  6631  6648 D testcallback: received msg: 46 . from server pid=6671
+05-08 12:49:10.051  6631  6648 D testcallback: received msg: 47 . from server pid=6671
+05-08 12:49:10.513  6671  6687 D testcallback: unregister callback from pid=6631
+05-08 12:49:14.176  6671  6687 D testcallback: unregister callback from pid=6631
+05-08 12:49:14.896  6671  6687 D testcallback: unregister callback from pid=6597
+```]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>C语言调用系统命令</title>
     <url>/2017/09/14/use-cmd-coomand-in-cpp/</url>
     <content><![CDATA[{% asset_img 1.jpg %}
@@ -13588,6 +14362,91 @@ wlan0     Link encap:Ethernet  HWaddr 94:65:9c:4e:02:dc
 
 参考文章:[http://www.cnblogs.com/makefile/p/5040615.html](http://www.cnblogs.com/makefile/p/5040615.html)
 {% cq %}生命重在折腾{% endcq %}]]></content>
+  </entry>
+  <entry>
+    <title>使用 openssl 进行 AES128/ECB/PKCS5Padding 加解密</title>
+    <url>/2024/08/03/use-openssl-AES-ECB-PKCS5Padding-encrypt-decrypt/</url>
+    <content><![CDATA[
+在 java 上进行 AES128/ECB/PKCS5Padding 加密解密是很简单的
+
+<!-- more -->
+
+```java
+    public static String aesDecrypt(String str,String key) throws Exception{
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
+        byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
+        byte[] ret = cipher.doFinal(bytes);
+        return new String(ret,"UTF-8");
+    }
+
+    public static String aesEncrypt(String str,String key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
+        return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes()));
+    }
+```
+AES 加解密使用的key本身是 16 字节（128位），但是key可能不是ascii里的可见字符，有时候我们把 key 进行 base64 编码之后，当作明文传输使用。真正把 key 用来加密解密的时候，需要先 base64 解码来得到原本的 key。
+同样的，经过AES加密的信息也有可能不是每一个字节都是ascii可见字符，我们同样将加密后的密文进行base64编码之后再展示。
+
+同样的操作，用 C/C++ 进行就复杂得多，C/C++ 自己本身没有对应的库，不过好在有很多开源的实现，这里用 openssl 作为演示
+```
+#include <openssl/evp.h>
+#include <vector>
+std::string AES128ECBEncrypt(const std::string& base64key, const std::string& str)
+{
+    std::vector<unsigned char> key;
+    if (!Base64Decode(base64key, key))
+        return "";
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    int encLen = 0;
+    int outlen = 0;
+    size_t outsize = ((str.size() / 16)+1) * 16;
+    std::vector<unsigned char> encData(outsize);
+
+    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 1);
+    EVP_CipherUpdate(ctx, encData.data(), &outlen, (const unsigned char*)str.c_str(), (int)str.size());
+    encLen = outlen;
+    EVP_CipherFinal_ex(ctx, encData.data() + outlen, &outlen);
+    encLen += outlen;
+    EVP_CIPHER_CTX_free(ctx);
+    return std::move(Base64Encode(encData.data(), encLen));
+}
+
+std::string AES128ECBDecrypt(const std::string& base64Key, const std::string& base64str)
+{
+    std::vector<unsigned char> buffer;
+    if (!Base64Decode(base64str, buffer))
+    {
+        return "";
+    }
+
+    std::vector<unsigned char> key;
+    if (!Base64Decode(base64Key, key))
+    {
+        return "";
+    }
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    int encLen = 0;
+    int outlen = 0;
+
+    BUFFER encData(buffer.size());
+
+    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 0);
+    EVP_CipherUpdate(ctx, encData.data(), &outlen, buffer.data(), (int)buffer.size());
+    encLen = outlen;
+    EVP_CipherFinal(ctx, encData.data() + outlen, &outlen);
+    encLen += outlen;
+    EVP_CIPHER_CTX_free(ctx);
+    return std::move(std::string((char*)encData.data(), encLen));
+}
+```]]></content>
+      <tags>
+        <tag>openssl</tag>
+        <tag>AES</tag>
+      </tags>
   </entry>
   <entry>
     <title>使用 openssl 进行 RSA/ECB/PKCS1PADDING 加解密</title>
@@ -13780,6 +14639,221 @@ _记于2017.2.12 10:17_
 {% asset_img 2.jpg %}]]></content>
       <tags>
         <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 workflow 来中转 http 请求</title>
+    <url>/2024/08/03/use-workflow-to-proxy-http-request/</url>
+    <content><![CDATA[
+Sogou 的 [workflow](https://github.com/sogou/workflow) 是一个 C++ 编写的简单易用的 web 框架，这里我对官方的 [http_proxy](https://github.com/sogou/workflow/blob/master/tutorial/tutorial-05-http_proxy.cc) 做一点简单修改，来实现抓包。
+通常的抓包是设置代理服务器来实现的，我这里不通过代理，而是 http_proxy 作为一个中继一样的存在。
+把官方的 [http_proxy](https://github.com/sogou/workflow/blob/master/tutorial/tutorial-05-http_proxy.cc) 修改成下面的样子
+
+<!-- more -->
+```cpp
+/*
+  Copyright (c) 2019 Sogou, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  Author: Xie Han (xiehan@sogou-inc.com;63350856@qq.com)
+*/
+
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <utility>
+#include "workflow/Workflow.h"
+#include "workflow/HttpMessage.h"
+#include "workflow/HttpUtil.h"
+#include "workflow/WFHttpServer.h"
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+struct tutorial_series_context
+{
+	std::string url;
+	WFHttpTask *proxy_task;
+	bool is_keep_alive;
+};
+
+void reply_callback(WFHttpTask *proxy_task)
+{
+	SeriesWork *series = series_of(proxy_task);
+	tutorial_series_context *context =
+		(tutorial_series_context *)series->get_context();
+	auto *proxy_resp = proxy_task->get_resp();
+	size_t size = proxy_resp->get_output_body_size();
+
+	if (proxy_task->get_state() == WFT_STATE_SUCCESS)
+	{
+		fprintf(stderr, "%s: Success. Http Status: %s, BodyLength: %zu\n",
+			context->url.c_str(), proxy_resp->get_status_code(), size);
+	}
+	else
+	{
+		/* WFT_STATE_SYS_ERROR*/
+		fprintf(stderr, "%s: Reply failed: %s, BodyLength: %zu\n",
+			context->url.c_str(), strerror(proxy_task->get_error()), size);
+	}
+}
+
+void http_callback(WFHttpTask *task)
+{
+	int state = task->get_state();
+	int error = task->get_error();
+	auto *resp = task->get_resp();
+	SeriesWork *series = series_of(task);
+	tutorial_series_context *context =
+		(tutorial_series_context *)series->get_context();
+	auto *proxy_resp = context->proxy_task->get_resp();
+
+	/* Some servers may close the socket as the end of http response. */
+	if (state == WFT_STATE_SYS_ERROR && error == ECONNRESET)
+		state = WFT_STATE_SUCCESS;
+
+	if (state == WFT_STATE_SUCCESS)
+	{
+		const void *body;
+		size_t len;
+
+		/* set a callback for getting reply status. */
+		context->proxy_task->set_callback(reply_callback);
+
+		/* Copy the remote webserver's response, to proxy response. */
+		if (resp->get_parsed_body(&body, &len))
+			resp->append_output_body_nocopy(body, len);
+		*proxy_resp = std::move(*resp);
+		if (!context->is_keep_alive)
+			proxy_resp->set_header_pair("Connection", "close");
+	}
+	else
+	{
+		const char *err_string;
+		int error = task->get_error();
+
+		if (state == WFT_STATE_SYS_ERROR)
+			err_string = strerror(error);
+		else if (state == WFT_STATE_DNS_ERROR)
+			err_string = gai_strerror(error);
+		else if (state == WFT_STATE_SSL_ERROR)
+			err_string = "SSL error";
+		else /* if (state == WFT_STATE_TASK_ERROR) */
+			err_string = "URL error (Cannot be a HTTPS proxy)";
+
+		fprintf(stderr, "%s: Fetch failed. state = %d, error = %d: %s\n",
+				context->url.c_str(), state, task->get_error(),
+				err_string);
+
+		/* As a tutorial, make it simple. And ignore reply status. */
+		proxy_resp->set_status_code("404");
+		proxy_resp->append_output_body_nocopy(
+							"<html>404 Not Found.</html>", 27);
+	}
+}
+
+void process(WFHttpTask *proxy_task)
+{
+	auto *req = proxy_task->get_req();
+	SeriesWork *series = series_of(proxy_task);
+	WFHttpTask *http_task; /* for requesting remote webserver. */
+
+	tutorial_series_context *context = new tutorial_series_context;
+	context->url = req->get_request_uri();
+	context->proxy_task = proxy_task;
+
+	series->set_context(context);
+	series->set_callback([](const SeriesWork *series) {
+		delete (tutorial_series_context *)series->get_context();
+	});
+	std::string requesturi = req->get_request_uri();
+        
+        // add begain
+	protocol::HttpHeaderCursor header_cursor(req);
+	std::string host;
+	if (header_cursor.find("Host", host))
+	{
+		requesturi = "http://" + host + requesturi;
+	}
+	printf("uri: %s\r\n", requesturi.c_str());
+        // add end
+
+	context->is_keep_alive = req->is_keep_alive();
+	http_task = WFTaskFactory::create_http_task(requesturi.c_str(), 0, 0,
+												http_callback);
+
+	const void *body;
+	size_t len;
+
+	/* Copy user's request to the new task's reuqest using std::move() */
+	req->set_request_uri(http_task->get_req()->get_request_uri());
+	req->get_parsed_body(&body, &len);
+	req->append_output_body_nocopy(body, len);
+	*http_task->get_req() = std::move(*req);
+
+	/* also, limit the remote webserver response size. */
+	http_task->get_resp()->set_size_limit(200 * 1024 * 1024);
+
+	*series << http_task;
+}
+
+void sig_handler(int signo) { }
+
+int main(int argc, char *argv[])
+{
+	unsigned short port;
+
+	if (argc != 2)
+	{
+		fprintf(stderr, "USAGE: %s <port>\n", argv[0]);
+		exit(1);
+	}
+
+	port = atoi(argv[1]);
+	signal(SIGINT, sig_handler);
+
+	struct WFServerParams params = HTTP_SERVER_PARAMS_DEFAULT;
+	/* for safety, limit request size to 8MB. */
+	params.request_size_limit = 8 * 1024 * 1024;
+
+	WFHttpServer server(&params, process);
+
+	if (server.start(port) == 0)
+	{
+#ifndef _WIN32
+		pause();
+#else
+		getchar();
+#endif
+		server.stop();
+	}
+	else
+	{
+		perror("Cannot start server");
+		exit(1);
+	}
+
+	return 0;
+}
+```
+]]></content>
+      <tags>
+        <tag>C++</tag>
+        <tag>workflow</tag>
+        <tag>sogou</tag>
+        <tag>proxy</tag>
       </tags>
   </entry>
   <entry>
@@ -14553,474 +15627,502 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 ]]></content>
   </entry>
   <entry>
-    <title>使用 openssl 进行 AES128/ECB/PKCS5Padding 加解密</title>
-    <url>/2024/08/03/use-openssl-AES-ECB-PKCS5Padding-encrypt-decrypt/</url>
+    <title>安卓 RemoteCallbackList 的使用 （系统服务篇）</title>
+    <url>/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/</url>
     <content><![CDATA[
-在 java 上进行 AES128/ECB/PKCS5Padding 加密解密是很简单的
+接着[应用篇](../usage-of-Android-RemoteCallbacckList-APP/)继续说，这次我们在系统服务里面使用 RemoteCallbackList 。
+首先，你需要有一份能完整编译的安卓源码。
 
 <!-- more -->
 
+我这里以 Android10_r47为例。
+我在 `frameworks/base/core/java/com/callback/` 内新增这几个文件。
+
+1. 服务接口的 aidl
 ```java
-    public static String aesDecrypt(String str,String key) throws Exception{
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
-        byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
-        byte[] ret = cipher.doFinal(bytes);
-        return new String(ret,"UTF-8");
-    }
+// ICallBackTestInterface.aidl
+package com.callback;
 
-    public static String aesEncrypt(String str,String key) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
-        return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes()));
-    }
-```
-AES 加解密使用的key本身是 16 字节（128位），但是key可能不是ascii里的可见字符，有时候我们把 key 进行 base64 编码之后，当作明文传输使用。真正把 key 用来加密解密的时候，需要先 base64 解码来得到原本的 key。
-同样的，经过AES加密的信息也有可能不是每一个字节都是ascii可见字符，我们同样将加密后的密文进行base64编码之后再展示。
+// Declare any non-default types here with import statements
 
-同样的操作，用 C/C++ 进行就复杂得多，C/C++ 自己本身没有对应的库，不过好在有很多开源的实现，这里用 openssl 作为演示
-```
-#include <openssl/evp.h>
-#include <vector>
-std::string AES128ECBEncrypt(const std::string& base64key, const std::string& str)
-{
-    std::vector<unsigned char> key;
-    if (!Base64Decode(base64key, key))
-        return "";
+import com.callback.ICallbackTestCallback;
 
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    int encLen = 0;
-    int outlen = 0;
-    size_t outsize = ((str.size() / 16)+1) * 16;
-    std::vector<unsigned char> encData(outsize);
-
-    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 1);
-    EVP_CipherUpdate(ctx, encData.data(), &outlen, (const unsigned char*)str.c_str(), (int)str.size());
-    encLen = outlen;
-    EVP_CipherFinal_ex(ctx, encData.data() + outlen, &outlen);
-    encLen += outlen;
-    EVP_CIPHER_CTX_free(ctx);
-    return std::move(Base64Encode(encData.data(), encLen));
+interface ICallBackTestInterface {
+    // 向服务端注册客户端回调
+    void register(ICallbackTestCallback callback);
+    // 向服务端注销客户端回调
+    void unregister(ICallbackTestCallback callback);
+    // 向服务端发送消息
+    void callServer(String msg);
 }
+```
+1. 服务回调的 aidl
+```java
+// ICallbackTestCallback.aidl
+package com.callback;
 
-std::string AES128ECBDecrypt(const std::string& base64Key, const std::string& base64str)
-{
-    std::vector<unsigned char> buffer;
-    if (!Base64Decode(base64str, buffer))
-    {
-        return "";
+// Declare any non-default types here with import statements
+
+interface ICallbackTestCallback {
+    /**
+     * 服务端调用客户端的回调
+     **/
+    void onReceived(String msg);
+}
+```
+aidl 的文件会自动编译成Binder对象的子类，这个编译系统已经为我们做好了
+3. 服务端实现
+然后，`frameworks/base/services/core/java/com/android/server/CallBackTestService.java`。在这里新建一个文件，用来作为服务端的真正实现
+```java
+package com.android.server;
+
+import android.util.Slog;
+
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
+import android.os.Binder;
+import android.os.IBinder;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.ICallBackTestInterface;
+
+public class CallBackTestService extends ICallBackTestInterface.Stub {
+
+    private final String TAG = "testcallback";
+
+    private boolean serverRunning = false;
+
+    private final RemoteCallbackList<ICallbackTestCallback> clients = new RemoteCallbackList<>();
+
+    public CallBackTestService(){
+        serverRunning = true;
+        new Thread(serverRunnable).start();
     }
 
-    std::vector<unsigned char> key;
-    if (!Base64Decode(base64Key, key))
-    {
-        return "";
+    public void register(ICallbackTestCallback callback) throws RemoteException {
+        Slog.d(TAG,"register callback from pid=" + Binder.getCallingPid());
+        clients.register(callback);
     }
 
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    int encLen = 0;
-    int outlen = 0;
+    public void unregister(ICallbackTestCallback callback) throws RemoteException {
+        Slog.d(TAG,"unregister callback from pid=" + Binder.getCallingPid());
+        clients.unregister(callback);
+    }
 
-    BUFFER encData(buffer.size());
+    public void callServer(String msg) throws RemoteException {
+        Slog.d(TAG,"received pid=" + Binder.getCallingPid()+" message: " + msg);
+    }
 
-    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 0);
-    EVP_CipherUpdate(ctx, encData.data(), &outlen, buffer.data(), (int)buffer.size());
-    encLen = outlen;
-    EVP_CipherFinal(ctx, encData.data() + outlen, &outlen);
-    encLen += outlen;
-    EVP_CIPHER_CTX_free(ctx);
-    return std::move(std::string((char*)encData.data(), encLen));
+    // 向客户端发送消息的具体实现
+    // 简单的做一个自增运算，然后发送回客户端
+    // 
+    private Runnable serverRunnable = () ->{
+        int count = 0;
+        while(serverRunning){
+            try {
+                Thread.sleep(500);
+                noteClients(Integer.toString(count++));
+                count = count > 10000 ? 0 : count;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    /**
+     * 
+     * @param msg 
+     */
+    private void noteClients(String msg){
+        int cb = clients.beginBroadcast();
+        for(int i=0;i<cb;i++){
+            try {
+               clients.getBroadcastItem(i).onReceived(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        clients.finishBroadcast();
+    }
 }
-```]]></content>
-      <tags>
-        <tag>openssl</tag>
-        <tag>AES</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>为 Android 编译 openssl 的注意事项</title>
-    <url>/2024/08/03/attention-of-build-openssl-for-Android/</url>
-    <content><![CDATA[
-以下载链接 https://www.openssl.org/source/openssl-1.1.1o.tar.gz 为例
-下载解压之后，查看根目录的 NOTES.ANDROID，其中有
-```bash
-export ANDROID_NDK_HOME=/home/whoever/Android/android-sdk/ndk/20.0.5594570
-PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HOME/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
-./Configure android-arm64 -D__ANDROID_API__=29
-make
 ```
-这里就是最直接的编译方式了。但是这样编译之后，会有一个坑
+这里服务端的实现，实际上就和上一篇中的 CallBackServer 是一个意思。
+然后封装一下服务的调用 `frameworks/base/core/java/com/callback/CallBackTestManager.java`
+```java
+package com.callback;
 
-<!-- more -->
+import android.util.Slog;
 
-```bash
-lrwxrwxrwx  1 ubuntu ubuntu      16 Jun  9 21:23 libcrypto.so -> libcrypto.so.1.1
--rwxrwxr-x  1 ubuntu ubuntu 2754216 Jun  9 21:23 libcrypto.so.1.1
-lrwxrwxrwx  1 ubuntu ubuntu      13 Jun  9 21:23 libssl.so -> libssl.so.1.1
--rwxrwxr-x  1 ubuntu ubuntu  596600 Jun  9 21:23 libssl.so.1.1
-```
-编译时尝试链接 `libssl.so` ，实际上会链接到 `libssl.so.1.1` ，但是当你尝试将 `libssl.so.1.1` 集成到 Android studio 工程内时，会发现 `libssl.so.1.1` 这种命名格式so，Android studio 是不会自动将其打包到 apk 内的，即使将 `libssl.so.1.1` 改名为 `libssl.so` 可以集成到 apk ，app运行时仍然会去找 `libssl.so.1.1`。因为 so 内部有其文件名信息
-```bash
-$objdump -p libssl.so | grep SONAME
-  SONAME               libssl.so.1.1
-```
-对于Android来说，我们更希望，编译之后，so 本身名字就叫 libssl.so。
-具体做法是解压 `openssl-1.1.1o.tar.gz` 之后，修改 `15-android.conf`。
-大概 193 行。
-```PERL
-my %targets = (
-    "android" => {
-        inherit_from     => [ "linux-generic32" ],
-        template         => 1,
-        ################################################################
-        # Special note about -pie. The underlying reason is that
-        # Lollipop refuses to run non-PIE. But what about older systems
-        # and NDKs? -fPIC was never problem, so the only concern is -pie.
-        # Older toolchains, e.g. r4, appear to handle it and binaries
-        # turn out mostly functional. "Mostly" means that oldest
-        # Androids, such as Froyo, fail to handle executable, but newer
-        # systems are perfectly capable of executing binaries targeting
-        # Froyo. Keep in mind that in the nutshell Android builds are
-        # about JNI, i.e. shared libraries, not applications.
-        cflags           => add(sub { android_ndk()->{cflags} }),
-        cppflags         => add(sub { android_ndk()->{cppflags} }),
-        cxxflags         => add(sub { android_ndk()->{cflags} }),
-        bn_ops           => sub { android_ndk()->{bn_ops} },
-        bin_cflags       => "-pie",
-        enable           => [ ],
-        shared_extension => ".so",  ### 这一行是新加的
-    },
-```
-这样可以编译出来不带版本后缀的 `libssl.so` 和 `libcrypto.so`。
-可以参考下边的懒人脚本来自行编译: 
-```bash
-#!/bin/bash
+import android.content.Context;
+import android.os.RemoteException;
 
-function buildopenssl()
-{
-    androidarch=$1
-    toolchain=$2
-    if [ ! -f openssl-1.1.1o.tar.gz ]; then
-        wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
-    fi
-    if [ !-d openssl-1.1.1o ]; then
-        tar -xf openssl-1.1.1o.tar.gz
-    fi
-    if [ -z $ANDROID_NDK_HOME ]; then
-        echo "missing ANDROID_NDK_HOME"
-        exit
-    fi
-    pushd openssl-1.1.1o
-    PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HOME/toolchains/${toolchain}-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
-    ./Configure android-$androidarch -D__ANDROID_API__=26
-    make clean
-    make
-    popd
-}
+import android.annotation.UnsupportedAppUsage;
 
-buildopenssl arm64 aarch64
-#buildopenssl arm arm
-#buildopenssl x86 x86
-#buildopenssl x86_64 x86_64
-```]]></content>
-      <tags>
-        <tag>openssl</tag>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>C/C++ 中，modulus，privateExponent, pulbicExponent 如何转换成 RSA密钥</title>
-    <url>/2024/08/03/convert-RSA-key-with-openssl/</url>
-    <content><![CDATA[
-p.s: 以下内容均以 openssl 实现。
-RSA 密钥的存储方式有很多，某些情况下，我们直接保存密钥的 modulus(n),publicExponent(e),privateExponent(d)，使用的时候再将它们转换成 RSA 密钥。下面来讲讲在 C/C++ 环境中，如何把这几个大整数转换成 RSA 密钥来用。
-根据 openssl 的文档，openssl提供了这样一个函数
+import com.callback.ICallbackTestCallback;
+import com.callback.ICallBackTestInterface;
 
-<!--more -->
+public class CallBackTestManager {
 
-```c
-int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);
-```
-这个参数里面的 n , e , q 对应 RSA 算法里面的参数，实际使用中，它们分别是
- - n --> modulus
- - e --> publicExponent
- - d --> privateExponent
+    public static final String SERVICE_NAME = "callbacktest";
 
-其中，n和e组成了公钥，n和d组成私钥(取自 [RSA算法原理](https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html))，那么，我们想用 modulus(n),publicExponent(e),privateExponent(q) 来生成一个RSA密钥使用的话，可以用下面这样简短的方式
-```c
-RSA* rsa = RSA_new();
-BIGNUM* modulus = BN_new();
-BIGNUM* publicExponent = BN_new();
-BIGNUM* privateExponent = BN_new();
-BN_hex2bn(&modulus,"the_modulus_hex_str");
-BN_hex2bn(&publicExponent,"the_publicexponent_hex_str");
-BN_hex2bn(&privateExponent,"the_privateexponent_hex_str");
-RSA_set0_key(rsa,n,e,d);
-```
-其中，`the_modulus_hex_str` ，`the_publicexponent_hex_str`，`the_privateexponent_hex_str` 是指对应的巨大整数的十六进制字符串。例如
-```
-n: XXXXXX31C433EDD1B99CE2B218C253F46FDFFFB888B6CFC6B2ED7C733454E744BF95369DA3E6648AFB6FB11EF85A5BB25A1F328266844C2E3FAC8EFAAB4B2C45588604BAC6CF8A9B528F0D03E6B56BDE534B0360F1BD9E8B36D4197FE6F058D97DE670C0F178D9633FEEAE94237827A4006BC737344932E8F3E349F62175B7
-e: 010001
-d: XXXXXXX6566B839C1F88C15D1A46771F1E4C3918000787D56016208B758F3E1A33A923226850DA53C288F9CF6753DFBE48750A83B3DE58D5C0B85933C5B92ABCCD60D80992AABA03C3B1A7E58B8289A93383D8DAA4EE23178660D09E0335522EDCEAD84FB34D7A39B7794C905F15883FC8D1F3D57790259B4D51BA25F67D2D211
-```
-上面对应的巨大整数的十进制数为
-```
-n: XXXXXXX9057732971629580498028671059682869498690832625587443656573925941563146104539350008204291144532450083831552937873084816334755400478676505846850294967700928692649221538739009633205352515287702420255727528786212412171786407245232978625501660599119803054000638252479305264674077018562561222430729026237879
-e: 65537
-d: XXXXXXXX041865311331499528401083208041704898325216901065444649537573972168292421030450065823066407208305456734951704373218531670621023627175563960996010664960509836168571614423098404829680294776295068450558648709945648817915783177775326687433116356887666860252766677606932669252345719029413488408688871813075473
-```
-这样，我们就得到了一个RSA密钥。接下来可以使用这个密钥对一些数据加密/解密。
-比如，使用 `RSA/ECB/PKCS1Padding` 填充方式，进行公钥加密，私钥解密例子
-```c
-    char encrypteddata[1024] = { 0 };
-    char originnaldata[1024] = { 0 };
-    const char* testinfo = "this is a sample info to encrypt";
-    int encryptlen = 0;
-    int retlen = 0;
-    encryptlen = RSA_public_encrypt(strlen(testinfo), (const unsigned char*)testinfo, (unsigned char *)encrypteddata, rsa, RSA_PKCS1_PADDING);
-    if (encryptlen > 0)
-    {
-        retlen = RSA_private_decrypt(encryptlen, (const unsigned char*)encrypteddata, (unsigned char*)originnaldata, rsa, RSA_PKCS1_PADDING);
-        if (retlen > 0)
-        {
-            printf("%.*s\n", retlen, originnaldata);
+    private final Context mContext;
+
+    private final ICallBackTestInterface mService;
+
+    public CallBackTestManager(Context context, ICallBackTestInterface service){
+        mContext = context;
+        mService = service;
+    }
+
+    public void register(ICallbackTestCallback callback) {
+        try{
+            mService.register(callback);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
         }
     }
-```
-openssl 里面，公钥加密，私钥解密的函数原型是
-```c
- int RSA_public_encrypt(int flen, const unsigned char *from,
-                        unsigned char *to, RSA *rsa, int padding);
 
- int RSA_private_decrypt(int flen, const unsigned char *from,
-                         unsigned char *to, RSA *rsa, int padding);
-```
-同样的，还有私钥加密，公钥解密的函数原型是
-```
- int RSA_private_encrypt(int flen, unsigned char *from,
-                         unsigned char *to, RSA *rsa, int padding);
+    public void unregister(ICallbackTestCallback callback) {
+        try{
+            mService.unregister(callback);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
- int RSA_public_decrypt(int flen, unsigned char *from,
-                        unsigned char *to, RSA *rsa, int padding);
-```]]></content>
+    public void callserver(String msg) {
+        try{
+            mService.callServer(msg);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
+        }
+    }
+}
+```
+
+到这里，我们的大部分工作就完成了。不过此时编译成系统镜像烧录或者编译成虚拟机，还是不能调用这个服务的。
+由于我们添加的类位于 frameworks/base/com 这个目录下，这个目录下的包并不在 bootclass 里面，修改一下这个文件
+```diff
+diff --git a/build/make/core/tasks/check_boot_jars/package_whitelist.txt b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
+index 38f2be57af..883b6d86ff 100644
+--- a/build/make/core/tasks/check_boot_jars/package_whitelist.txt
++++ b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
+@@ -237,6 +237,7 @@ org\.apache\.xalan\.xslt
+ # Packages in the google namespace across all bootclasspath jars.
+ com\.google\.android\..*
+ com\.google\.vr\.platform.*
++com\.callback\.*
+
+ ###################################################
+ # Packages used for Android in Chrome OS
+```
+首先会遇到的问题是 selinux 的限制，
+按照下面的这个 diff 文件来添加关于这个新增加的服务的规则
+```diff
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/service.te b/system/sepolicy/prebuilts/api/29.0/private/service.te
+index a8ee195590..7d9a2452fa 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/service.te
++++ b/system/sepolicy/prebuilts/api/29.0/private/service.te
+@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
+ type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
+ type stats_service,                 service_manager_type;
+ type statscompanion_service,        system_server_service, service_manager_type;
++type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/service_contexts b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
+index 96d553bf49..9067330ae5 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/service_contexts
++++ b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
+@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
+ *                                         u:object_r:default_android_service:s0
++callbacktest                              u:object_r:callbacktest_service:s0
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
+index 3c20c082b7..d8e2fac17d 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
++++ b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
+@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
+ allow untrusted_app_all app_api_service:service_manager find;
+ allow untrusted_app_all vr_manager_service:service_manager find;
+ allow untrusted_app_all gpu_service:service_manager find;
++allow untrusted_app_all callbacktest_service:service_manager find;
+
+ # Allow untrusted apps to interact with gpuservice
+ binder_call(untrusted_app_all, gpuservice)
+diff --git a/system/sepolicy/private/service.te b/system/sepolicy/private/service.te
+index a8ee195590..7d9a2452fa 100644
+--- a/system/sepolicy/private/service.te
++++ b/system/sepolicy/private/service.te
+@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
+ type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
+ type stats_service,                 service_manager_type;
+ type statscompanion_service,        system_server_service, service_manager_type;
++type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
+diff --git a/system/sepolicy/private/service_contexts b/system/sepolicy/private/service_contexts
+index 96d553bf49..9067330ae5 100644
+--- a/system/sepolicy/private/service_contexts
++++ b/system/sepolicy/private/service_contexts
+@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
+ *                                         u:object_r:default_android_service:s0
++callbacktest                              u:object_r:callbacktest_service:s0
+diff --git a/system/sepolicy/private/untrusted_app_all.te b/system/sepolicy/private/untrusted_app_all.te
+index 3c20c082b7..d8e2fac17d 100644
+--- a/system/sepolicy/private/untrusted_app_all.te
++++ b/system/sepolicy/private/untrusted_app_all.te
+@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
+ allow untrusted_app_all app_api_service:service_manager find;
+ allow untrusted_app_all vr_manager_service:service_manager find;
+ allow untrusted_app_all gpu_service:service_manager find;
++allow untrusted_app_all callbacktest_service:service_manager find;
+
+ # Allow untrusted apps to interact with gpuservice
+ binder_call(untrusted_app_all, gpuservice)
+```
+到这里之后，回到Android源码根目录，正常 `make update-api && make` 之后，就可以启动虚拟机了。
+然后再新建一个应用。
+```bash
+.
+├── aidl
+│   └── com
+│       └── callback
+│           ├── ICallbackTestCallback.aidl
+│           └── ICallBackTestInterface.aidl
+├── AndroidManifest.xml
+├── java
+│   └── com
+│       └── callback
+│           ├── CallBackTestManager.java
+│           └── demo
+│               └── MainActivity.java
+
+```
+其中，`ICallbackTestCallback.aidl` , `ICallBackTestInterface.aidl` , `CallBackTestManager.java` 三个文件都是从我们添加在源码里面的拷贝出来的，因为Android Studio的sdk里面并没有这些实现，把这些文件放到工程的目录里面，让编译可以通过。
+通过 java 的类加载机制，实际上运行的时候是编译到系统里启动的那些代码，实际上我们拷贝到工程里的文件，只要接口声明与系统内的一致就可以，接口实现可以留空。就像Android SDK 里面的andrroid.jar里面的那些空接口一样。
+
+MainActivity.java的内容如下
+```java
+package com.callback.demo;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.CallBackTestManager;
+import com.testcallback.demo.R;
+
+public class MainActivity extends AppCompatActivity {
+
+    private final String TAG = "testcallback";
+
+    CallBackTestManager callbackSerice = null;
+
+    private boolean bound = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(bound){
+            registerCallback(null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(bound){
+            unregisterCallback(null);
+        }
+    }
+
+    private ICallbackTestCallback callback = new ICallbackTestCallback.Stub(){
+        @Override
+        public void onReceived(String msg) throws RemoteException {
+            Log.d(TAG,"received msg: " + msg + " . from server pid=" + Binder.getCallingPid());
+        }
+    };
+
+    public void registerCallback(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.register(callback);
+        }
+    }
+
+    public void unregisterCallback(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.unregister(callback);
+        }
+    }
+
+    public void bindService(View view) {
+        if(callbackSerice == null){
+            callbackSerice = (CallBackTestManager)getSystemService(CallBackTestManager.SERVICE_NAME);
+            bound = true;
+        }
+    }
+
+    public void notifyService(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.callserver("hello, I'm client");
+        }
+    }
+
+}
+```
+对应的资源文件如下
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/registerBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="registerCallback"
+        android:text="register"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/unregisterBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/registerBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="unregisterCallback"
+        android:text="unregister"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bindservice"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/unregisterBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="bindService"
+        android:text="Bind service"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/notifyservice"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/bindservice"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="notifyService"
+        android:text="Notify service"/>
+```
+编译完成之后，我们将apk用AOSP的系统签名（如果你用了自己的密钥，就是你自己密钥的platform签名），AOSP的签名位于`build/target/product/security/`,其内的 platform.pk8 和 platform.x509.pem 。用这两个签名给apk签名安装。这个apk需要注意声明 systemuid。
+p.s: 这里使用系统签名，是因为按照本篇的流程，添加后的 CallBackTestManager 是 hide 的接口，Android 10 对hide接口做了限制，普通app直接去调的话，会报找不到接口。对于安卓10新增的hidden api 调用限制，可以前往 https://developer.android.google.cn/guide/app-compatibility/restrictions-non-sdk-interfaces 。普通应用直接调用hide的接口，可能会直接闪退，查看log，有类似下面这样的log生成
+```
+Accessing hidden field Landroid/os/Message;->flags:I (light greylist, JNI)
+```
+# 把我们新增的接口变成public的接口
+这一部分，你可以理解为将我们自行增加的接口变成 SDK 接口（如果你的ROM需要通过谷歌的CTS认证，则不可以将自行增加的API变成SDK API）。
+如果你有留意，在 make update-api 之后，`android10_r47/frameworks/base/api/current.txt`，会出现新增的一些和aidl文件有关的内容
+```java
+package com.callback {
+
+  public interface ICallBackTestInterface extends android.os.IInterface {
+    method public void callServer(String) throws android.os.RemoteException;
+    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+  }
+
+  public static class ICallBackTestInterface.Default implements com.callback.ICallBackTestInterface {
+    ctor public ICallBackTestInterface.Default();
+    method public android.os.IBinder asBinder();
+    method public void callServer(String) throws android.os.RemoteException;
+    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+  }
+
+  public abstract static class ICallBackTestInterface.Stub extends android.os.Binder implements com.callback.ICallBackTestInterface {
+    ctor public ICallBackTestInterface.Stub();
+    method public android.os.IBinder asBinder();
+    method public static com.callback.ICallBackTestInterface asInterface(android.os.IBinder);
+    method public static com.callback.ICallBackTestInterface getDefaultImpl();
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+    method public static boolean setDefaultImpl(com.callback.ICallBackTestInterface);
+  }
+
+  public interface ICallbackTestCallback extends android.os.IInterface {
+    method public void onReceived(String) throws android.os.RemoteException;
+  }
+
+  public static class ICallbackTestCallback.Default implements com.callback.ICallbackTestCallback {
+    ctor public ICallbackTestCallback.Default();
+    method public android.os.IBinder asBinder();
+    method public void onReceived(String) throws android.os.RemoteException;
+  }
+  public abstract static class ICallbackTestCallback.Stub extends android.os.Binder implements com.callback.ICallbackTestCallback {
+    ctor public ICallbackTestCallback.Stub();
+    method public android.os.IBinder asBinder();
+    method public static com.callback.ICallbackTestCallback asInterface(android.os.IBinder);
+    method public static com.callback.ICallbackTestCallback getDefaultImpl();
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+    method public static boolean setDefaultImpl(com.callback.ICallbackTestCallback);
+  }
+}
+```
+某种程度上，你可以认为，这个txt的内容就是SDK api，可以看到，我们新增的 CallBackTestManager 的内容并不在这个txt里面。
+可以通过修改 `frameworks/base/Android.bp` 这个文件，修改内容如下
+```diff
+diff --git a/frameworks/base/Android.bp b/frameworks/base/Android.bp
+index 663354835e..03a98395e5 100644
+--- a/frameworks/base/Android.bp
++++ b/frameworks/base/Android.bp
+@@ -1237,6 +1237,7 @@ packages_to_document = [
+     "javax/microedition/khronos",
+     "org/apache/http/conn",
+     "org/apache/http/params",
++    "com/callback",
+ ]
+
+ // Make the api/current.txt file available for use by modules in other
+```
+修改这个文件之后，再次 `make update-api`，可以看到 CallBackTestManager 的内容已经添加到 current.txt 里面去了。
+再次make之后，普通应用就可以像调用安卓已有的服务那样，来使用新增的这个服务了。
+# 复习一下
+有几个小地方需要注意：
+1. 如果你添加的接口没有出现在 current.txt 里面的话，安卓10上由于谷歌新增的hidden api访问限制，普通应用是无法访问的
+2. 使用AOSP 编译出来的 signapk.jar 和 platform 签名的apk，似乎无法在虚拟机上安装为系统应用，我是把 platform key 转换成 Android Studio 使用的 keystore 来使用的。]]></content>
       <tags>
-        <tag>openssl</tag>
-        <tag>RSA</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 workflow 来中转 http 请求</title>
-    <url>/2024/08/03/use-workflow-to-proxy-http-request/</url>
-    <content><![CDATA[
-Sogou 的 [workflow](https://github.com/sogou/workflow) 是一个 C++ 编写的简单易用的 web 框架，这里我对官方的 [http_proxy](https://github.com/sogou/workflow/blob/master/tutorial/tutorial-05-http_proxy.cc) 做一点简单修改，来实现抓包。
-通常的抓包是设置代理服务器来实现的，我这里不通过代理，而是 http_proxy 作为一个中继一样的存在。
-把官方的 [http_proxy](https://github.com/sogou/workflow/blob/master/tutorial/tutorial-05-http_proxy.cc) 修改成下面的样子
-
-<!-- more -->
-```cpp
-/*
-  Copyright (c) 2019 Sogou, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  Author: Xie Han (xiehan@sogou-inc.com;63350856@qq.com)
-*/
-
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <utility>
-#include "workflow/Workflow.h"
-#include "workflow/HttpMessage.h"
-#include "workflow/HttpUtil.h"
-#include "workflow/WFHttpServer.h"
-
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
-struct tutorial_series_context
-{
-	std::string url;
-	WFHttpTask *proxy_task;
-	bool is_keep_alive;
-};
-
-void reply_callback(WFHttpTask *proxy_task)
-{
-	SeriesWork *series = series_of(proxy_task);
-	tutorial_series_context *context =
-		(tutorial_series_context *)series->get_context();
-	auto *proxy_resp = proxy_task->get_resp();
-	size_t size = proxy_resp->get_output_body_size();
-
-	if (proxy_task->get_state() == WFT_STATE_SUCCESS)
-	{
-		fprintf(stderr, "%s: Success. Http Status: %s, BodyLength: %zu\n",
-			context->url.c_str(), proxy_resp->get_status_code(), size);
-	}
-	else
-	{
-		/* WFT_STATE_SYS_ERROR*/
-		fprintf(stderr, "%s: Reply failed: %s, BodyLength: %zu\n",
-			context->url.c_str(), strerror(proxy_task->get_error()), size);
-	}
-}
-
-void http_callback(WFHttpTask *task)
-{
-	int state = task->get_state();
-	int error = task->get_error();
-	auto *resp = task->get_resp();
-	SeriesWork *series = series_of(task);
-	tutorial_series_context *context =
-		(tutorial_series_context *)series->get_context();
-	auto *proxy_resp = context->proxy_task->get_resp();
-
-	/* Some servers may close the socket as the end of http response. */
-	if (state == WFT_STATE_SYS_ERROR && error == ECONNRESET)
-		state = WFT_STATE_SUCCESS;
-
-	if (state == WFT_STATE_SUCCESS)
-	{
-		const void *body;
-		size_t len;
-
-		/* set a callback for getting reply status. */
-		context->proxy_task->set_callback(reply_callback);
-
-		/* Copy the remote webserver's response, to proxy response. */
-		if (resp->get_parsed_body(&body, &len))
-			resp->append_output_body_nocopy(body, len);
-		*proxy_resp = std::move(*resp);
-		if (!context->is_keep_alive)
-			proxy_resp->set_header_pair("Connection", "close");
-	}
-	else
-	{
-		const char *err_string;
-		int error = task->get_error();
-
-		if (state == WFT_STATE_SYS_ERROR)
-			err_string = strerror(error);
-		else if (state == WFT_STATE_DNS_ERROR)
-			err_string = gai_strerror(error);
-		else if (state == WFT_STATE_SSL_ERROR)
-			err_string = "SSL error";
-		else /* if (state == WFT_STATE_TASK_ERROR) */
-			err_string = "URL error (Cannot be a HTTPS proxy)";
-
-		fprintf(stderr, "%s: Fetch failed. state = %d, error = %d: %s\n",
-				context->url.c_str(), state, task->get_error(),
-				err_string);
-
-		/* As a tutorial, make it simple. And ignore reply status. */
-		proxy_resp->set_status_code("404");
-		proxy_resp->append_output_body_nocopy(
-							"<html>404 Not Found.</html>", 27);
-	}
-}
-
-void process(WFHttpTask *proxy_task)
-{
-	auto *req = proxy_task->get_req();
-	SeriesWork *series = series_of(proxy_task);
-	WFHttpTask *http_task; /* for requesting remote webserver. */
-
-	tutorial_series_context *context = new tutorial_series_context;
-	context->url = req->get_request_uri();
-	context->proxy_task = proxy_task;
-
-	series->set_context(context);
-	series->set_callback([](const SeriesWork *series) {
-		delete (tutorial_series_context *)series->get_context();
-	});
-	std::string requesturi = req->get_request_uri();
-        
-        // add begain
-	protocol::HttpHeaderCursor header_cursor(req);
-	std::string host;
-	if (header_cursor.find("Host", host))
-	{
-		requesturi = "http://" + host + requesturi;
-	}
-	printf("uri: %s\r\n", requesturi.c_str());
-        // add end
-
-	context->is_keep_alive = req->is_keep_alive();
-	http_task = WFTaskFactory::create_http_task(requesturi.c_str(), 0, 0,
-												http_callback);
-
-	const void *body;
-	size_t len;
-
-	/* Copy user's request to the new task's reuqest using std::move() */
-	req->set_request_uri(http_task->get_req()->get_request_uri());
-	req->get_parsed_body(&body, &len);
-	req->append_output_body_nocopy(body, len);
-	*http_task->get_req() = std::move(*req);
-
-	/* also, limit the remote webserver response size. */
-	http_task->get_resp()->set_size_limit(200 * 1024 * 1024);
-
-	*series << http_task;
-}
-
-void sig_handler(int signo) { }
-
-int main(int argc, char *argv[])
-{
-	unsigned short port;
-
-	if (argc != 2)
-	{
-		fprintf(stderr, "USAGE: %s <port>\n", argv[0]);
-		exit(1);
-	}
-
-	port = atoi(argv[1]);
-	signal(SIGINT, sig_handler);
-
-	struct WFServerParams params = HTTP_SERVER_PARAMS_DEFAULT;
-	/* for safety, limit request size to 8MB. */
-	params.request_size_limit = 8 * 1024 * 1024;
-
-	WFHttpServer server(&params, process);
-
-	if (server.start(port) == 0)
-	{
-#ifndef _WIN32
-		pause();
-#else
-		getchar();
-#endif
-		server.stop();
-	}
-	else
-	{
-		perror("Cannot start server");
-		exit(1);
-	}
-
-	return 0;
-}
-```
-]]></content>
-      <tags>
-        <tag>C++</tag>
-        <tag>workflow</tag>
-        <tag>sogou</tag>
-        <tag>proxy</tag>
+        <tag>Android</tag>
       </tags>
   </entry>
   <entry>

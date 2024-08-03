@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接着应用篇继续说，这次我们在系统服务里面使用 RemoteCallbackList 。首先，你需要有一份能完整编译的安卓源码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安卓 RemoteCallbackList 的使用 （系统服务篇）">
+<meta property="og:url" content="http://example.com/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="接着应用篇继续说，这次我们在系统服务里面使用 RemoteCallbackList 。首先，你需要有一份能完整编译的安卓源码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-03T01:33:30.000Z">
+<meta property="article:modified_time" content="2024-08-03T01:42:04.239Z">
+<meta property="article:author" content="SupperMary">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>安卓 RemoteCallbackList 的使用 （系统服务篇） | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          安卓 RemoteCallbackList 的使用 （系统服务篇）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-08-03 09:33:30 / 修改时间：09:42:04" itemprop="dateCreated datePublished" datetime="2024-08-03T09:33:30+08:00">2024-08-03</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接着<a href="../usage-of-Android-RemoteCallbacckList-APP/">应用篇</a>继续说，这次我们在系统服务里面使用 RemoteCallbackList 。<br>首先，你需要有一份能完整编译的安卓源码。</p>
+<span id="more"></span>
+
+<p>我这里以 Android10_r47为例。<br>我在 <code>frameworks/base/core/java/com/callback/</code> 内新增这几个文件。</p>
+<ol>
+<li>服务接口的 aidl<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ICallBackTestInterface.aidl</span></span><br><span class="line"><span class="keyword">package</span> com.callback;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Declare any non-default types here with import statements</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.callback.ICallbackTestCallback;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">ICallBackTestInterface</span> &#123;</span><br><span class="line">    <span class="comment">// 向服务端注册客户端回调</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(ICallbackTestCallback callback)</span>;</span><br><span class="line">    <span class="comment">// 向服务端注销客户端回调</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">unregister</span><span class="params">(ICallbackTestCallback callback)</span>;</span><br><span class="line">    <span class="comment">// 向服务端发送消息</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">callServer</span><span class="params">(String msg)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>服务回调的 aidl<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ICallbackTestCallback.aidl</span></span><br><span class="line"><span class="keyword">package</span> com.callback;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Declare any non-default types here with import statements</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">ICallbackTestCallback</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务端调用客户端的回调</span></span><br><span class="line"><span class="comment">     **/</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">onReceived</span><span class="params">(String msg)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+aidl 的文件会自动编译成Binder对象的子类，这个编译系统已经为我们做好了</li>
+<li>服务端实现<br>然后，<code>frameworks/base/services/core/java/com/android/server/CallBackTestService.java</code>。在这里新建一个文件，用来作为服务端的真正实现<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.android.server;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.util.Slog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.os.RemoteCallbackList;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.os.Binder;</span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.callback.ICallbackTestCallback;</span><br><span class="line"><span class="keyword">import</span> com.callback.ICallBackTestInterface;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CallBackTestService</span> <span class="keyword">extends</span> <span class="title class_">ICallBackTestInterface</span>.Stub &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TAG</span> <span class="operator">=</span> <span class="string">&quot;testcallback&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">serverRunning</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> RemoteCallbackList&lt;ICallbackTestCallback&gt; clients = <span class="keyword">new</span> <span class="title class_">RemoteCallbackList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CallBackTestService</span><span class="params">()</span>&#123;</span><br><span class="line">        serverRunning = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(serverRunnable).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(ICallbackTestCallback callback)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        Slog.d(TAG,<span class="string">&quot;register callback from pid=&quot;</span> + Binder.getCallingPid());</span><br><span class="line">        clients.register(callback);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unregister</span><span class="params">(ICallbackTestCallback callback)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        Slog.d(TAG,<span class="string">&quot;unregister callback from pid=&quot;</span> + Binder.getCallingPid());</span><br><span class="line">        clients.unregister(callback);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">callServer</span><span class="params">(String msg)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        Slog.d(TAG,<span class="string">&quot;received pid=&quot;</span> + Binder.getCallingPid()+<span class="string">&quot; message: &quot;</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 向客户端发送消息的具体实现</span></span><br><span class="line">    <span class="comment">// 简单的做一个自增运算，然后发送回客户端</span></span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">Runnable</span> <span class="variable">serverRunnable</span> <span class="operator">=</span> () -&gt;&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(serverRunning)&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                noteClients(Integer.toString(count++));</span><br><span class="line">                count = count &gt; <span class="number">10000</span> ? <span class="number">0</span> : count;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> msg </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">noteClients</span><span class="params">(String msg)</span>&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">cb</span> <span class="operator">=</span> clients.beginBroadcast();</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;cb;i++)&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">               clients.getBroadcastItem(i).onReceived(msg);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        clients.finishBroadcast();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+这里服务端的实现，实际上就和上一篇中的 CallBackServer 是一个意思。<br>然后封装一下服务的调用 <code>frameworks/base/core/java/com/callback/CallBackTestManager.java</code><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.callback;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.util.Slog;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.annotation.UnsupportedAppUsage;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.callback.ICallbackTestCallback;</span><br><span class="line"><span class="keyword">import</span> com.callback.ICallBackTestInterface;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CallBackTestManager</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SERVICE_NAME</span> <span class="operator">=</span> <span class="string">&quot;callbacktest&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Context mContext;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ICallBackTestInterface mService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CallBackTestManager</span><span class="params">(Context context, ICallBackTestInterface service)</span>&#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">        mService = service;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(ICallbackTestCallback callback)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            mService.register(callback);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e)&#123;</span><br><span class="line">            <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unregister</span><span class="params">(ICallbackTestCallback callback)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            mService.unregister(callback);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e)&#123;</span><br><span class="line">            <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">callserver</span><span class="params">(String msg)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            mService.callServer(msg);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e)&#123;</span><br><span class="line">            <span class="keyword">throw</span> e.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>到这里，我们的大部分工作就完成了。不过此时编译成系统镜像烧录或者编译成虚拟机，还是不能调用这个服务的。<br>由于我们添加的类位于 frameworks&#x2F;base&#x2F;com 这个目录下，这个目录下的包并不在 bootclass 里面，修改一下这个文件</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">diff --git a/build/make/core/tasks/check_boot_jars/package_whitelist.txt b/build/make/core/tasks/check_boot_jars/package_whitelist.txt</span></span><br><span class="line"><span class="comment">index 38f2be57af..883b6d86ff 100644</span></span><br><span class="line"><span class="comment">--- a/build/make/core/tasks/check_boot_jars/package_whitelist.txt</span></span><br><span class="line"><span class="comment">+++ b/build/make/core/tasks/check_boot_jars/package_whitelist.txt</span></span><br><span class="line"><span class="meta">@@ -237,6 +237,7 @@</span> org\.apache\.xalan\.xslt</span><br><span class="line"> # Packages in the google namespace across all bootclasspath jars.</span><br><span class="line"> com\.google\.android\..*</span><br><span class="line"> com\.google\.vr\.platform.*</span><br><span class="line"><span class="addition">+com\.callback\.*</span></span><br><span class="line"></span><br><span class="line"> ###################################################</span><br><span class="line"> # Packages used for Android in Chrome OS</span><br></pre></td></tr></table></figure>
+<p>首先会遇到的问题是 selinux 的限制，<br>按照下面的这个 diff 文件来添加关于这个新增加的服务的规则</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">diff --git a/system/sepolicy/prebuilts/api/29.0/private/service.te b/system/sepolicy/prebuilts/api/29.0/private/service.te</span></span><br><span class="line"><span class="comment">index a8ee195590..7d9a2452fa 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/prebuilts/api/29.0/private/service.te</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/prebuilts/api/29.0/private/service.te</span></span><br><span class="line"><span class="meta">@@ -5,3 +5,4 @@</span> type gsi_service,                   service_manager_type;</span><br><span class="line"> type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;</span><br><span class="line"> type stats_service,                 service_manager_type;</span><br><span class="line"> type statscompanion_service,        system_server_service, service_manager_type;</span><br><span class="line"><span class="addition">+type callbacktest_service,     system_api_service, system_server_service, service_manager_type;</span></span><br><span class="line"><span class="comment">diff --git a/system/sepolicy/prebuilts/api/29.0/private/service_contexts b/system/sepolicy/prebuilts/api/29.0/private/service_contexts</span></span><br><span class="line"><span class="comment">index 96d553bf49..9067330ae5 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/prebuilts/api/29.0/private/service_contexts</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/prebuilts/api/29.0/private/service_contexts</span></span><br><span class="line"><span class="meta">@@ -220,3 +220,4 @@</span> wifiaware                                 u:object_r:wifiaware_service:s0</span><br><span class="line"> wifirtt                                   u:object_r:rttmanager_service:s0</span><br><span class="line"> window                                    u:object_r:window_service:s0</span><br><span class="line"> *                                         u:object_r:default_android_service:s0</span><br><span class="line"><span class="addition">+callbacktest                              u:object_r:callbacktest_service:s0</span></span><br><span class="line"><span class="comment">diff --git a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te</span></span><br><span class="line"><span class="comment">index 3c20c082b7..d8e2fac17d 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te</span></span><br><span class="line"><span class="meta">@@ -100,6 +100,7 @@</span> allow untrusted_app_all radio_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all app_api_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all vr_manager_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all gpu_service:service_manager find;</span><br><span class="line"><span class="addition">+allow untrusted_app_all callbacktest_service:service_manager find;</span></span><br><span class="line"></span><br><span class="line"> # Allow untrusted apps to interact with gpuservice</span><br><span class="line"> binder_call(untrusted_app_all, gpuservice)</span><br><span class="line"><span class="comment">diff --git a/system/sepolicy/private/service.te b/system/sepolicy/private/service.te</span></span><br><span class="line"><span class="comment">index a8ee195590..7d9a2452fa 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/private/service.te</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/private/service.te</span></span><br><span class="line"><span class="meta">@@ -5,3 +5,4 @@</span> type gsi_service,                   service_manager_type;</span><br><span class="line"> type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;</span><br><span class="line"> type stats_service,                 service_manager_type;</span><br><span class="line"> type statscompanion_service,        system_server_service, service_manager_type;</span><br><span class="line"><span class="addition">+type callbacktest_service,     system_api_service, system_server_service, service_manager_type;</span></span><br><span class="line"><span class="comment">diff --git a/system/sepolicy/private/service_contexts b/system/sepolicy/private/service_contexts</span></span><br><span class="line"><span class="comment">index 96d553bf49..9067330ae5 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/private/service_contexts</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/private/service_contexts</span></span><br><span class="line"><span class="meta">@@ -220,3 +220,4 @@</span> wifiaware                                 u:object_r:wifiaware_service:s0</span><br><span class="line"> wifirtt                                   u:object_r:rttmanager_service:s0</span><br><span class="line"> window                                    u:object_r:window_service:s0</span><br><span class="line"> *                                         u:object_r:default_android_service:s0</span><br><span class="line"><span class="addition">+callbacktest                              u:object_r:callbacktest_service:s0</span></span><br><span class="line"><span class="comment">diff --git a/system/sepolicy/private/untrusted_app_all.te b/system/sepolicy/private/untrusted_app_all.te</span></span><br><span class="line"><span class="comment">index 3c20c082b7..d8e2fac17d 100644</span></span><br><span class="line"><span class="comment">--- a/system/sepolicy/private/untrusted_app_all.te</span></span><br><span class="line"><span class="comment">+++ b/system/sepolicy/private/untrusted_app_all.te</span></span><br><span class="line"><span class="meta">@@ -100,6 +100,7 @@</span> allow untrusted_app_all radio_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all app_api_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all vr_manager_service:service_manager find;</span><br><span class="line"> allow untrusted_app_all gpu_service:service_manager find;</span><br><span class="line"><span class="addition">+allow untrusted_app_all callbacktest_service:service_manager find;</span></span><br><span class="line"></span><br><span class="line"> # Allow untrusted apps to interact with gpuservice</span><br><span class="line"> binder_call(untrusted_app_all, gpuservice)</span><br></pre></td></tr></table></figure>
+<p>到这里之后，回到Android源码根目录，正常 <code>make update-api &amp;&amp; make</code> 之后，就可以启动虚拟机了。<br>然后再新建一个应用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── aidl</span><br><span class="line">│   └── com</span><br><span class="line">│       └── callback</span><br><span class="line">│           ├── ICallbackTestCallback.aidl</span><br><span class="line">│           └── ICallBackTestInterface.aidl</span><br><span class="line">├── AndroidManifest.xml</span><br><span class="line">├── java</span><br><span class="line">│   └── com</span><br><span class="line">│       └── callback</span><br><span class="line">│           ├── CallBackTestManager.java</span><br><span class="line">│           └── demo</span><br><span class="line">│               └── MainActivity.java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其中，<code>ICallbackTestCallback.aidl</code> , <code>ICallBackTestInterface.aidl</code> , <code>CallBackTestManager.java</code> 三个文件都是从我们添加在源码里面的拷贝出来的，因为Android Studio的sdk里面并没有这些实现，把这些文件放到工程的目录里面，让编译可以通过。<br>通过 java 的类加载机制，实际上运行的时候是编译到系统里启动的那些代码，实际上我们拷贝到工程里的文件，只要接口声明与系统内的一致就可以，接口实现可以留空。就像Android SDK 里面的andrroid.jar里面的那些空接口一样。</p>
+<p>MainActivity.java的内容如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.callback.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> androidx.appcompat.app.AppCompatActivity;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.content.pm.PackageManager;</span><br><span class="line"><span class="keyword">import</span> android.os.Binder;</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"><span class="keyword">import</span> android.view.View;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.callback.ICallbackTestCallback;</span><br><span class="line"><span class="keyword">import</span> com.callback.CallBackTestManager;</span><br><span class="line"><span class="keyword">import</span> com.testcallback.demo.R;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TAG</span> <span class="operator">=</span> <span class="string">&quot;testcallback&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">CallBackTestManager</span> <span class="variable">callbackSerice</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">bound</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onResume</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onResume();</span><br><span class="line">        <span class="keyword">if</span>(bound)&#123;</span><br><span class="line">            registerCallback(<span class="literal">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onPause</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onPause();</span><br><span class="line">        <span class="keyword">if</span>(bound)&#123;</span><br><span class="line">            unregisterCallback(<span class="literal">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">ICallbackTestCallback</span> <span class="variable">callback</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ICallbackTestCallback</span>.Stub()&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onReceived</span><span class="params">(String msg)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">            Log.d(TAG,<span class="string">&quot;received msg: &quot;</span> + msg + <span class="string">&quot; . from server pid=&quot;</span> + Binder.getCallingPid());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">registerCallback</span><span class="params">(View view)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(callbackSerice!=<span class="literal">null</span>)&#123;</span><br><span class="line">            callbackSerice.register(callback);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unregisterCallback</span><span class="params">(View view)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(callbackSerice!=<span class="literal">null</span>)&#123;</span><br><span class="line">            callbackSerice.unregister(callback);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">bindService</span><span class="params">(View view)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(callbackSerice == <span class="literal">null</span>)&#123;</span><br><span class="line">            callbackSerice = (CallBackTestManager)getSystemService(CallBackTestManager.SERVICE_NAME);</span><br><span class="line">            bound = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">notifyService</span><span class="params">(View view)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(callbackSerice!=<span class="literal">null</span>)&#123;</span><br><span class="line">            callbackSerice.callserver(<span class="string">&quot;hello, I&#x27;m client&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对应的资源文件如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span> <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">&quot;.MainActivity&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Hello World!&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/registerBotton&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;5dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:onClick</span>=<span class="string">&quot;registerCallback&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;register&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/unregisterBotton&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;5dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@id/registerBotton&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:onClick</span>=<span class="string">&quot;unregisterCallback&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;unregister&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/bindservice&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;5dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@id/unregisterBotton&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:onClick</span>=<span class="string">&quot;bindService&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Bind service&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">&quot;@+id/notifyservice&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:textAllCaps</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_marginLeft</span>=<span class="string">&quot;5dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toBottomOf</span>=<span class="string">&quot;@id/bindservice&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:onClick</span>=<span class="string">&quot;notifyService&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:text</span>=<span class="string">&quot;Notify service&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>编译完成之后，我们将apk用AOSP的系统签名（如果你用了自己的密钥，就是你自己密钥的platform签名），AOSP的签名位于<code>build/target/product/security/</code>,其内的 platform.pk8 和 platform.x509.pem 。用这两个签名给apk签名安装。这个apk需要注意声明 systemuid。<br>p.s: 这里使用系统签名，是因为按照本篇的流程，添加后的 CallBackTestManager 是 hide 的接口，Android 10 对hide接口做了限制，普通app直接去调的话，会报找不到接口。对于安卓10新增的hidden api 调用限制，可以前往 <a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/app-compatibility/restrictions-non-sdk-interfaces">https://developer.android.google.cn/guide/app-compatibility/restrictions-non-sdk-interfaces</a> 。普通应用直接调用hide的接口，可能会直接闪退，查看log，有类似下面这样的log生成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Accessing hidden field Landroid/os/Message;-&gt;flags:I (light greylist, JNI)</span><br></pre></td></tr></table></figure>
+<h1 id="把我们新增的接口变成public的接口"><a href="#把我们新增的接口变成public的接口" class="headerlink" title="把我们新增的接口变成public的接口"></a>把我们新增的接口变成public的接口</h1><p>这一部分，你可以理解为将我们自行增加的接口变成 SDK 接口（如果你的ROM需要通过谷歌的CTS认证，则不可以将自行增加的API变成SDK API）。<br>如果你有留意，在 make update-api 之后，<code>android10_r47/frameworks/base/api/current.txt</code>，会出现新增的一些和aidl文件有关的内容</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.callback &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ICallBackTestInterface</span> <span class="keyword">extends</span> <span class="title class_">android</span>.os.IInterface &#123;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">callServer</span><span class="params">(String)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(com.callback.ICallbackTestCallback)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unregister</span><span class="params">(com.callback.ICallbackTestCallback)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ICallBackTestInterface</span>.Default <span class="keyword">implements</span> <span class="title class_">com</span>.callback.ICallBackTestInterface &#123;</span><br><span class="line">    ctor <span class="keyword">public</span> ICallBackTestInterface.Default();</span><br><span class="line">    method <span class="keyword">public</span> android.os.IBinder <span class="title function_">asBinder</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">callServer</span><span class="params">(String)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">register</span><span class="params">(com.callback.ICallbackTestCallback)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unregister</span><span class="params">(com.callback.ICallbackTestCallback)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ICallBackTestInterface</span>.Stub <span class="keyword">extends</span> <span class="title class_">android</span>.os.Binder <span class="keyword">implements</span> <span class="title class_">com</span>.callback.ICallBackTestInterface &#123;</span><br><span class="line">    ctor <span class="keyword">public</span> ICallBackTestInterface.Stub();</span><br><span class="line">    method <span class="keyword">public</span> android.os.IBinder <span class="title function_">asBinder</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> com.callback.ICallBackTestInterface <span class="title function_">asInterface</span><span class="params">(android.os.IBinder)</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> com.callback.ICallBackTestInterface <span class="title function_">getDefaultImpl</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">onTransact</span><span class="params">(<span class="type">int</span>, android.os.Parcel, android.os.Parcel, <span class="type">int</span>)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">setDefaultImpl</span><span class="params">(com.callback.ICallBackTestInterface)</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ICallbackTestCallback</span> <span class="keyword">extends</span> <span class="title class_">android</span>.os.IInterface &#123;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onReceived</span><span class="params">(String)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ICallbackTestCallback</span>.Default <span class="keyword">implements</span> <span class="title class_">com</span>.callback.ICallbackTestCallback &#123;</span><br><span class="line">    ctor <span class="keyword">public</span> ICallbackTestCallback.Default();</span><br><span class="line">    method <span class="keyword">public</span> android.os.IBinder <span class="title function_">asBinder</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onReceived</span><span class="params">(String)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ICallbackTestCallback</span>.Stub <span class="keyword">extends</span> <span class="title class_">android</span>.os.Binder <span class="keyword">implements</span> <span class="title class_">com</span>.callback.ICallbackTestCallback &#123;</span><br><span class="line">    ctor <span class="keyword">public</span> ICallbackTestCallback.Stub();</span><br><span class="line">    method <span class="keyword">public</span> android.os.IBinder <span class="title function_">asBinder</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> com.callback.ICallbackTestCallback <span class="title function_">asInterface</span><span class="params">(android.os.IBinder)</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> com.callback.ICallbackTestCallback <span class="title function_">getDefaultImpl</span><span class="params">()</span>;</span><br><span class="line">    method <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">onTransact</span><span class="params">(<span class="type">int</span>, android.os.Parcel, android.os.Parcel, <span class="type">int</span>)</span> <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line">    method <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">setDefaultImpl</span><span class="params">(com.callback.ICallbackTestCallback)</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>某种程度上，你可以认为，这个txt的内容就是SDK api，可以看到，我们新增的 CallBackTestManager 的内容并不在这个txt里面。<br>可以通过修改 <code>frameworks/base/Android.bp</code> 这个文件，修改内容如下</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">diff --git a/frameworks/base/Android.bp b/frameworks/base/Android.bp</span></span><br><span class="line"><span class="comment">index 663354835e..03a98395e5 100644</span></span><br><span class="line"><span class="comment">--- a/frameworks/base/Android.bp</span></span><br><span class="line"><span class="comment">+++ b/frameworks/base/Android.bp</span></span><br><span class="line"><span class="meta">@@ -1237,6 +1237,7 @@</span> packages_to_document = [</span><br><span class="line">     &quot;javax/microedition/khronos&quot;,</span><br><span class="line">     &quot;org/apache/http/conn&quot;,</span><br><span class="line">     &quot;org/apache/http/params&quot;,</span><br><span class="line"><span class="addition">+    &quot;com/callback&quot;,</span></span><br><span class="line"> ]</span><br><span class="line"></span><br><span class="line"> // Make the api/current.txt file available for use by modules in other</span><br></pre></td></tr></table></figure>
+<p>修改这个文件之后，再次 <code>make update-api</code>，可以看到 CallBackTestManager 的内容已经添加到 current.txt 里面去了。<br>再次make之后，普通应用就可以像调用安卓已有的服务那样，来使用新增的这个服务了。</p>
+<h1 id="复习一下"><a href="#复习一下" class="headerlink" title="复习一下"></a>复习一下</h1><p>有几个小地方需要注意：</p>
+<ol>
+<li>如果你添加的接口没有出现在 current.txt 里面的话，安卓10上由于谷歌新增的hidden api访问限制，普通应用是无法访问的</li>
+<li>使用AOSP 编译出来的 signapk.jar 和 platform 签名的apk，似乎无法在虚拟机上安装为系统应用，我是把 platform key 转换成 Android Studio 使用的 keystore 来使用的。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/03/usage-of-Android-RemoteCallbacckList-APP/" rel="prev" title="安卓 RemoteCallbackList 的使用 （应用篇）">
+      <i class="fa fa-chevron-left"></i> 安卓 RemoteCallbackList 的使用 （应用篇）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%8A%E6%88%91%E4%BB%AC%E6%96%B0%E5%A2%9E%E7%9A%84%E6%8E%A5%E5%8F%A3%E5%8F%98%E6%88%90public%E7%9A%84%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.</span> <span class="nav-text">把我们新增的接口变成public的接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E4%B9%A0%E4%B8%80%E4%B8%8B"><span class="nav-number">2.</span> <span class="nav-text">复习一下</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">125k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
