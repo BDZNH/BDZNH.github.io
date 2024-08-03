@@ -28,9 +28,10 @@
 <meta property="og:description" content="以下载链接 https:&#x2F;&#x2F;www.openssl.org&#x2F;source&#x2F;openssl-1.1.1o.tar.gz 为例下载解压之后，查看根目录的 NOTES.ANDROID，其中有 1234export ANDROID_NDK_HOME&#x3D;&#x2F;home&#x2F;whoever&#x2F;Android&#x2F;android-sdk&#x2F;ndk&#x2F;20.0.5594570PATH&#x3D;$ANDROID_NDK_HOME&#x2F;toolch">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-08-03T01:00:54.000Z">
-<meta property="article:modified_time" content="2024-08-03T01:04:15.002Z">
+<meta property="article:modified_time" content="2024-08-03T01:07:53.191Z">
 <meta property="article:author" content="SupperMary">
-<meta property="article:tag" content="openssl Android">
+<meta property="article:tag" content="openssl">
+<meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://example.com/2024/08/03/attention-of-build-openssl-for-Android/">
@@ -223,7 +224,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-08-03 09:00:54 / 修改时间：09:04:15" itemprop="dateCreated datePublished" datetime="2024-08-03T09:00:54+08:00">2024-08-03</time>
+              <time title="创建时间：2024-08-03 09:00:54 / 修改时间：09:07:53" itemprop="dateCreated datePublished" datetime="2024-08-03T09:00:54+08:00">2024-08-03</time>
             </span>
 
           
@@ -239,7 +240,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>531</span>
+              <span>532</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -261,6 +262,8 @@
         <p>以下载链接 <a target="_blank" rel="noopener" href="https://www.openssl.org/source/openssl-1.1.1o.tar.gz">https://www.openssl.org/source/openssl-1.1.1o.tar.gz</a> 为例<br>下载解压之后，查看根目录的 NOTES.ANDROID，其中有</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ANDROID_NDK_HOME=/home/whoever/Android/android-sdk/ndk/20.0.5594570</span><br><span class="line">PATH=<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/llvm/prebuilt/linux-x86_64/bin:<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:<span class="variable">$PATH</span></span><br><span class="line">./Configure android-arm64 -D__ANDROID_API__=29</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
 <p>这里就是最直接的编译方式了。但是这样编译之后，会有一个坑</p>
+<span id="more"></span>
+
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lrwxrwxrwx  1 ubuntu ubuntu      16 Jun  9 21:23 libcrypto.so -&gt; libcrypto.so.1.1</span><br><span class="line">-rwxrwxr-x  1 ubuntu ubuntu 2754216 Jun  9 21:23 libcrypto.so.1.1</span><br><span class="line">lrwxrwxrwx  1 ubuntu ubuntu      13 Jun  9 21:23 libssl.so -&gt; libssl.so.1.1</span><br><span class="line">-rwxrwxr-x  1 ubuntu ubuntu  596600 Jun  9 21:23 libssl.so.1.1</span><br></pre></td></tr></table></figure>
 <p>编译时尝试链接 <code>libssl.so</code> ，实际上会链接到 <code>libssl.so.1.1</code> ，但是当你尝试将 <code>libssl.so.1.1</code> 集成到 Android studio 工程内时，会发现 <code>libssl.so.1.1</code> 这种命名格式so，Android studio 是不会自动将其打包到 apk 内的，即使将 <code>libssl.so.1.1</code> 改名为 <code>libssl.so</code> 可以集成到 apk ，app运行时仍然会去找 <code>libssl.so.1.1</code>。因为 so 内部有其文件名信息</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$objdump</span> -p libssl.so | grep SONAME</span><br><span class="line">  SONAME               libssl.so.1.1</span><br></pre></td></tr></table></figure>
@@ -276,7 +279,8 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/openssl-Android/" rel="tag"># openssl Android</a>
+              <a href="/tags/openssl/" rel="tag"># openssl</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
           </div>
 
         
@@ -367,7 +371,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">34</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

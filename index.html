@@ -218,7 +218,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-08-03 09:00:54 / 修改时间：09:04:15" itemprop="dateCreated datePublished" datetime="2024-08-03T09:00:54+08:00">2024-08-03</time>
+              <time title="创建时间：2024-08-03 09:00:54 / 修改时间：09:07:53" itemprop="dateCreated datePublished" datetime="2024-08-03T09:00:54+08:00">2024-08-03</time>
             </span>
 
           <br>
@@ -227,7 +227,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>531</span>
+              <span>532</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -249,13 +249,14 @@
           <p>以下载链接 <a target="_blank" rel="noopener" href="https://www.openssl.org/source/openssl-1.1.1o.tar.gz">https://www.openssl.org/source/openssl-1.1.1o.tar.gz</a> 为例<br>下载解压之后，查看根目录的 NOTES.ANDROID，其中有</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ANDROID_NDK_HOME=/home/whoever/Android/android-sdk/ndk/20.0.5594570</span><br><span class="line">PATH=<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/llvm/prebuilt/linux-x86_64/bin:<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:<span class="variable">$PATH</span></span><br><span class="line">./Configure android-arm64 -D__ANDROID_API__=29</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
 <p>这里就是最直接的编译方式了。但是这样编译之后，会有一个坑</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lrwxrwxrwx  1 ubuntu ubuntu      16 Jun  9 21:23 libcrypto.so -&gt; libcrypto.so.1.1</span><br><span class="line">-rwxrwxr-x  1 ubuntu ubuntu 2754216 Jun  9 21:23 libcrypto.so.1.1</span><br><span class="line">lrwxrwxrwx  1 ubuntu ubuntu      13 Jun  9 21:23 libssl.so -&gt; libssl.so.1.1</span><br><span class="line">-rwxrwxr-x  1 ubuntu ubuntu  596600 Jun  9 21:23 libssl.so.1.1</span><br></pre></td></tr></table></figure>
-<p>编译时尝试链接 <code>libssl.so</code> ，实际上会链接到 <code>libssl.so.1.1</code> ，但是当你尝试将 <code>libssl.so.1.1</code> 集成到 Android studio 工程内时，会发现 <code>libssl.so.1.1</code> 这种命名格式so，Android studio 是不会自动将其打包到 apk 内的，即使将 <code>libssl.so.1.1</code> 改名为 <code>libssl.so</code> 可以集成到 apk ，app运行时仍然会去找 <code>libssl.so.1.1</code>。因为 so 内部有其文件名信息</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$objdump</span> -p libssl.so | grep SONAME</span><br><span class="line">  SONAME               libssl.so.1.1</span><br></pre></td></tr></table></figure>
-<p>对于Android来说，我们更希望，编译之后，so 本身名字就叫 libssl.so。<br>具体做法是解压 <code>openssl-1.1.1o.tar.gz</code> 之后，修改 <code>15-android.conf</code>。<br>大概 193 行。</p>
-<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">my</span> <span class="variable">%targets</span> = (</span><br><span class="line">    <span class="string">&quot;android&quot;</span> =&gt; &#123;</span><br><span class="line">        <span class="string">inherit_from     =&gt;</span> [ <span class="string">&quot;linux-generic32&quot;</span> ],</span><br><span class="line">        <span class="string">template         =&gt;</span> <span class="number">1</span>,</span><br><span class="line">        <span class="comment">################################################################</span></span><br><span class="line">        <span class="comment"># Special note about -pie. The underlying reason is that</span></span><br><span class="line">        <span class="comment"># Lollipop refuses to run non-PIE. But what about older systems</span></span><br><span class="line">        <span class="comment"># and NDKs? -fPIC was never problem, so the only concern is -pie.</span></span><br><span class="line">        <span class="comment"># Older toolchains, e.g. r4, appear to handle it and binaries</span></span><br><span class="line">        <span class="comment"># turn out mostly functional. &quot;Mostly&quot; means that oldest</span></span><br><span class="line">        <span class="comment"># Androids, such as Froyo, fail to handle executable, but newer</span></span><br><span class="line">        <span class="comment"># systems are perfectly capable of executing binaries targeting</span></span><br><span class="line">        <span class="comment"># Froyo. Keep in mind that in the nutshell Android builds are</span></span><br><span class="line">        <span class="comment"># about JNI, i.e. shared libraries, not applications.</span></span><br><span class="line">        <span class="string">cflags           =&gt;</span> add(<span class="function"><span class="keyword">sub</span> </span>&#123; android_ndk()-&gt;&#123;cflags&#125; &#125;),</span><br><span class="line">        <span class="string">cppflags         =&gt;</span> add(<span class="function"><span class="keyword">sub</span> </span>&#123; android_ndk()-&gt;&#123;cppflags&#125; &#125;),</span><br><span class="line">        <span class="string">cxxflags         =&gt;</span> add(<span class="function"><span class="keyword">sub</span> </span>&#123; android_ndk()-&gt;&#123;cflags&#125; &#125;),</span><br><span class="line">        <span class="string">bn_ops           =&gt;</span> <span class="function"><span class="keyword">sub</span> </span>&#123; android_ndk()-&gt;&#123;bn_ops&#125; &#125;,</span><br><span class="line">        <span class="string">bin_cflags       =&gt;</span> <span class="string">&quot;-pie&quot;</span>,</span><br><span class="line">        <span class="string">enable           =&gt;</span> [ ],</span><br><span class="line">        <span class="string">shared_extension =&gt;</span> <span class="string">&quot;.so&quot;</span>,  <span class="comment">### 这一行是新加的</span></span><br><span class="line">    &#125;,</span><br></pre></td></tr></table></figure>
-<p>这样可以编译出来不带版本后缀的 <code>libssl.so</code> 和 <code>libcrypto.so</code>。<br>可以参考下边的懒人脚本来自行编译: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">buildopenssl</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    androidarch=<span class="variable">$1</span></span><br><span class="line">    toolchain=<span class="variable">$2</span></span><br><span class="line">    <span class="keyword">if</span> [ ! -f openssl-1.1.1o.tar.gz ]; <span class="keyword">then</span></span><br><span class="line">        wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">if</span> [ !-d openssl-1.1.1o ]; <span class="keyword">then</span></span><br><span class="line">        tar -xf openssl-1.1.1o.tar.gz</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">if</span> [ -z <span class="variable">$ANDROID_NDK_HOME</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;missing ANDROID_NDK_HOME&quot;</span></span><br><span class="line">        <span class="built_in">exit</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="built_in">pushd</span> openssl-1.1.1o</span><br><span class="line">    PATH=<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/llvm/prebuilt/linux-x86_64/bin:<span class="variable">$ANDROID_NDK_HOME</span>/toolchains/<span class="variable">$&#123;toolchain&#125;</span>-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:<span class="variable">$PATH</span></span><br><span class="line">    ./Configure android-<span class="variable">$androidarch</span> -D__ANDROID_API__=26</span><br><span class="line">    make clean</span><br><span class="line">    make</span><br><span class="line">    <span class="built_in">popd</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">buildopenssl arm64 aarch64</span><br><span class="line"><span class="comment">#buildopenssl arm arm</span></span><br><span class="line"><span class="comment">#buildopenssl x86 x86</span></span><br><span class="line"><span class="comment">#buildopenssl x86_64 x86_64</span></span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/08/03/attention-of-build-openssl-for-Android/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -299,7 +300,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-08-03 08:58:02 / 修改时间：08:59:12" itemprop="dateCreated datePublished" datetime="2024-08-03T08:58:02+08:00">2024-08-03</time>
+              <time title="创建时间：2024-08-03 08:58:02 / 修改时间：09:06:14" itemprop="dateCreated datePublished" datetime="2024-08-03T08:58:02+08:00">2024-08-03</time>
             </span>
 
           <br>
@@ -705,7 +706,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-08-03 08:56:43" itemprop="dateModified" datetime="2024-08-03T08:56:43+08:00">2024-08-03</time>
+                <time title="修改时间：2024-08-03 09:06:23" itemprop="dateModified" datetime="2024-08-03T09:06:23+08:00">2024-08-03</time>
               </span>
 
           <br>
@@ -1072,7 +1073,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-count">34</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

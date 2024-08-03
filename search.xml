@@ -6209,6 +6209,9 @@ struct wav_header {
 ```
 当然如果我们继续深入的看 `pcm_close(pcm)` 确实能出来这里做了一些内存释放的操作。这里就不展示相应的代码了。
 到这里就已经明显了，修改之前，这个函数的返回值将是 0 ，这里也会导致生成的 wav 文件的头部用于标志 data 长度的 4 字节为 0，如果播放器按照标准的wav文件去读取，则会发现这是一个没有数据的wav文件。不过我们也能看到，这个bug已经在 2018.03.19 修复。所以本文开头才说这是安卓 9.0 之前的版本有的问题。]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
   </entry>
   <entry>
     <title>【转载】探寻C++最快的读取文件的方案</title>
@@ -13692,7 +13695,8 @@ wlan0     Link encap:Ethernet  HWaddr 94:65:9c:4e:02:dc
  - 公钥加密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_encrypt_init, EVP_PKEY_encrypt
  - 公钥解密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_verify_recover_init, EVP_PKEY_verify_recover]]></content>
       <tags>
-        <tag>openssl RSA</tag>
+        <tag>openssl</tag>
+        <tag>RSA</tag>
       </tags>
   </entry>
   <entry>
@@ -14624,7 +14628,8 @@ std::string AES128ECBDecrypt(const std::string& base64Key, const std::string& ba
 }
 ```]]></content>
       <tags>
-        <tag>openssl AES</tag>
+        <tag>openssl</tag>
+        <tag>AES</tag>
       </tags>
   </entry>
   <entry>
@@ -14640,6 +14645,9 @@ PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_HO
 make
 ```
 这里就是最直接的编译方式了。但是这样编译之后，会有一个坑
+
+<!-- more -->
+
 ```bash
 lrwxrwxrwx  1 ubuntu ubuntu      16 Jun  9 21:23 libcrypto.so -> libcrypto.so.1.1
 -rwxrwxr-x  1 ubuntu ubuntu 2754216 Jun  9 21:23 libcrypto.so.1.1
@@ -14711,7 +14719,8 @@ buildopenssl arm64 aarch64
 #buildopenssl x86_64 x86_64
 ```]]></content>
       <tags>
-        <tag>openssl Android</tag>
+        <tag>openssl</tag>
+        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
