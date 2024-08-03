@@ -8410,7 +8410,7 @@ sudo cp -f chrome_cn.sh /usr/bin/chrome_cn.sh
 最好不要直接更改 `LANGUAGE` 这个环境变量的值，这个值与系统语言相关。]]></content>
   </entry>
   <entry>
-    <title>how to control Yeelight</title>
+    <title>如何控制 Yeelight 台灯</title>
     <url>/2019/04/13/how-to-control-Yeelight/</url>
     <content><![CDATA[
 {% asset_img 1.jpg %}
@@ -8593,6 +8593,11 @@ int main()
 在台灯开启的情况下，输入1或者2进行亮度调节，输入3退出。
 
 更多更详细的控制信息可以阅读[官方文档](https://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf)。]]></content>
+      <tags>
+        <tag>Yeelight</tag>
+        <tag>SSDP</tag>
+        <tag>ssdp</tag>
+      </tags>
   </entry>
   <entry>
     <title>如何部署 perfetto ui</title>
