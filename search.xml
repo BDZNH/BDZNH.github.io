@@ -13691,6 +13691,9 @@ wlan0     Link encap:Ethernet  HWaddr 94:65:9c:4e:02:dc
  - 私钥解密 PEM_read_bio_PrivateKey, EVP_PKEY_CTX_new, EVP_PKEY_decrypt_init, EVP_PKEY_decrypt
  - 公钥加密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_encrypt_init, EVP_PKEY_encrypt
  - 公钥解密 PEM_read_bio_PUBKEY, EVP_PKEY_CTX_new, EVP_PKEY_verify_recover_init, EVP_PKEY_verify_recover]]></content>
+      <tags>
+        <tag>openssl RSA</tag>
+      </tags>
   </entry>
   <entry>
     <title>在Linux终端使用代理</title>
@@ -14539,6 +14542,90 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 -----
 内容来自官方wiki:[http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts](http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts) ，看来得抽空翻译一下d=====(￣▽￣*)b
 ]]></content>
+  </entry>
+  <entry>
+    <title>使用 openssl 进行 AES128/ECB/PKCS5Padding 加解密</title>
+    <url>/2024/08/03/use-openssl-AES-ECB-PKCS5Padding-encrypt-decrypt/</url>
+    <content><![CDATA[
+在 java 上进行 AES128/ECB/PKCS5Padding 加密解密是很简单的
+
+<!-- more -->
+
+```java
+    public static String aesDecrypt(String str,String key) throws Exception{
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
+        byte[] bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
+        byte[] ret = cipher.doFinal(bytes);
+        return new String(ret,"UTF-8");
+    }
+
+    public static String aesEncrypt(String str,String key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE,new SecretKeySpec(Base64.getDecoder().decode(key),"AES"));
+        return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes()));
+    }
+```
+AES 加解密使用的key本身是 16 字节（128位），但是key可能不是ascii里的可见字符，有时候我们把 key 进行 base64 编码之后，当作明文传输使用。真正把 key 用来加密解密的时候，需要先 base64 解码来得到原本的 key。
+同样的，经过AES加密的信息也有可能不是每一个字节都是ascii可见字符，我们同样将加密后的密文进行base64编码之后再展示。
+
+同样的操作，用 C/C++ 进行就复杂得多，C/C++ 自己本身没有对应的库，不过好在有很多开源的实现，这里用 openssl 作为演示
+```
+#include <openssl/evp.h>
+#include <vector>
+std::string AES128ECBEncrypt(const std::string& base64key, const std::string& str)
+{
+    std::vector<unsigned char> key;
+    if (!Base64Decode(base64key, key))
+        return "";
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    int encLen = 0;
+    int outlen = 0;
+    size_t outsize = ((str.size() / 16)+1) * 16;
+    std::vector<unsigned char> encData(outsize);
+
+    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 1);
+    EVP_CipherUpdate(ctx, encData.data(), &outlen, (const unsigned char*)str.c_str(), (int)str.size());
+    encLen = outlen;
+    EVP_CipherFinal_ex(ctx, encData.data() + outlen, &outlen);
+    encLen += outlen;
+    EVP_CIPHER_CTX_free(ctx);
+    return std::move(Base64Encode(encData.data(), encLen));
+}
+
+std::string AES128ECBDecrypt(const std::string& base64Key, const std::string& base64str)
+{
+    std::vector<unsigned char> buffer;
+    if (!Base64Decode(base64str, buffer))
+    {
+        return "";
+    }
+
+    std::vector<unsigned char> key;
+    if (!Base64Decode(base64Key, key))
+    {
+        return "";
+    }
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    int encLen = 0;
+    int outlen = 0;
+
+    BUFFER encData(buffer.size());
+
+    EVP_CipherInit_ex(ctx, EVP_aes_128_ecb(), NULL, key.data(), NULL, 0);
+    EVP_CipherUpdate(ctx, encData.data(), &outlen, buffer.data(), (int)buffer.size());
+    encLen = outlen;
+    EVP_CipherFinal(ctx, encData.data() + outlen, &outlen);
+    encLen += outlen;
+    EVP_CIPHER_CTX_free(ctx);
+    return std::move(std::string((char*)encData.data(), encLen));
+}
+```]]></content>
+      <tags>
+        <tag>openssl AES</tag>
+      </tags>
   </entry>
   <entry>
     <title>Minecraft专题</title>
