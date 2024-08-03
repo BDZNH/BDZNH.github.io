@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="p.s: 以下内容均以 openssl 实现。RSA 密钥的存储方式有很多，某些情况下，我们直接保存密钥的 modulus(n),publicExponent(e),privateExponent(d)，使用的时候再将它们转换成 RSA 密钥。下面来讲讲在 C&#x2F;C++ 环境中，如何把这几个大整数转换成 RSA 密钥来用。根据 openssl 的文档，openssl提供了这样一个函数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C&#x2F;C++ 中，modulus，privateExponent, pulbicExponent 如何转换成 RSA密钥">
+<meta property="og:url" content="http://example.com/2024/08/03/convert-RSA-key-with-openssl/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="p.s: 以下内容均以 openssl 实现。RSA 密钥的存储方式有很多，某些情况下，我们直接保存密钥的 modulus(n),publicExponent(e),privateExponent(d)，使用的时候再将它们转换成 RSA 密钥。下面来讲讲在 C&#x2F;C++ 环境中，如何把这几个大整数转换成 RSA 密钥来用。根据 openssl 的文档，openssl提供了这样一个函数">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-03T01:10:34.000Z">
+<meta property="article:modified_time" content="2024-08-03T01:13:46.978Z">
+<meta property="article:author" content="SupperMary">
+<meta property="article:tag" content="openssl">
+<meta property="article:tag" content="RSA">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/08/03/convert-RSA-key-with-openssl/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>C/C++ 中，modulus，privateExponent, pulbicExponent 如何转换成 RSA密钥 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/08/03/convert-RSA-key-with-openssl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C/C++ 中，modulus，privateExponent, pulbicExponent 如何转换成 RSA密钥
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-08-03 09:10:34 / 修改时间：09:13:46" itemprop="dateCreated datePublished" datetime="2024-08-03T09:10:34+08:00">2024-08-03</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>498</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>p.s: 以下内容均以 openssl 实现。<br>RSA 密钥的存储方式有很多，某些情况下，我们直接保存密钥的 modulus(n),publicExponent(e),privateExponent(d)，使用的时候再将它们转换成 RSA 密钥。下面来讲讲在 C&#x2F;C++ 环境中，如何把这几个大整数转换成 RSA 密钥来用。<br>根据 openssl 的文档，openssl提供了这样一个函数</p>
+<span id="more"></span>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">RSA_set0_key</span><span class="params">(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)</span>;</span><br></pre></td></tr></table></figure>
+<p>这个参数里面的 n , e , q 对应 RSA 算法里面的参数，实际使用中，它们分别是</p>
+<ul>
+<li>n –&gt; modulus</li>
+<li>e –&gt; publicExponent</li>
+<li>d –&gt; privateExponent</li>
+</ul>
+<p>其中，n和e组成了公钥，n和d组成私钥(取自 <a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html">RSA算法原理</a>)，那么，我们想用 modulus(n),publicExponent(e),privateExponent(q) 来生成一个RSA密钥使用的话，可以用下面这样简短的方式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">RSA* rsa = RSA_new();</span><br><span class="line">BIGNUM* modulus = BN_new();</span><br><span class="line">BIGNUM* publicExponent = BN_new();</span><br><span class="line">BIGNUM* privateExponent = BN_new();</span><br><span class="line">BN_hex2bn(&amp;modulus,<span class="string">&quot;the_modulus_hex_str&quot;</span>);</span><br><span class="line">BN_hex2bn(&amp;publicExponent,<span class="string">&quot;the_publicexponent_hex_str&quot;</span>);</span><br><span class="line">BN_hex2bn(&amp;privateExponent,<span class="string">&quot;the_privateexponent_hex_str&quot;</span>);</span><br><span class="line">RSA_set0_key(rsa,n,e,d);</span><br></pre></td></tr></table></figure>
+<p>其中，<code>the_modulus_hex_str</code> ，<code>the_publicexponent_hex_str</code>，<code>the_privateexponent_hex_str</code> 是指对应的巨大整数的十六进制字符串。例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n: XXXXXX31C433EDD1B99CE2B218C253F46FDFFFB888B6CFC6B2ED7C733454E744BF95369DA3E6648AFB6FB11EF85A5BB25A1F328266844C2E3FAC8EFAAB4B2C45588604BAC6CF8A9B528F0D03E6B56BDE534B0360F1BD9E8B36D4197FE6F058D97DE670C0F178D9633FEEAE94237827A4006BC737344932E8F3E349F62175B7</span><br><span class="line">e: 010001</span><br><span class="line">d: XXXXXXX6566B839C1F88C15D1A46771F1E4C3918000787D56016208B758F3E1A33A923226850DA53C288F9CF6753DFBE48750A83B3DE58D5C0B85933C5B92ABCCD60D80992AABA03C3B1A7E58B8289A93383D8DAA4EE23178660D09E0335522EDCEAD84FB34D7A39B7794C905F15883FC8D1F3D57790259B4D51BA25F67D2D211</span><br></pre></td></tr></table></figure>
+<p>上面对应的巨大整数的十进制数为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n: XXXXXXX9057732971629580498028671059682869498690832625587443656573925941563146104539350008204291144532450083831552937873084816334755400478676505846850294967700928692649221538739009633205352515287702420255727528786212412171786407245232978625501660599119803054000638252479305264674077018562561222430729026237879</span><br><span class="line">e: 65537</span><br><span class="line">d: XXXXXXXX041865311331499528401083208041704898325216901065444649537573972168292421030450065823066407208305456734951704373218531670621023627175563960996010664960509836168571614423098404829680294776295068450558648709945648817915783177775326687433116356887666860252766677606932669252345719029413488408688871813075473</span><br></pre></td></tr></table></figure>
+<p>这样，我们就得到了一个RSA密钥。接下来可以使用这个密钥对一些数据加密&#x2F;解密。<br>比如，使用 <code>RSA/ECB/PKCS1Padding</code> 填充方式，进行公钥加密，私钥解密例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> encrypteddata[<span class="number">1024</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line"><span class="type">char</span> originnaldata[<span class="number">1024</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* testinfo = <span class="string">&quot;this is a sample info to encrypt&quot;</span>;</span><br><span class="line"><span class="type">int</span> encryptlen = <span class="number">0</span>;</span><br><span class="line"><span class="type">int</span> retlen = <span class="number">0</span>;</span><br><span class="line">encryptlen = RSA_public_encrypt(<span class="built_in">strlen</span>(testinfo), (<span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span>*)testinfo, (<span class="type">unsigned</span> <span class="type">char</span> *)encrypteddata, rsa, RSA_PKCS1_PADDING);</span><br><span class="line"><span class="keyword">if</span> (encryptlen &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    retlen = RSA_private_decrypt(encryptlen, (<span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span>*)encrypteddata, (<span class="type">unsigned</span> <span class="type">char</span>*)originnaldata, rsa, RSA_PKCS1_PADDING);</span><br><span class="line">    <span class="keyword">if</span> (retlen &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%.*s\n&quot;</span>, retlen, originnaldata);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>openssl 里面，公钥加密，私钥解密的函数原型是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">RSA_public_encrypt</span><span class="params">(<span class="type">int</span> flen, <span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span> *from,</span></span><br><span class="line"><span class="params">                       <span class="type">unsigned</span> <span class="type">char</span> *to, RSA *rsa, <span class="type">int</span> padding)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">RSA_private_decrypt</span><span class="params">(<span class="type">int</span> flen, <span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span> *from,</span></span><br><span class="line"><span class="params">                        <span class="type">unsigned</span> <span class="type">char</span> *to, RSA *rsa, <span class="type">int</span> padding)</span>;</span><br></pre></td></tr></table></figure>
+<p>同样的，还有私钥加密，公钥解密的函数原型是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int RSA_private_encrypt(int flen, unsigned char *from,</span><br><span class="line">                        unsigned char *to, RSA *rsa, int padding);</span><br><span class="line"></span><br><span class="line">int RSA_public_decrypt(int flen, unsigned char *from,</span><br><span class="line">                       unsigned char *to, RSA *rsa, int padding);</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/openssl/" rel="tag"># openssl</a>
+              <a href="/tags/RSA/" rel="tag"># RSA</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/03/attention-of-build-openssl-for-Android/" rel="prev" title="为 Android 编译 openssl 的注意事项">
+      <i class="fa fa-chevron-left"></i> 为 Android 编译 openssl 的注意事项
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/08/03/use-workflow-to-proxy-http-request/" rel="next" title="使用 workflow 来中转 http 请求">
+      使用 workflow 来中转 http 请求 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">120k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:17</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
