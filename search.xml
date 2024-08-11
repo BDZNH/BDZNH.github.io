@@ -485,6 +485,223 @@ int main()
 ]]></content>
   </entry>
   <entry>
+    <title>今日头条 ANR 优化实践系列 - 监控工具与分析思路</title>
+    <url>/2024/08/11/ANR-page-1/</url>
+    <content><![CDATA[
+前言：这篇文章是一篇转载文章用，用来为后面的一些文章做铺垫。
+转载链接为 [今日头条 ANR 优化实践系列 - 监控工具与分析思路](https://mp.weixin.qq.com/s/_Z6GdGRVWq-_JXf5Fs6fsw),如有侵权，请在 GitHub 提 Issue 联系我。
+
+<!-- more -->
+
+在前文，我们对[ANR 设计原理及影响因素](https://mp.weixin.qq.com/s/ApNSEWxQdM19QoCNijagtg)进行了介绍，并对影响 ANR 的不同场景进行归类。但是依靠现有的系统日志，不足以完成复杂场景的问题归因，而且有些信息从应用侧无法获取，这就导致很多线上问题更加棘手；因此我们在应用侧探索了新的监控能力，以弥补信息获取不足的短板。同时对日常分析过程中用到日志信息和分析思路进行总结，以帮忙大家更好的掌握分析技巧，下面我们就来看看相关实现。
+
+# Raster 监控工具
+俗话说：“工欲善其事，必先利其器”，日常分析 ANR 问题也是如此，一个好的监控工具不仅可以帮助我们在解决常规问题时达到锦上添花的效果，在面对线上复杂隐蔽的问题时，也能为我们打开视野，提供更多线索和思路。
+## 工具介绍：
+该工具主要是在主线程消息调度过程进行监控，并按照一定策略聚合，以保证监控工具本身对应用性能和内存抖动影响降至最低。同时对应用四大组件消息执行过程进行监控，便于对这类消息的调度及耗时情况进行跟踪和记录。另外对当前正在调度的消息及消息队列中待调度消息进行统计，从而在发生问题时，可以回放主线程的整体调度情况。此外，我们将系统服务的 CheckTime 机制迁移到应用侧，应用为线程 CheckTime 机制，以便于系统信息不足时，从线程调度及时性推测过去一段时间系统负载和调度情况。 
+
+因此该工具用一句话来概括就是：由点到面，回放过去，现在和将来。 
+
+因其实现原理和消息聚合后的效果，直观展示主线程调度过程长短不一的耗时片段，犹如一道道光栅，故将该工具命名为 Raster[ˈræstər]。
+## 监控工具由来
+例如下图，是线下遇到的 ANR 问题，从手机端获取的 Trace 日志，可以看到从主线程堆栈上基本得不到太多有效信息。
+{% asset_img 1.png %}
+继续从 Trace 中分析其它信息，包含了各个进程的虚拟机和线程状态信息，以及 ANR 之前或之后一段时间，CPU 使用率比较高的进程乃至系统负载(CPU，IO)的相关信息等等，如下图：
+{% asset_img 2.png %}
+但是从这些信息中，相信很多同学都很难再进一步分析，因为这些信息只是列举了当前各个进程或线程的状态，并没有很好的监控和记录影响这些指标的过程。而现实中这类场景的问题，每天都在线上大量发生。那么针对这种情况该如何更好的解决呢？下面就来介绍一下我们是如何应对的。
+## 消息调度监控
+在Android 系统的 ANR 设计原理及影响因素一文中，我们讲到，ANR 问题很多场景都是历史消息耗时较长并不断累加后导致的，但是在 ANR 发生时我们并不知道之前都调度了哪些消息，如果可以监控每次消息调度的耗时并记录，当发生 ANR 时，获取这些记录信息，并能计算出当前正在执行消息的耗时，是不是就可以清晰的知道 ANR 发生前主线程都发生了什么？按照这个思路，整理出如下示意图：
+{% asset_img 3.png %}
+但是通过上面示意图并结合实际业务场景，我们发现，对于大多数业务消息，单次耗时都很少，如果每个消息都单独记录，要想跟踪记录 ANR 前 10S 甚至更长时间范围内的所有消息，可能需要成千上万条记录，这个显然是不合理的，而且这么多的消息也不方便我们后续查看。
+### 消息聚合分类
+联想到实际业务场景很多情况都是耗时较少的消息，而在排查这类问题过程耗时较少的消息基本是可以直接忽略的，因此我们是不是可以对这类消息按照一定条件进行聚合，将一段时间以内的消息进行累加计算，如果累计耗时超过我们规定的阈值，那么就将这些消息的数量和累计耗时合并成一条记录，如 16 个消息累计耗时刚好超过 300ms，则生成一条记录。以此类推存储 100 条的话，就能监控到 ANR 发生前 30S 主线程的调度历史了(实际可能是大于 15S，至于为何是这个范围，我们会在后面说明)，如此一来就可以较好的解决大量记录和频繁更新带来的内存抖动问题。
+
+根据上面的思路，我们对消息监控及记录又进一步的进行聚合优化和关键消息过滤；总结来看，分为以下几种类型：
+
+### 多消息聚合：
+该场景主要用于主线程连续调度多个消息，并且每个消息耗时都很少的情况下，将这些消息耗时累加，直到这些消息累计耗时超过设置的阈值，则汇总并生成一条记录，并在这条记录中标明本次聚合总共调度了多少个消息。按照消息聚合的思路，发生问题时主线程消息调度示意图如下：
+
+{% asset_img 4.png %}
+
+### 消息聚合拆分：
+针对上面多消息聚合策略，会存在一些特殊情况，例如在将多个消息进行累计统计过程中，如果前 N 次消息调度结束后，累计耗时都没有超过阈值，但是调度完下一个消息之后，发现累计耗时超过阈值，并且还明显超出，如设置阈值是 300ms，但是前 N 个消息累计 200ms，加上本次消息累计耗时达到了 900ms，那么这种情况，我们明显知道是最后一次消息耗时严重，因此需要将本次消息单独记录，并标记其耗时和相关信息，同时将之前 N 次消息调度耗时和消息数聚合在一起并单独记录，这种场景相当于一次生成 2 条记录。
+
+为了考虑监控工具对性能的影响，我们只在每轮统计需要保存时，更新线程 cpu 执行时间，如果发生消息聚合拆分的场景，会默认前一条记录的 cpu 时间为-1，因为本条记录并不是我们重点关注的，所以会把本轮统计的 cpu 时间全部归到后一条消息。
+
+在一些极端场景下，如本轮监控第一个消息执行耗时为 1ms，但是加上本次消息耗时，累计超过 600ms，因此两次消息累计耗时远大于设定的阈值 300ms，那么就需要对本次耗时严重的消息单独记录，而前面那个 1ms 的消息也需要被单独进行记录；类似情形如此反复，就会出现上面说的保存 100 条记录，整体监控可回溯的时长区间存在波动的情况；该场景的示意图如下：
+{% asset_img 5.png %}
+### 关键消息聚合：
+除了上面单次耗时严重的消息需要拆分并单独记录之外，还有一类消息也需要我们单独标记，以达到更好的识别，那就是可能会引起 ANR 的应用组件，如 Activity，Service，Receiver，Provider 等等。为了监控这几种组件的执行过程，我们需要对 ActivityThread.H 的消息调度进行监控，当发现上面这些组件有关的消息在执行时，不管其耗时多少，都对其进行单独记录，并将之前监控的一个或多个消息也保存为一条记录。该场景的示意图如下：
+{% asset_img 6.png %}
+### IDLE 场景聚合：
+熟悉消息队列的同学都知道，主线程是基于消息队列的方式进行调度，在每次消息调度完成之后都会从消息队列读取下一个待调度的消息，如果消息队列没有消息，或者下一个消息没有到设定的调度时间，并且也没有 IDLE 消息等待调度，那么主线程将会进入 IDLE 状态，如下示意图：
+{% asset_img 7.png %}
+正是因为上面的调度逻辑，使得主线程在消息调度过程中会多次进入 IDLE 状态，而这个过程也涉及到线程上下文切换(如：Java 环境切换到 Native 环境)，会去检测是否有挂起请求，所以对调用频繁的接口来说，会在 ANR 发生时被命中，理论上调用越频繁的接口被命中的概率越大，如下图堆栈：
+{% asset_img 8.png %}
+但是上面这种场景的 IDLE 停留时长可长可短，如果按照完全上面那几类消息聚合策略，多个消息连续聚合的话，可能会把这类场景也给聚合进来，一定程度造成干扰，这显然不是我们想要的。为此需要进一步优化，在每次消息调度结束后，获取当前时间，在下次消息调度开始前，再次获取当前时间，并统计距离上次消息调度结束的间隔时长。如果间隔较长，那么也需要单独记录，如果间隔时间较短，我们认为可以忽略，并将其合并到之前统计的消息一起跟踪，到这里就完成了各类场景的监控和归类；该场景的示意图如下：
+{% asset_img 9.png %}
+### 耗时消息堆栈采样：
+在上面重点讲述了主线程消息调度过程的监控和聚合策略，便于发生 ANR，在线下进行回放。但是那些耗时较长的消息，仅仅知道其耗时和消息 tag 是远远不够的，因为每个消息内部的业务逻辑对于我们来说都是黑盒，各个接口耗时也存在很多不确定性，如锁等待、Binder 通信、IO 等系统调用。
+
+因此需要知道这些耗时消息内部接口的耗时情况，我们选取了 2 种方案进行对比：
+
+第一种方案：是对每个函数进行插桩，在进入和退出过程统计其耗时，并进行聚合和汇总。该方案的优点是可以精确的知道每个函数的真实耗时，缺点是很影响包体积和性能，而且不利于其他产品高效复用。
+
+第二种方案，在每个消息开始执行时，触发子线程的超时监控，如果在超时之后本次消息还没执行结束，则抓取主线程堆栈，并继续对该消息设置下一次超时监控，直到该消息执行结束并取消本轮监控。如果在触发超时之前已经执行完毕，则取消本次监控并在下次消息开始执行时，再次设置超时监控，但是因为大部分消息耗时都很少，如果每次都频繁设置和取消，将会带来性能影响，因此我们对此进行优化，采用系统 ANR 超时监控相同的时间对齐方案，具体来说就是： 
+
+以消息开始时间加上超时时长为目标超时时间，每次超时时间到了之后，检查当前时间是否大于或等于目标时间，如果满足，则说明目标时间没有更新，也就是说本次消息没结束，则抓取堆栈。如果每次超时之后，检查当前时间小于目标时间，则说明上次消息执行结束，新的消息开始执行并更新了目标超时时间，这时异步监控需对齐目标超时，再次设置超时监控，如此往复。 
+
+根据上面的思路，整理流程图如下：
+{% asset_img 10.png %}
+需要注意的是，消息采样堆栈的超时时长不可设置太短，否则频繁抓取堆栈对主线程性能影响较大，同时也不能设置太长，否则会因为采样过低导致数据置信度降低；具体时长根据每个产品复杂度灵活调整即可。
+
+### 监控正在调度消息及耗时：
+除了监控 ANR 发生之前主线程历史消息调度及耗时之外，也需要知道 ANR 发生时正在调度的消息及其耗时，以便于在看到 ANR 的 Trace 堆栈时，可以清晰的知道当前 Trace 逻辑到底执行了多长时间，帮忙我们排除干扰，快速定位；借助这个监控可以很好的回答大家，ANR 发生时当前 Trace 堆栈是否耗时以及耗时多久的问题，避免陷入“Trace 堆栈”误区。
+### 获取 Pending 消息：
+同时除了监控主线程历史消息调度及耗时之外，也需要在 ANR 发生时，获取消息队列中待调度的消息，为我们分析问题时提供更多线索，如：
+ - 消息队列中待调度消息是否被 Block 以及被 Block 时长，根据 Block 时长可以推测主线程的繁忙程度；
+ - 可以观察消息队列中是否存在发生 ANR 的应用组件消息，如 Service 消息，以及其在待调度消息队列中的位置和 Block 时长；
+ - 可以观察消息队列中都有哪些消息，这些消息是否有一定规律，如大量重复消息，如果有大量重复消息，则说明很有可能与该消息相关的业务逻辑发生异常，频繁和主线程交互(后面的案例分析中我们也会有介绍)。
+
+{% asset_img 11.png %}
+
+之前我们讲到，对于一次消息调度，它的耗时可以从两个维度进行统计，即 Wall Duration 和 Cpu Duration，通过这两个维度的统计，可以帮助我们更好的推测一次严重耗时，是执行大量业务逻辑还是处于等待或被抢占的情况。如果是后者，那么可以看到这类消息的 Wall Duration 和 Cpu Duration 比例会比较大，当然如何更好更全面的区分一次消息耗时是等待较多还是线程调度被抢占，我们将会在后面结合其他参考信息进行介绍。
+
+### 完整示意图
+在这里我们再把 Cpu Duration 耗时也给统计之后，那么整个有关主线程完整的消息调度监控功能就基本完成了。示意图如下：
+{% asset_img 12.png %}
+通过这个消息调度监控工具，我们就可以很清晰的看到发生 ANR 时，主线程历史消息调度情况；当前正在调度消息耗时，以及消息队列待调度消息及相关信息；而且利用这个监控工具，一眼便知 ANR 发生时主线程 Trace 实际耗时情况，因此很好解决了部分同学对当前堆栈是否耗时以及耗时多久的疑问。
+
+从上面介绍可以看出，为了重点标记单次耗时消息和关键消息，我们使用了多种聚合策略，因此监控过程记录的信息可能会代表不同类型的消息，为了便于区分，我们在可视化展示时加上 Type 标识，便于区别。
+
+# 应用示例：
+例如下图，从 Trace 日志可以看到，ANR 发生时主线程被 Block 在 Binder 通信过程，可能很多同学第一反应是 WMS 服务没有及时响应 Binder 请求导致的问题。
+{% asset_img 13.png %}
+但是再结合下面的消息调度监控来核实一下，我们发现当前调度的消息 Wall duration 只有 44ms，而在该消息之前有两次历史消息耗时比较严重，分别为 2166ms，3277ms，也就是说本次 Binder 调用耗时并不严重，真正的问题是前面 2 次消息耗时较长，影响了后续消息调度，只有同时解决这 2 个消息耗时严重问题，该 ANR 问题才可能解决。
+{% asset_img 14.png %}
+如果没有消息调度监控工具，上去就盲目的分析当前逻辑调用的 IPC 问题，可能就犯了方向性的错误，掉入“Trace 堆栈”陷阱中。 
+
+接下来再来看一个发生在线上的另外一个实例，从下图可以看到主线程正在调度的消息耗时超过 1S，但是在此之前的另一个历史消息耗时长达 9828ms。继续观察下图消息队列待调度的消息状态(灰色示意)，可以看到第一个待调度的消息被 Block 了 14S 之久。由此我们可以知道 ANR 消息之前的这个历史消息，才是导致 ANR 的罪魁祸首，当然这个正在执行的消息也需要优化一下性能，因为我们在前面说过：“发生 ANR 时，没有一个消息是无辜的。”
+{% asset_img 15.png %}
+正是因为有了上面这些监控能力，让我们在日常面对 Trace 日志中的业务逻辑是否耗时以及耗时多久的困惑，瞬间就会变得清晰起来。
+
+# Checktime
+## Checktime 背景介绍：
+Checktime 是 Android 系统针对一些系统服务(AMS，InputService 等)中高频访问的接口，执行时间的监控，当这类接口真实耗时超过预期值将会给出提示信息，此类设计为了在真实环境监测进程被调度和响应能力的一种结果反馈。具体实现是，在每个函数执行前和执行后分析获取当前系统时间，并计算差值，如果该接口耗时超过其设定的阈值，则会触发“slow operation”的信息提醒，部分代码实现如下：
+{% asset_img 16.png %}
+Checktime 逻辑很简单，用当前系统时间减去对比时间，如果超过 50ms，则给出 Waring 日志提示。
+{% asset_img 17.png %}
+我们在分析线下问题，或者在系统层面分析这类问题时，经常会在 logcat 中看到这类消息，但是对于线上的三方应用来说，因为权限问题无法获取系统日志，只能自己实现了。
+## 线程 Checktime：
+了解完系统 Checktime 设计思路及实现之后，我们就可以在应用层实现类似的功能了。通过借助其它子线程的周期检测机制，`在每次调度前获取当前系统时间，然后减去我们设置延迟的时间，即可得到本次线程调度前的真实间隔时间，如设置线程每隔 300ms 调度一次，结果发现实际响应时间间隔有时会超过 300ms，如果偏差越大，则说明线程没有被及时调度，进一步反映系统响应能力变差`。
+通过这样的方式，即使在线上环境获取不到系统日志，也可以从侧面反映不同时段系统负载对线程调度影响，如下图示意，当连续发生多次严重 Delay 时，说明线程调度受到了影响。
+{% asset_img 18.png %}
+## 小结：
+通过上述监控能力，我们可以清晰的知道 ANR 发生时主线程历史消息调度以及耗时严重消息的采样堆栈，同时可以知道正在执行消息的耗时，以及消息队列待中调度消息的状态。同时通过线程 CheckTime 机制从侧面反映线程调度响应能力，由此完成了应用侧监控信息从点到面的覆盖。但是在面对 ANR 问题时，只有这个监控，是远远不够的，需要结合其他信息整体分析，以应对更为复杂的系统环境。下面就结合监控工具来介绍一下 ANR 问题的分析思路。
+# ANR 分析思路：
+在介绍分析思路之前，我们先来说一下分析这类问题需要用到哪些日志，当然在不同的环境下，获取信息能力会有很大差别，如线下环境和线上环境，应用侧和系统角度都有差异；这里我们会将我们日常排查问题常用的信息都介绍一下，便于大家更好的理解，主要包括以下几种：
+ - Trace 日志
+ - AnrInfo
+ - Kernel 日志
+ - Logcat 日志
+ - Meminfo 日志
+ - Raster 监控工具
+
+对于应用侧来说，在线上环境可能只能拿到当前进程内部的线程堆栈(取决于实现原理，参见：Android 系统的 ANR 设计原理及影响因素)以及 ANR Info 信息。在系统侧，几乎能获取到上面的所有信息，对于这类问题获取的信息越多，分析定位成功率就越大，例如可以利用完整的 Trace 日志，分析跨进程 Block 或死锁问题，系统内存或 IO 紧张程度等等，甚至可以知道硬件状态，如低电状态，硬件频率(CPU，IO，GPU)等等。
+
+## 关键信息解读：
+在这里我们把上面列举的日志进行提取并解读，以便于大家在日常开发和面对线上问题，根据当前获取的信息进行参考。
+
+## Trace 信息
+在前文Android 系统的 ANR 设计原理及影响因素中，我们讲到了在发生 ANR 之后，系统会 Dump 当前进程以及关键进程的线程堆栈，状态(红框所示关键信息，稍后详细说明)，示例如下：
+{% asset_img 19.png %}
+
+上面的日志包含很多信息，这里将常用的关键信息进行说明，如下：
+ - 线程堆栈：
+ 这个比较好理解，也就是发生 ANR 时，线程正在执行的逻辑，但是很多场景下，获取的堆栈耗时并不长，原因详见Android 系统的 ANR 设计原理及影响因素。
+ - 线程状态：
+ 见上图“state=xxx”，表示当前线程工作状态，Running 表示当前线程正在被 CPU 调度，Runnable 表示线程已经 Ready 等待 CPU 调度，如上图 SignalCatcher 线程状态。Native 态则表示线程由 Java 环境进入到 Native 环境，可能在执行 Native 逻辑，也可能是进入等待状态；Waiting 表示处于空闲等待状态。除此之外还有 Sleep，Blocked 状态等等；
+ - 线程耗时：
+ 见上图“utmXXX，stmXXX”，表示该线程从创建到现在，被 CPU 调度的真实运行时长，不包括线程等待或者 Sleep 耗时，其中线程 CPU 耗时又可以进一步分为用户空间耗时(utm)和系统空间耗时(stm)，这里的单位是 jiffies，当 HZ=100 时，1utm 等于 10ms。
+ - utm： Java 层和 Native 层非 Kernel 层系统调用的逻辑，执行时间都会被统计为用户空间耗时；
+ - stm： 即系统空间耗时，一般调用 Kernel 层 API 过程中会进行空间切换，由用户空间切换到 Kernel 空间，在 Kernel 层执行的逻辑耗时会被统计为 stm，如文件操作，open,write,read 等等；
+ - core：最后执行这个线程的 cpu 核的序号。
+ - 线程优先级：
+ nice： 该值越低，代表当前线程优先级越高，理论上享受的 CPU 调度能力也越强。对于应用进程(线程)来说，nice 范围基本在 100~139。随着应用所在前后台不同场景，系统会对进程优先级进行调整，厂商可能也会开启 cpu quota 等功能去限制调度能力；
+ - 调度态：
+ schedstat： 参见“schedstat=( 1813617862 14167238 546 )”，分别表示线程 CPU 执行时长(单位 ns)，等待时长，Switch 次数。
+
+## AnrInfo 信息
+除了 Trace 之外，系统会在发生 ANR 时获取一些系统状态，如 ANR 问题发生之前和之后的系统负载以及 Top 进程和关键进程 CPU 使用率。这些信息如果在本地环境可以从 Logcat 日志中拿到，也可以在应用侧通过系统提供的 API 获取(参见：Android 系统的 ANR 设计原理及影响因素)，Anr Info 节选部分信息如下：
+{% asset_img 20.png %}
+对于上图信息，主要对以下几部分关键信息进行介绍：
+ - ANR 类型(longMsg)：
+ 表示当前是哪种类型的消息或应用组件导致的 ANR，如 Input，Receiver，Service 等等。
+ - 系统负载(Load)：
+ 表示不同时间段的系统整体负载，如："Load：45.53 / 27.94 / 19.57"，分布代表 ANR 发生前 1 分钟，前 5 分钟，前 15 分钟各个时间段系统 CPU 负载，具体数值代表单位时间等待系统调度的任务数(可以理解为线程)。如果这个数值过高，则表示当前系统中面临 CPU 或 IO 竞争，此时，普通进程或线程调度将会受到影响。如果手机处于温度过高或低电等场景，系统会进行限频，甚至限核，此时系统调度能力也会受到影响。 
+ 此外，可以将这些时间段的负载和应用进程启动时长进行关联。如果进程刚启动 1 分钟，但是从 Load 数据看到前 5 分钟，甚至前 15 分钟系统负载已经很高，那很大程度说明本次 ANR 在很大程度会受到系统环境影响。
+ - 进程 CPU 使用率：
+ 如上图，表示当前 ANR 问题发生之前(CPU usage from XXX to XXX ago)或发生之后(CPU usage from XXX to XXX later)一段时间内，都有哪些进程占用 CPU 较高，并列出这些进程的 user，kernel 的 CPU 占比。当然很多场景会出现 system_server 进程 CPU 占比较高的现象，针对这个进程需要视情况而定，至于 system_server 进程 CPU 占比为何普遍较高，参见：Android 系统的 ANR 设计原理及影响因素。 
+ minor 表示次要页错误，文件或其它内存被加载到内存后，但是没有被映射到当前进程，通过内核访问时，会触发一次 Page Fault。如果访问的内容还没有加载到内存，那么会触发 major，所以对比可以看到，major 的系统开销会比 minor 大很多。
+ - 关键进程：
+ kswapd： 是 linux 中用于页面回收的内核线程，主要用来维护可用内存与文件缓存的平衡，以追求性能最大化，当该线程 CPU 占用过高，说明系统可用内存紧张，或者内存碎片化严重，需要进行 file cache 回写或者内存交换(交换到磁盘)，线程 CPU 过高则系统整体性能将会明显下降，进而影响所有应用调度。
+ mmcqd： 内核线程，主要作用是把上层的 IO 请求进行统一管理和转发到 Driver 层，当该线程 CPU 占用过高，说明系统存在大量文件读写，当然如果内存紧张也会触发文件回写和内存交换到磁盘，所以 kswapd 和 mmcqd 经常是同步出现的。
+ - 系统 CPU 分布：
+ 如下图，反映一段时间内，系统整体 CPU 使用率，以及 user，kernel，iowait 方向的 CPU 占比，如果发生大量文件读写或内存紧张的场景，则 iowait 占比较高，这个时候则要进一步观察上述进程的 kernel 空间 CPU 使用情况，并通过进程 CPU 使用，再进一步对比各个线程的 CPU 使用，找出占比最大的一个或一类线程。
+ {%asset_img 21.png %}
+ - Logcat 日志：
+ 在 log 日志中，我们除了可以观察业务信息之外，还有一些关键字也可以帮我们去推测当前系统性能是否遇到问题，如下图， “`Slow operation`”，“`Slow delivery`” 等等。
+ {%asset_img 22.png %}
+ - Slow operation
+ Android 系统在一些频繁调用的接口中，分别在方法前后利用 checktime 检测，以判断本次函数执行耗时是否超过设定阈值，通常这些值都会设置的较为宽松，如果实际耗时超过设置阈值，则会给出“Slow XXX”提示，表示系统进程调度受到了影响，一般来说系统进程优先级比较高，如果系统进程调度都受到了影响，那么则反映了这段时间内系统性能很有可能发生了问题。
+ - Kernel 日志：
+ 对于应用侧来说，这类日志基本是拿不到的，但是如下是在线下测试或者从事系统开发的同学，可以通过 dmesg 命令进行查看。对于 kernel 日志，我们主要分析的是 lowmemkiller 相关信息，如下图：
+ {%asset_img 23.png %}
+ - Lowmemkiller：
+ 从事性能(内存)优化的同学对该模块都比较熟悉，主要是用来监控和管理系统可用内存，当可用内存紧张时，从 kernel 层强制 Kill 一些低优先级的应用，以达到调节系统内存的目的。而选择哪些应用，则主要参考进程优先级(oom_score_adj)，这个优先级是 AMS 服务根据应用当前的状态，如前台还是后台，以及进程存活的应用组件类型而计算出来的。例如：对于用户感知比较明显的前台应用，优先级肯定是最高的，此外还有一些系统服务，和后台服务(播放器场景)优先级也会比较高。当然厂商也对此进行了大量的定制(优化)，以防止三方应用利用系统设计漏洞，将自身进程设置太高优先级进而达到保活目的。
+ - 消息调度时序图：
+ {%asset_img 24.png %}
+ 如上图，在我们分析完系统日志之后，会进一步的锁定或缩小范围，但是最终我们还是要回归到主线程进一步的分析 Trace 堆栈的业务逻辑以及耗时情况，以便于我们更加清晰的知道正在调度的消息持续了多长时间。但是很多情况当前 Trace 堆栈并不是我们期待的答案，因此需要进一步的确认 ANR 之前主线程的调度信息，评估历史消息对后续消息调度的影响，便于我们寻找“真凶”。
+ 当然，有时也需要进一步的参考消息队列中待调度消息，在这些消息里面，除了可以看到 ANR 时对应的应用组件被 Block 的时长之外，还可以了解一下都有哪些消息，这些消息的特征有时对于我们分析问题也会提供有力的证据和方向。
+
+## 分析思路
+在上面我们对各类日志的关键信息进行了基本释义，下面就来介绍一下，当我们日常遇到 ANR 问题时，是如何分析的，总结思路如下：
+ - 分析堆栈，看看是否存在明显业务问题(如死锁，业务严重耗时等等)，如果无上述明显问题，则进一步通过 ANR Info 观察系统负载是否过高，进而导致整体性能较差，如 CPU，Mem，IO。然后再进一步分析是本进程还是其它进程导致，最后再分析进程内部分析对比各个线程 CPU 占比，找出可疑线程。
+ - 综合上述信息，利用监控工具收集的信息，观察和找出 ANR 发生前一段时间内，主线程耗时较长的消息都有哪些，并查看这些耗时较长的消息执行过程中采样堆栈，根据堆栈聚合展示，进一步的对比当前耗时严重的接口或业务逻辑。
+
+以上分析思路，进一步细分的话，可以分为以下几个步骤：
+ - 一看 Trace：
+   - 死锁堆栈： 观察 Trace 堆栈，确认是否有明显问题，如主线程是否与其他线程发生死锁，如果是进程内部发生了死锁，那么恭喜，这类问题就清晰多了，只需找到与当前线程死锁的线程，问题即可解决；
+   - 业务堆栈： 观察通过 Trace 堆栈，发现当前主线程堆栈正在执行业务逻辑，你找到对应的业务同学，他承认该业务逻辑确实存在性能问题，那么恭喜，你很有可能解决了该问题，为什么只是有可能解决该问题呢？因为有些问题取决于技术栈或框架设计，无法在短时间内解决。如果业务同学反馈当前业务很简单，基本不怎么耗时，而这种场景也是日常经常遇到的一类问题，那么就可能需要借助我们的监控工具，追溯历史消息耗时情况了；
+   - IPC Block 堆栈： 观察通过 Trace 堆栈，发现主线程堆栈是在跨进程(Binder)通信，那么这个情况并不能当即下定论就是 IPC block 导致，实际情况也有可能是刚发送 Binder 请求不久，以及想要进一步的分析定位，这时也需要借助我们的自研监控工具了；
+   - 系统堆栈： 通过观察 Trace，发现当前堆栈只是简单的系统堆栈，想要搞清楚是否发生严重耗时，以及进一步的分析定位，如我们常见的 NativePollOnce 场景，那么也需要借助我们的自研监控工具进一步确认了。
+ - 二看关键字：Load，CPU，Slow Operation，Kswapd，Mmcqd，Kwork，Lowmemkiller 等等
+ 刚才我们介绍到，上面这些关键字是反应系统 CPU，Mem，IO 负载的关键信息，在分析完主线程堆栈信息之后，还需要进一步在 ANRInfo，logcat 或 Kernel 日志中搜索这些关键字，并根据这些关键字当前数值，判断当前系统是否存在资源(CPU，Mem，IO)紧张的情况；
+ - 三看系统负载分布：观察系统整体负载：User,Sys,IOWait
+ 通过观察系统负载，则可以进一步明确是 CPU 资源紧张，还是 IO 资源紧张；如果系统负载过高，一定是有某个进程或多个进程引起的。反之系统负载过高又会影响到所有进程调度性能。通过观察 User，Sys 的 CPU 占比，可以进一步发分析当前负载过高是发生在应用空间，还是系统空间，如大量调用逻辑(如文件读写，内存紧张导致系统不断回收内存等等)，知道这些之后，排查方向又会进一步缩小范围。
+ - 四看进程 CPU：观察 Top 进程的 CPU 占比
+ 从上面分析，在我们知道当前系统负载过高，是发生在用户空间还是内核空间之后，那么我们就要通过 Anrinfo 的提供的进程 CPU 列表，进一步锁定是哪个(些)进程导致的，这时则要进一步的观察每个进程的 CPU 占比，以及进程内部 user，sys 占比。
+  - 在分析进程 CPU 占比过程，有一个关键的信息，要看统计这些进程 CPU 过高的场景是发生在 ANR 之前的一段时间还是之后一段时间，如下图表示 ANR 之前 4339ms 到 22895ms 时间内进程的 CPU 使用率。
+  {% asset_img 25.png %}
+ - 五看 CPU 占比定线程 ：对比各线程 CPU 占比，以及线程内部 user 和 kernel 占比
+ 在通过系统负载(user,sys,iowait)锁定方向之后，又通过进程列表锁定目标进程，那么接下来我们就可以从目标进程内部分析各个线程的(utm,stm)，进一步分析是哪个线程有问题了。
+ 在 Trace 日志的线程信息里可以清晰的看到每个线程的 utm，stm 耗时。至此我们就完成了从系统到进程，再到进程内部线程方向的负载分析和排查。当然，有时候可能导致系统高负载的不是当前进程，而是其他进程导致，这时同样会影响其他进程，进而导致 ANR。
+ - 六看消息调度锁定细节 ：
+  在分析和明确系统负载是否正常，以及负载过高是哪个进程引起的结论之后，接下来便要通过我们的监控工具，进一步排查是当前消息调度耗时导致，历史消息调度耗时导致，还是消息过于频繁导致。同时通过我们的线程 CheckTime 调度情况分析当前进程的 CPU 调度是否及时以及影响程度，在锁定上述场景之后，再进一步分析耗时消息的采样堆栈，才算找到解决问题的终极之钥。当然耗时消息内部可能存在一个或多个耗时较长的函数接口，或者会有多个消息存在耗时较长的函数接口，这就是我们前文中提到的：“发生 ANR 时，没有一个消息是无辜的”
+## 更多信息：
+除了上面的一些信息，我们还可以结合 logcat 日志分析 ANR 之前的一些信息，查看是否存在业务侧或系统侧的异常输出，如搜索“Slow operation”，"Slow delivery"等关键字。也可以观察当前进程和系统进程是否存在频繁 GC 等等，以帮忙我们更全面的分析系统状态。
+## 总结：
+上面我们重点介绍了基于主线程消息调度的监控工具，实现了“由点到面”的监控能力，以便于发生 ANR 问题时，可以更加清晰直观的整体评估主线程的“过去，现在和将来”。同时结合日常实践，介绍了在应用侧分析 ANR 问题经常用到的日志信息和分析思路。 
+
+目前，Raster 监控工具因为其很好的提升了问题定位效率和成功率，成为 ANR 问题分析利器，并融合到公司性能稳定性监控平台，为公司众多产品广泛使用。接下来我们将利用该工具并结合上面的分析思路，讲一讲实际工作中遇到不同类型的 ANR 问题时，是如何快速分析和定位问题的。
+
+]]></content>
+      <tags>
+        <tag>Android</tag>
+        <tag>ANR</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android Native Service 示例</title>
     <url>/2024/07/31/Android-native-service-sample-1/</url>
     <content><![CDATA[安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。
@@ -9548,6 +9765,119 @@ void IniParser::addNewRecord(const char* section, const char* key, const char* v
 ```]]></content>
   </entry>
   <entry>
+    <title>在 Centos 7.4 上安装Gcc 7.3</title>
+    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
+    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
+下面记录一下安装过程。
+
+<!--more -->
+
+## 描述
+
+系统为Cent OS7.4，全新安装，更新全部软件至最新版。
+
+## 安装准备
+
+```bash
+yum update -y
+yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
+```
+
+安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
+
+```bash
+configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
+```
+
+网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
+
+## 动手
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
+tar -zxf gcc-7.3.0.tar.gz
+cd gcc-7.3.0
+./contrib/download_prerequisites
+mkdir builddir && cd builddir
+../configure
+make && sudo make install
+```
+
+编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
+需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
+
+```bash
+2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
+2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
+2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
+2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
+gmp-6.1.0.tar.bz2: OK
+mpfr-3.1.4.tar.bz2: OK
+mpc-1.0.3.tar.gz: OK
+isl-0.16.1.tar.bz2: OK
+All prerequisites downloaded successfully.
+```
+
+这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
+
+另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
+
+```bash
+../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+```
+
+选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
+
+## 安装gdb
+
+在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
+tar -zxf gdb-8.1.tar.gz
+cd gdb-8.1
+mkdir builddir && cd builddir
+../configure
+make && make install
+```
+
+## 碎碎念
+
+有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
+
+```bash
+WARNING: 'makeinfo' is missing on your system.
+         You should only need it if you modified a '.texi' file, or
+         any other file indirectly affecting the aspect of the manual.
+         You might want to install the Texinfo package:
+         <http://www.gnu.org/software/texinfo/>
+         The spurious makeinfo call might also be the consequence of
+         using a buggy 'make' (AIX, DU, IRIX), in which case you might
+         want to install GNU make:
+         <http://www.gnu.org/software/make/>
+make[5]: *** [gdb.info] Error 127
+make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
+make[4]: *** [subdir_do] Error 1
+make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[3]: *** [install-only] Error 2
+make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[2]: *** [install] Error 2
+make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[1]: *** [install-gdb] Error 2
+make[1]: Leaving directory `/root/gdb-8.1/build'
+make: *** [install] Error 2
+```
+
+需要`yum install texinfo`，然后再执行`make install`。
+至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
+安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
+自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
+建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
+Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
+{% asset_img 1.jpg 来张合影 %}
+]]></content>
+  </entry>
+  <entry>
     <title>如何下载AOSP的单个仓库</title>
     <url>/2024/07/30/how-to-down-load-simple-aosp-project/</url>
     <content><![CDATA[AOSP 使用 repo 来组织代码的，有时候我们只需要下载其中一部分代码。下面是具体的操作方式
@@ -10750,119 +11080,6 @@ void IniParser::addNewRecord(const char* section, const char* key, const char* v
   <project path="tools/apksig" name="platform/tools/apksig" groups="pdk,tradefed" />
 ```
 把这里的 name 取出来，拼上`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/`得到一个链接`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`，用`git clone https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`的形式就可以下载到对应的代码了。]]></content>
-  </entry>
-  <entry>
-    <title>在 Centos 7.4 上安装Gcc 7.3</title>
-    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
-    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
-下面记录一下安装过程。
-
-<!--more -->
-
-## 描述
-
-系统为Cent OS7.4，全新安装，更新全部软件至最新版。
-
-## 安装准备
-
-```bash
-yum update -y
-yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
-```
-
-安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
-
-```bash
-configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
-```
-
-网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
-
-## 动手
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
-tar -zxf gcc-7.3.0.tar.gz
-cd gcc-7.3.0
-./contrib/download_prerequisites
-mkdir builddir && cd builddir
-../configure
-make && sudo make install
-```
-
-编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
-需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
-
-```bash
-2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
-2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
-2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
-2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
-gmp-6.1.0.tar.bz2: OK
-mpfr-3.1.4.tar.bz2: OK
-mpc-1.0.3.tar.gz: OK
-isl-0.16.1.tar.bz2: OK
-All prerequisites downloaded successfully.
-```
-
-这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
-
-另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
-
-```bash
-../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
-```
-
-选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
-
-## 安装gdb
-
-在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
-tar -zxf gdb-8.1.tar.gz
-cd gdb-8.1
-mkdir builddir && cd builddir
-../configure
-make && make install
-```
-
-## 碎碎念
-
-有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
-
-```bash
-WARNING: 'makeinfo' is missing on your system.
-         You should only need it if you modified a '.texi' file, or
-         any other file indirectly affecting the aspect of the manual.
-         You might want to install the Texinfo package:
-         <http://www.gnu.org/software/texinfo/>
-         The spurious makeinfo call might also be the consequence of
-         using a buggy 'make' (AIX, DU, IRIX), in which case you might
-         want to install GNU make:
-         <http://www.gnu.org/software/make/>
-make[5]: *** [gdb.info] Error 127
-make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
-make[4]: *** [subdir_do] Error 1
-make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[3]: *** [install-only] Error 2
-make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[2]: *** [install] Error 2
-make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[1]: *** [install-gdb] Error 2
-make[1]: Leaving directory `/root/gdb-8.1/build'
-make: *** [install] Error 2
-```
-
-需要`yum install texinfo`，然后再执行`make install`。
-至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
-安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
-自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
-建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
-Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
-{% asset_img 1.jpg 来张合影 %}
-]]></content>
   </entry>
   <entry>
     <title>在Linux上安装node.js</title>
@@ -14254,6 +14471,505 @@ C:.
       </tags>
   </entry>
   <entry>
+    <title>安卓 RemoteCallbackList 的使用 （系统服务篇）</title>
+    <url>/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/</url>
+    <content><![CDATA[
+接着[应用篇](../usage-of-Android-RemoteCallbacckList-APP/)继续说，这次我们在系统服务里面使用 RemoteCallbackList 。
+首先，你需要有一份能完整编译的安卓源码。
+
+<!-- more -->
+
+我这里以 Android10_r47为例。
+我在 `frameworks/base/core/java/com/callback/` 内新增这几个文件。
+
+1. 服务接口的 aidl
+```java
+// ICallBackTestInterface.aidl
+package com.callback;
+
+// Declare any non-default types here with import statements
+
+import com.callback.ICallbackTestCallback;
+
+interface ICallBackTestInterface {
+    // 向服务端注册客户端回调
+    void register(ICallbackTestCallback callback);
+    // 向服务端注销客户端回调
+    void unregister(ICallbackTestCallback callback);
+    // 向服务端发送消息
+    void callServer(String msg);
+}
+```
+1. 服务回调的 aidl
+```java
+// ICallbackTestCallback.aidl
+package com.callback;
+
+// Declare any non-default types here with import statements
+
+interface ICallbackTestCallback {
+    /**
+     * 服务端调用客户端的回调
+     **/
+    void onReceived(String msg);
+}
+```
+aidl 的文件会自动编译成Binder对象的子类，这个编译系统已经为我们做好了
+3. 服务端实现
+然后，`frameworks/base/services/core/java/com/android/server/CallBackTestService.java`。在这里新建一个文件，用来作为服务端的真正实现
+```java
+package com.android.server;
+
+import android.util.Slog;
+
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
+import android.os.Binder;
+import android.os.IBinder;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.ICallBackTestInterface;
+
+public class CallBackTestService extends ICallBackTestInterface.Stub {
+
+    private final String TAG = "testcallback";
+
+    private boolean serverRunning = false;
+
+    private final RemoteCallbackList<ICallbackTestCallback> clients = new RemoteCallbackList<>();
+
+    public CallBackTestService(){
+        serverRunning = true;
+        new Thread(serverRunnable).start();
+    }
+
+    public void register(ICallbackTestCallback callback) throws RemoteException {
+        Slog.d(TAG,"register callback from pid=" + Binder.getCallingPid());
+        clients.register(callback);
+    }
+
+    public void unregister(ICallbackTestCallback callback) throws RemoteException {
+        Slog.d(TAG,"unregister callback from pid=" + Binder.getCallingPid());
+        clients.unregister(callback);
+    }
+
+    public void callServer(String msg) throws RemoteException {
+        Slog.d(TAG,"received pid=" + Binder.getCallingPid()+" message: " + msg);
+    }
+
+    // 向客户端发送消息的具体实现
+    // 简单的做一个自增运算，然后发送回客户端
+    // 
+    private Runnable serverRunnable = () ->{
+        int count = 0;
+        while(serverRunning){
+            try {
+                Thread.sleep(500);
+                noteClients(Integer.toString(count++));
+                count = count > 10000 ? 0 : count;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    /**
+     * 
+     * @param msg 
+     */
+    private void noteClients(String msg){
+        int cb = clients.beginBroadcast();
+        for(int i=0;i<cb;i++){
+            try {
+               clients.getBroadcastItem(i).onReceived(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        clients.finishBroadcast();
+    }
+}
+```
+这里服务端的实现，实际上就和上一篇中的 CallBackServer 是一个意思。
+然后封装一下服务的调用 `frameworks/base/core/java/com/callback/CallBackTestManager.java`
+```java
+package com.callback;
+
+import android.util.Slog;
+
+import android.content.Context;
+import android.os.RemoteException;
+
+import android.annotation.UnsupportedAppUsage;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.ICallBackTestInterface;
+
+public class CallBackTestManager {
+
+    public static final String SERVICE_NAME = "callbacktest";
+
+    private final Context mContext;
+
+    private final ICallBackTestInterface mService;
+
+    public CallBackTestManager(Context context, ICallBackTestInterface service){
+        mContext = context;
+        mService = service;
+    }
+
+    public void register(ICallbackTestCallback callback) {
+        try{
+            mService.register(callback);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    public void unregister(ICallbackTestCallback callback) {
+        try{
+            mService.unregister(callback);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    public void callserver(String msg) {
+        try{
+            mService.callServer(msg);
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
+        }
+    }
+}
+```
+
+到这里，我们的大部分工作就完成了。不过此时编译成系统镜像烧录或者编译成虚拟机，还是不能调用这个服务的。
+由于我们添加的类位于 frameworks/base/com 这个目录下，这个目录下的包并不在 bootclass 里面，修改一下这个文件
+```diff
+diff --git a/build/make/core/tasks/check_boot_jars/package_whitelist.txt b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
+index 38f2be57af..883b6d86ff 100644
+--- a/build/make/core/tasks/check_boot_jars/package_whitelist.txt
++++ b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
+@@ -237,6 +237,7 @@ org\.apache\.xalan\.xslt
+ # Packages in the google namespace across all bootclasspath jars.
+ com\.google\.android\..*
+ com\.google\.vr\.platform.*
++com\.callback\.*
+
+ ###################################################
+ # Packages used for Android in Chrome OS
+```
+首先会遇到的问题是 selinux 的限制，
+按照下面的这个 diff 文件来添加关于这个新增加的服务的规则
+```diff
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/service.te b/system/sepolicy/prebuilts/api/29.0/private/service.te
+index a8ee195590..7d9a2452fa 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/service.te
++++ b/system/sepolicy/prebuilts/api/29.0/private/service.te
+@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
+ type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
+ type stats_service,                 service_manager_type;
+ type statscompanion_service,        system_server_service, service_manager_type;
++type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/service_contexts b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
+index 96d553bf49..9067330ae5 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/service_contexts
++++ b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
+@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
+ *                                         u:object_r:default_android_service:s0
++callbacktest                              u:object_r:callbacktest_service:s0
+diff --git a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
+index 3c20c082b7..d8e2fac17d 100644
+--- a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
++++ b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
+@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
+ allow untrusted_app_all app_api_service:service_manager find;
+ allow untrusted_app_all vr_manager_service:service_manager find;
+ allow untrusted_app_all gpu_service:service_manager find;
++allow untrusted_app_all callbacktest_service:service_manager find;
+
+ # Allow untrusted apps to interact with gpuservice
+ binder_call(untrusted_app_all, gpuservice)
+diff --git a/system/sepolicy/private/service.te b/system/sepolicy/private/service.te
+index a8ee195590..7d9a2452fa 100644
+--- a/system/sepolicy/private/service.te
++++ b/system/sepolicy/private/service.te
+@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
+ type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
+ type stats_service,                 service_manager_type;
+ type statscompanion_service,        system_server_service, service_manager_type;
++type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
+diff --git a/system/sepolicy/private/service_contexts b/system/sepolicy/private/service_contexts
+index 96d553bf49..9067330ae5 100644
+--- a/system/sepolicy/private/service_contexts
++++ b/system/sepolicy/private/service_contexts
+@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
+ *                                         u:object_r:default_android_service:s0
++callbacktest                              u:object_r:callbacktest_service:s0
+diff --git a/system/sepolicy/private/untrusted_app_all.te b/system/sepolicy/private/untrusted_app_all.te
+index 3c20c082b7..d8e2fac17d 100644
+--- a/system/sepolicy/private/untrusted_app_all.te
++++ b/system/sepolicy/private/untrusted_app_all.te
+@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
+ allow untrusted_app_all app_api_service:service_manager find;
+ allow untrusted_app_all vr_manager_service:service_manager find;
+ allow untrusted_app_all gpu_service:service_manager find;
++allow untrusted_app_all callbacktest_service:service_manager find;
+
+ # Allow untrusted apps to interact with gpuservice
+ binder_call(untrusted_app_all, gpuservice)
+```
+到这里之后，回到Android源码根目录，正常 `make update-api && make` 之后，就可以启动虚拟机了。
+然后再新建一个应用。
+```bash
+.
+├── aidl
+│   └── com
+│       └── callback
+│           ├── ICallbackTestCallback.aidl
+│           └── ICallBackTestInterface.aidl
+├── AndroidManifest.xml
+├── java
+│   └── com
+│       └── callback
+│           ├── CallBackTestManager.java
+│           └── demo
+│               └── MainActivity.java
+
+```
+其中，`ICallbackTestCallback.aidl` , `ICallBackTestInterface.aidl` , `CallBackTestManager.java` 三个文件都是从我们添加在源码里面的拷贝出来的，因为Android Studio的sdk里面并没有这些实现，把这些文件放到工程的目录里面，让编译可以通过。
+通过 java 的类加载机制，实际上运行的时候是编译到系统里启动的那些代码，实际上我们拷贝到工程里的文件，只要接口声明与系统内的一致就可以，接口实现可以留空。就像Android SDK 里面的andrroid.jar里面的那些空接口一样。
+
+MainActivity.java的内容如下
+```java
+package com.callback.demo;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+
+import com.callback.ICallbackTestCallback;
+import com.callback.CallBackTestManager;
+import com.testcallback.demo.R;
+
+public class MainActivity extends AppCompatActivity {
+
+    private final String TAG = "testcallback";
+
+    CallBackTestManager callbackSerice = null;
+
+    private boolean bound = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(bound){
+            registerCallback(null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(bound){
+            unregisterCallback(null);
+        }
+    }
+
+    private ICallbackTestCallback callback = new ICallbackTestCallback.Stub(){
+        @Override
+        public void onReceived(String msg) throws RemoteException {
+            Log.d(TAG,"received msg: " + msg + " . from server pid=" + Binder.getCallingPid());
+        }
+    };
+
+    public void registerCallback(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.register(callback);
+        }
+    }
+
+    public void unregisterCallback(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.unregister(callback);
+        }
+    }
+
+    public void bindService(View view) {
+        if(callbackSerice == null){
+            callbackSerice = (CallBackTestManager)getSystemService(CallBackTestManager.SERVICE_NAME);
+            bound = true;
+        }
+    }
+
+    public void notifyService(View view) {
+        if(callbackSerice!=null){
+            callbackSerice.callserver("hello, I'm client");
+        }
+    }
+
+}
+```
+对应的资源文件如下
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/registerBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="registerCallback"
+        android:text="register"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/unregisterBotton"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/registerBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="unregisterCallback"
+        android:text="unregister"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bindservice"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/unregisterBotton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="bindService"
+        android:text="Bind service"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/notifyservice"
+        android:textAllCaps="false"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toBottomOf="@id/bindservice"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:onClick="notifyService"
+        android:text="Notify service"/>
+```
+编译完成之后，我们将apk用AOSP的系统签名（如果你用了自己的密钥，就是你自己密钥的platform签名），AOSP的签名位于`build/target/product/security/`,其内的 platform.pk8 和 platform.x509.pem 。用这两个签名给apk签名安装。这个apk需要注意声明 systemuid。
+p.s: 这里使用系统签名，是因为按照本篇的流程，添加后的 CallBackTestManager 是 hide 的接口，Android 10 对hide接口做了限制，普通app直接去调的话，会报找不到接口。对于安卓10新增的hidden api 调用限制，可以前往 https://developer.android.google.cn/guide/app-compatibility/restrictions-non-sdk-interfaces 。普通应用直接调用hide的接口，可能会直接闪退，查看log，有类似下面这样的log生成
+```
+Accessing hidden field Landroid/os/Message;->flags:I (light greylist, JNI)
+```
+# 把我们新增的接口变成public的接口
+这一部分，你可以理解为将我们自行增加的接口变成 SDK 接口（如果你的ROM需要通过谷歌的CTS认证，则不可以将自行增加的API变成SDK API）。
+如果你有留意，在 make update-api 之后，`android10_r47/frameworks/base/api/current.txt`，会出现新增的一些和aidl文件有关的内容
+```java
+package com.callback {
+
+  public interface ICallBackTestInterface extends android.os.IInterface {
+    method public void callServer(String) throws android.os.RemoteException;
+    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+  }
+
+  public static class ICallBackTestInterface.Default implements com.callback.ICallBackTestInterface {
+    ctor public ICallBackTestInterface.Default();
+    method public android.os.IBinder asBinder();
+    method public void callServer(String) throws android.os.RemoteException;
+    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
+  }
+
+  public abstract static class ICallBackTestInterface.Stub extends android.os.Binder implements com.callback.ICallBackTestInterface {
+    ctor public ICallBackTestInterface.Stub();
+    method public android.os.IBinder asBinder();
+    method public static com.callback.ICallBackTestInterface asInterface(android.os.IBinder);
+    method public static com.callback.ICallBackTestInterface getDefaultImpl();
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+    method public static boolean setDefaultImpl(com.callback.ICallBackTestInterface);
+  }
+
+  public interface ICallbackTestCallback extends android.os.IInterface {
+    method public void onReceived(String) throws android.os.RemoteException;
+  }
+
+  public static class ICallbackTestCallback.Default implements com.callback.ICallbackTestCallback {
+    ctor public ICallbackTestCallback.Default();
+    method public android.os.IBinder asBinder();
+    method public void onReceived(String) throws android.os.RemoteException;
+  }
+  public abstract static class ICallbackTestCallback.Stub extends android.os.Binder implements com.callback.ICallbackTestCallback {
+    ctor public ICallbackTestCallback.Stub();
+    method public android.os.IBinder asBinder();
+    method public static com.callback.ICallbackTestCallback asInterface(android.os.IBinder);
+    method public static com.callback.ICallbackTestCallback getDefaultImpl();
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+    method public static boolean setDefaultImpl(com.callback.ICallbackTestCallback);
+  }
+}
+```
+某种程度上，你可以认为，这个txt的内容就是SDK api，可以看到，我们新增的 CallBackTestManager 的内容并不在这个txt里面。
+可以通过修改 `frameworks/base/Android.bp` 这个文件，修改内容如下
+```diff
+diff --git a/frameworks/base/Android.bp b/frameworks/base/Android.bp
+index 663354835e..03a98395e5 100644
+--- a/frameworks/base/Android.bp
++++ b/frameworks/base/Android.bp
+@@ -1237,6 +1237,7 @@ packages_to_document = [
+     "javax/microedition/khronos",
+     "org/apache/http/conn",
+     "org/apache/http/params",
++    "com/callback",
+ ]
+
+ // Make the api/current.txt file available for use by modules in other
+```
+修改这个文件之后，再次 `make update-api`，可以看到 CallBackTestManager 的内容已经添加到 current.txt 里面去了。
+再次make之后，普通应用就可以像调用安卓已有的服务那样，来使用新增的这个服务了。
+# 复习一下
+有几个小地方需要注意：
+1. 如果你添加的接口没有出现在 current.txt 里面的话，安卓10上由于谷歌新增的hidden api访问限制，普通应用是无法访问的
+2. 使用AOSP 编译出来的 signapk.jar 和 platform 签名的apk，似乎无法在虚拟机上安装为系统应用，我是把 platform key 转换成 Android Studio 使用的 keystore 来使用的。]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>C语言调用系统命令</title>
     <url>/2017/09/14/use-cmd-coomand-in-cpp/</url>
     <content><![CDATA[{% asset_img 1.jpg %}
@@ -15625,505 +16341,6 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 -----
 内容来自官方wiki:[http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts](http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts) ，看来得抽空翻译一下d=====(￣▽￣*)b
 ]]></content>
-  </entry>
-  <entry>
-    <title>安卓 RemoteCallbackList 的使用 （系统服务篇）</title>
-    <url>/2024/08/03/usage-of-Android-RemoteCallbacckList-framework/</url>
-    <content><![CDATA[
-接着[应用篇](../usage-of-Android-RemoteCallbacckList-APP/)继续说，这次我们在系统服务里面使用 RemoteCallbackList 。
-首先，你需要有一份能完整编译的安卓源码。
-
-<!-- more -->
-
-我这里以 Android10_r47为例。
-我在 `frameworks/base/core/java/com/callback/` 内新增这几个文件。
-
-1. 服务接口的 aidl
-```java
-// ICallBackTestInterface.aidl
-package com.callback;
-
-// Declare any non-default types here with import statements
-
-import com.callback.ICallbackTestCallback;
-
-interface ICallBackTestInterface {
-    // 向服务端注册客户端回调
-    void register(ICallbackTestCallback callback);
-    // 向服务端注销客户端回调
-    void unregister(ICallbackTestCallback callback);
-    // 向服务端发送消息
-    void callServer(String msg);
-}
-```
-1. 服务回调的 aidl
-```java
-// ICallbackTestCallback.aidl
-package com.callback;
-
-// Declare any non-default types here with import statements
-
-interface ICallbackTestCallback {
-    /**
-     * 服务端调用客户端的回调
-     **/
-    void onReceived(String msg);
-}
-```
-aidl 的文件会自动编译成Binder对象的子类，这个编译系统已经为我们做好了
-3. 服务端实现
-然后，`frameworks/base/services/core/java/com/android/server/CallBackTestService.java`。在这里新建一个文件，用来作为服务端的真正实现
-```java
-package com.android.server;
-
-import android.util.Slog;
-
-import android.os.RemoteCallbackList;
-import android.os.RemoteException;
-import android.os.Binder;
-import android.os.IBinder;
-
-import com.callback.ICallbackTestCallback;
-import com.callback.ICallBackTestInterface;
-
-public class CallBackTestService extends ICallBackTestInterface.Stub {
-
-    private final String TAG = "testcallback";
-
-    private boolean serverRunning = false;
-
-    private final RemoteCallbackList<ICallbackTestCallback> clients = new RemoteCallbackList<>();
-
-    public CallBackTestService(){
-        serverRunning = true;
-        new Thread(serverRunnable).start();
-    }
-
-    public void register(ICallbackTestCallback callback) throws RemoteException {
-        Slog.d(TAG,"register callback from pid=" + Binder.getCallingPid());
-        clients.register(callback);
-    }
-
-    public void unregister(ICallbackTestCallback callback) throws RemoteException {
-        Slog.d(TAG,"unregister callback from pid=" + Binder.getCallingPid());
-        clients.unregister(callback);
-    }
-
-    public void callServer(String msg) throws RemoteException {
-        Slog.d(TAG,"received pid=" + Binder.getCallingPid()+" message: " + msg);
-    }
-
-    // 向客户端发送消息的具体实现
-    // 简单的做一个自增运算，然后发送回客户端
-    // 
-    private Runnable serverRunnable = () ->{
-        int count = 0;
-        while(serverRunning){
-            try {
-                Thread.sleep(500);
-                noteClients(Integer.toString(count++));
-                count = count > 10000 ? 0 : count;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    /**
-     * 
-     * @param msg 
-     */
-    private void noteClients(String msg){
-        int cb = clients.beginBroadcast();
-        for(int i=0;i<cb;i++){
-            try {
-               clients.getBroadcastItem(i).onReceived(msg);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-        clients.finishBroadcast();
-    }
-}
-```
-这里服务端的实现，实际上就和上一篇中的 CallBackServer 是一个意思。
-然后封装一下服务的调用 `frameworks/base/core/java/com/callback/CallBackTestManager.java`
-```java
-package com.callback;
-
-import android.util.Slog;
-
-import android.content.Context;
-import android.os.RemoteException;
-
-import android.annotation.UnsupportedAppUsage;
-
-import com.callback.ICallbackTestCallback;
-import com.callback.ICallBackTestInterface;
-
-public class CallBackTestManager {
-
-    public static final String SERVICE_NAME = "callbacktest";
-
-    private final Context mContext;
-
-    private final ICallBackTestInterface mService;
-
-    public CallBackTestManager(Context context, ICallBackTestInterface service){
-        mContext = context;
-        mService = service;
-    }
-
-    public void register(ICallbackTestCallback callback) {
-        try{
-            mService.register(callback);
-        } catch (RemoteException e){
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    public void unregister(ICallbackTestCallback callback) {
-        try{
-            mService.unregister(callback);
-        } catch (RemoteException e){
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    public void callserver(String msg) {
-        try{
-            mService.callServer(msg);
-        } catch (RemoteException e){
-            throw e.rethrowFromSystemServer();
-        }
-    }
-}
-```
-
-到这里，我们的大部分工作就完成了。不过此时编译成系统镜像烧录或者编译成虚拟机，还是不能调用这个服务的。
-由于我们添加的类位于 frameworks/base/com 这个目录下，这个目录下的包并不在 bootclass 里面，修改一下这个文件
-```diff
-diff --git a/build/make/core/tasks/check_boot_jars/package_whitelist.txt b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
-index 38f2be57af..883b6d86ff 100644
---- a/build/make/core/tasks/check_boot_jars/package_whitelist.txt
-+++ b/build/make/core/tasks/check_boot_jars/package_whitelist.txt
-@@ -237,6 +237,7 @@ org\.apache\.xalan\.xslt
- # Packages in the google namespace across all bootclasspath jars.
- com\.google\.android\..*
- com\.google\.vr\.platform.*
-+com\.callback\.*
-
- ###################################################
- # Packages used for Android in Chrome OS
-```
-首先会遇到的问题是 selinux 的限制，
-按照下面的这个 diff 文件来添加关于这个新增加的服务的规则
-```diff
-diff --git a/system/sepolicy/prebuilts/api/29.0/private/service.te b/system/sepolicy/prebuilts/api/29.0/private/service.te
-index a8ee195590..7d9a2452fa 100644
---- a/system/sepolicy/prebuilts/api/29.0/private/service.te
-+++ b/system/sepolicy/prebuilts/api/29.0/private/service.te
-@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
- type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
- type stats_service,                 service_manager_type;
- type statscompanion_service,        system_server_service, service_manager_type;
-+type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
-diff --git a/system/sepolicy/prebuilts/api/29.0/private/service_contexts b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
-index 96d553bf49..9067330ae5 100644
---- a/system/sepolicy/prebuilts/api/29.0/private/service_contexts
-+++ b/system/sepolicy/prebuilts/api/29.0/private/service_contexts
-@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
- wifirtt                                   u:object_r:rttmanager_service:s0
- window                                    u:object_r:window_service:s0
- *                                         u:object_r:default_android_service:s0
-+callbacktest                              u:object_r:callbacktest_service:s0
-diff --git a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
-index 3c20c082b7..d8e2fac17d 100644
---- a/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
-+++ b/system/sepolicy/prebuilts/api/29.0/private/untrusted_app_all.te
-@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
- allow untrusted_app_all app_api_service:service_manager find;
- allow untrusted_app_all vr_manager_service:service_manager find;
- allow untrusted_app_all gpu_service:service_manager find;
-+allow untrusted_app_all callbacktest_service:service_manager find;
-
- # Allow untrusted apps to interact with gpuservice
- binder_call(untrusted_app_all, gpuservice)
-diff --git a/system/sepolicy/private/service.te b/system/sepolicy/private/service.te
-index a8ee195590..7d9a2452fa 100644
---- a/system/sepolicy/private/service.te
-+++ b/system/sepolicy/private/service.te
-@@ -5,3 +5,4 @@ type gsi_service,                   service_manager_type;
- type incidentcompanion_service,     system_api_service, system_server_service, service_manager_type;
- type stats_service,                 service_manager_type;
- type statscompanion_service,        system_server_service, service_manager_type;
-+type callbacktest_service,     system_api_service, system_server_service, service_manager_type;
-diff --git a/system/sepolicy/private/service_contexts b/system/sepolicy/private/service_contexts
-index 96d553bf49..9067330ae5 100644
---- a/system/sepolicy/private/service_contexts
-+++ b/system/sepolicy/private/service_contexts
-@@ -220,3 +220,4 @@ wifiaware                                 u:object_r:wifiaware_service:s0
- wifirtt                                   u:object_r:rttmanager_service:s0
- window                                    u:object_r:window_service:s0
- *                                         u:object_r:default_android_service:s0
-+callbacktest                              u:object_r:callbacktest_service:s0
-diff --git a/system/sepolicy/private/untrusted_app_all.te b/system/sepolicy/private/untrusted_app_all.te
-index 3c20c082b7..d8e2fac17d 100644
---- a/system/sepolicy/private/untrusted_app_all.te
-+++ b/system/sepolicy/private/untrusted_app_all.te
-@@ -100,6 +100,7 @@ allow untrusted_app_all radio_service:service_manager find;
- allow untrusted_app_all app_api_service:service_manager find;
- allow untrusted_app_all vr_manager_service:service_manager find;
- allow untrusted_app_all gpu_service:service_manager find;
-+allow untrusted_app_all callbacktest_service:service_manager find;
-
- # Allow untrusted apps to interact with gpuservice
- binder_call(untrusted_app_all, gpuservice)
-```
-到这里之后，回到Android源码根目录，正常 `make update-api && make` 之后，就可以启动虚拟机了。
-然后再新建一个应用。
-```bash
-.
-├── aidl
-│   └── com
-│       └── callback
-│           ├── ICallbackTestCallback.aidl
-│           └── ICallBackTestInterface.aidl
-├── AndroidManifest.xml
-├── java
-│   └── com
-│       └── callback
-│           ├── CallBackTestManager.java
-│           └── demo
-│               └── MainActivity.java
-
-```
-其中，`ICallbackTestCallback.aidl` , `ICallBackTestInterface.aidl` , `CallBackTestManager.java` 三个文件都是从我们添加在源码里面的拷贝出来的，因为Android Studio的sdk里面并没有这些实现，把这些文件放到工程的目录里面，让编译可以通过。
-通过 java 的类加载机制，实际上运行的时候是编译到系统里启动的那些代码，实际上我们拷贝到工程里的文件，只要接口声明与系统内的一致就可以，接口实现可以留空。就像Android SDK 里面的andrroid.jar里面的那些空接口一样。
-
-MainActivity.java的内容如下
-```java
-package com.callback.demo;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.util.Log;
-import android.view.View;
-
-import com.callback.ICallbackTestCallback;
-import com.callback.CallBackTestManager;
-import com.testcallback.demo.R;
-
-public class MainActivity extends AppCompatActivity {
-
-    private final String TAG = "testcallback";
-
-    CallBackTestManager callbackSerice = null;
-
-    private boolean bound = false;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(bound){
-            registerCallback(null);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(bound){
-            unregisterCallback(null);
-        }
-    }
-
-    private ICallbackTestCallback callback = new ICallbackTestCallback.Stub(){
-        @Override
-        public void onReceived(String msg) throws RemoteException {
-            Log.d(TAG,"received msg: " + msg + " . from server pid=" + Binder.getCallingPid());
-        }
-    };
-
-    public void registerCallback(View view) {
-        if(callbackSerice!=null){
-            callbackSerice.register(callback);
-        }
-    }
-
-    public void unregisterCallback(View view) {
-        if(callbackSerice!=null){
-            callbackSerice.unregister(callback);
-        }
-    }
-
-    public void bindService(View view) {
-        if(callbackSerice == null){
-            callbackSerice = (CallBackTestManager)getSystemService(CallBackTestManager.SERVICE_NAME);
-            bound = true;
-        }
-    }
-
-    public void notifyService(View view) {
-        if(callbackSerice!=null){
-            callbackSerice.callserver("hello, I'm client");
-        }
-    }
-
-}
-```
-对应的资源文件如下
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/registerBotton"
-        android:textAllCaps="false"
-        android:layout_marginLeft="5dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:onClick="registerCallback"
-        android:text="register"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/unregisterBotton"
-        android:textAllCaps="false"
-        android:layout_marginLeft="5dp"
-        app:layout_constraintTop_toBottomOf="@id/registerBotton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:onClick="unregisterCallback"
-        android:text="unregister"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/bindservice"
-        android:textAllCaps="false"
-        android:layout_marginLeft="5dp"
-        app:layout_constraintTop_toBottomOf="@id/unregisterBotton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:onClick="bindService"
-        android:text="Bind service"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/notifyservice"
-        android:textAllCaps="false"
-        android:layout_marginLeft="5dp"
-        app:layout_constraintTop_toBottomOf="@id/bindservice"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:onClick="notifyService"
-        android:text="Notify service"/>
-```
-编译完成之后，我们将apk用AOSP的系统签名（如果你用了自己的密钥，就是你自己密钥的platform签名），AOSP的签名位于`build/target/product/security/`,其内的 platform.pk8 和 platform.x509.pem 。用这两个签名给apk签名安装。这个apk需要注意声明 systemuid。
-p.s: 这里使用系统签名，是因为按照本篇的流程，添加后的 CallBackTestManager 是 hide 的接口，Android 10 对hide接口做了限制，普通app直接去调的话，会报找不到接口。对于安卓10新增的hidden api 调用限制，可以前往 https://developer.android.google.cn/guide/app-compatibility/restrictions-non-sdk-interfaces 。普通应用直接调用hide的接口，可能会直接闪退，查看log，有类似下面这样的log生成
-```
-Accessing hidden field Landroid/os/Message;->flags:I (light greylist, JNI)
-```
-# 把我们新增的接口变成public的接口
-这一部分，你可以理解为将我们自行增加的接口变成 SDK 接口（如果你的ROM需要通过谷歌的CTS认证，则不可以将自行增加的API变成SDK API）。
-如果你有留意，在 make update-api 之后，`android10_r47/frameworks/base/api/current.txt`，会出现新增的一些和aidl文件有关的内容
-```java
-package com.callback {
-
-  public interface ICallBackTestInterface extends android.os.IInterface {
-    method public void callServer(String) throws android.os.RemoteException;
-    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
-    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
-  }
-
-  public static class ICallBackTestInterface.Default implements com.callback.ICallBackTestInterface {
-    ctor public ICallBackTestInterface.Default();
-    method public android.os.IBinder asBinder();
-    method public void callServer(String) throws android.os.RemoteException;
-    method public void register(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
-    method public void unregister(com.callback.ICallbackTestCallback) throws android.os.RemoteException;
-  }
-
-  public abstract static class ICallBackTestInterface.Stub extends android.os.Binder implements com.callback.ICallBackTestInterface {
-    ctor public ICallBackTestInterface.Stub();
-    method public android.os.IBinder asBinder();
-    method public static com.callback.ICallBackTestInterface asInterface(android.os.IBinder);
-    method public static com.callback.ICallBackTestInterface getDefaultImpl();
-    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
-    method public static boolean setDefaultImpl(com.callback.ICallBackTestInterface);
-  }
-
-  public interface ICallbackTestCallback extends android.os.IInterface {
-    method public void onReceived(String) throws android.os.RemoteException;
-  }
-
-  public static class ICallbackTestCallback.Default implements com.callback.ICallbackTestCallback {
-    ctor public ICallbackTestCallback.Default();
-    method public android.os.IBinder asBinder();
-    method public void onReceived(String) throws android.os.RemoteException;
-  }
-  public abstract static class ICallbackTestCallback.Stub extends android.os.Binder implements com.callback.ICallbackTestCallback {
-    ctor public ICallbackTestCallback.Stub();
-    method public android.os.IBinder asBinder();
-    method public static com.callback.ICallbackTestCallback asInterface(android.os.IBinder);
-    method public static com.callback.ICallbackTestCallback getDefaultImpl();
-    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
-    method public static boolean setDefaultImpl(com.callback.ICallbackTestCallback);
-  }
-}
-```
-某种程度上，你可以认为，这个txt的内容就是SDK api，可以看到，我们新增的 CallBackTestManager 的内容并不在这个txt里面。
-可以通过修改 `frameworks/base/Android.bp` 这个文件，修改内容如下
-```diff
-diff --git a/frameworks/base/Android.bp b/frameworks/base/Android.bp
-index 663354835e..03a98395e5 100644
---- a/frameworks/base/Android.bp
-+++ b/frameworks/base/Android.bp
-@@ -1237,6 +1237,7 @@ packages_to_document = [
-     "javax/microedition/khronos",
-     "org/apache/http/conn",
-     "org/apache/http/params",
-+    "com/callback",
- ]
-
- // Make the api/current.txt file available for use by modules in other
-```
-修改这个文件之后，再次 `make update-api`，可以看到 CallBackTestManager 的内容已经添加到 current.txt 里面去了。
-再次make之后，普通应用就可以像调用安卓已有的服务那样，来使用新增的这个服务了。
-# 复习一下
-有几个小地方需要注意：
-1. 如果你添加的接口没有出现在 current.txt 里面的话，安卓10上由于谷歌新增的hidden api访问限制，普通应用是无法访问的
-2. 使用AOSP 编译出来的 signapk.jar 和 platform 签名的apk，似乎无法在虚拟机上安装为系统应用，我是把 platform key 转换成 Android Studio 使用的 keystore 来使用的。]]></content>
-      <tags>
-        <tag>Android</tag>
-      </tags>
   </entry>
   <entry>
     <title>Minecraft专题</title>
