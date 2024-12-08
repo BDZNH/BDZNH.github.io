@@ -16343,6 +16343,275 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 ]]></content>
   </entry>
   <entry>
+    <title>消息监控工具的一种实现思路</title>
+    <url>/2024/08/11/ANR-page-2/</url>
+    <content><![CDATA[
+在 [今日头条 ANR 优化实践系列 - 监控工具与分析思路](#../ANR-page-1) 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。
+本文来设计一种类似的消息监控的实现思路。
+
+<!-- more -->
+
+这里大概说一下思路。
+1. 记录主线程Looper的消息分发记录
+2. 当 Signal Catcher线程收到QUIT消息的时候，Jni回调到ActivityThread，获取记录好的消息分发记录
+3. 写入 trace 文件。
+
+下面是一种参考实现方式
+```diff
+commit cd0214ccd7e58224723eb3d581ef67afc3d43161
+Author: BDZNH
+Date:   Mon Aug 19 22:34:37 2024 +0800
+
+    anr catch sample
+
+diff --git a/art/runtime/signal_catcher.cc b/art/runtime/signal_catcher.cc
+index f76a0d0b7b..c4414f1396 100644
+--- a/art/runtime/signal_catcher.cc
++++ b/art/runtime/signal_catcher.cc
+@@ -114,6 +114,36 @@ void SignalCatcher::Output(const std::string& s) {
+   }
+ }
+ 
++void testCallActivityThread(std::ostringstream& os) {
++  LOG(INFO) << "start testCallActivityThread";
++  Thread* self = Thread::Current();
++  JNIEnv* env = self->GetJniEnv();
++  jclass clazz = env->FindClass("android/app/ActivityThread");
++  if(clazz == nullptr) {
++    LOG(ERROR) << "can't find class android/app/ActivityThread";
++    return;
++  }
++  jmethodID onSignalQuitMethod = env->GetStaticMethodID(clazz,"onSignalQuit","()Ljava/lang/String;");
++  if(onSignalQuitMethod == nullptr) {
++    LOG(ERROR) << "can't find method onSignalQuitMethod";
++    return;
++  }
++  LOG(INFO) << "call android.app.ActivityThread.onSignalQuit";
++  LOG(INFO) << "clazz: " << (void*)clazz << "  method: " << (void*)onSignalQuitMethod;
++  jstring retstring = (jstring)(env->CallStaticObjectMethod(clazz,onSignalQuitMethod));
++  if(retstring != nullptr) {
++    const char* str = env->GetStringUTFChars(retstring,NULL);
++    if(str != nullptr) {
++      // LOG(INFO) << str ;
++      os << str << "\n";
++    } else {
++      LOG(ERROR) << "Java api return null ptr";
++    }
++  } else {
++    LOG(ERROR) << "Java api return null ptr";
++  }
++}
++
+ void SignalCatcher::HandleSigQuit() {
+   Runtime* runtime = Runtime::Current();
+   std::ostringstream os;
+@@ -130,6 +160,9 @@ void SignalCatcher::HandleSigQuit() {
+ 
+   os << "Build type: " << (kIsDebugBuild ? "debug" : "optimized") << "\n";
+ 
++  os << ">>>>>>>>>> Begin dump main thread handler history" << "\n";
++  testCallActivityThread(os);
++  os << ">>>>>>>>>> finish dump main thread handler history" << "\n";
+   runtime->DumpForSigQuit(os);
+ 
+   if ((false)) {
+diff --git a/frameworks/base/core/java/android/app/ActivityThread.java b/frameworks/base/core/java/android/app/ActivityThread.java
+index 8af74edb88..dfce7abfe2 100644
+--- a/frameworks/base/core/java/android/app/ActivityThread.java
++++ b/frameworks/base/core/java/android/app/ActivityThread.java
+@@ -7818,6 +7818,20 @@ public final class ActivityThread extends ClientTransactionHandler
+         }
+     }
+ 
++    /**
++     * @hide
++     */
++    public static String onSignalQuit() {
++        Log.i("HSP","onSignalQuit call begin");
++        StringBuilder sb = new StringBuilder();
++        Looper.getMainLooper().dump((str)->{
++            sb.append(str);
++            sb.append("\n");
++        }," ");
++        Log.i("HSP","onSignalQuit call end");
++        return sb.toString();
++    }
++
+     public static void main(String[] args) {
+         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
+ 
+@@ -7860,11 +7874,17 @@ public final class ActivityThread extends ClientTransactionHandler
+             sMainThreadHandler = thread.getHandler();
+         }
+ 
+-        if (false) {
++        if(SystemProperties.getBoolean("persist.sys.debug.looper.history",false)) {
++            Looper.myLooper().enableDispatchHistory();
++        }
++
++        if (SystemProperties.getBoolean("persist.sys.debug.handler",false)) {
+             Looper.myLooper().setMessageLogging(new
+                     LogPrinter(Log.DEBUG, "ActivityThread"));
++            Looper.myLooper().setTraceTag(Trace.TRACE_TAG_ALWAYS);
+         }
+ 
++
+         // End of event ActivityThreadMain.
+         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+         Looper.loop();
+diff --git a/frameworks/base/core/java/android/os/Looper.java b/frameworks/base/core/java/android/os/Looper.java
+index 8c98362fa9..8f6144d988 100644
+--- a/frameworks/base/core/java/android/os/Looper.java
++++ b/frameworks/base/core/java/android/os/Looper.java
+@@ -152,6 +152,15 @@ public final class Looper {
+         sObserver = observer;
+     }
+ 
++    MessageDispatchRecorder mMessageRecorder;
++
++    /**
++     * @hide
++     */
++    public void enableDispatchHistory(){
++        mMessageRecorder = new MessageDispatchRecorder();
++    }
++
+     /**
+      * Poll and deliver single message, return true if the outer loop should continue.
+      */
+@@ -186,8 +195,14 @@ public final class Looper {
+         final boolean needStartTime = logSlowDelivery || logSlowDispatch;
+         final boolean needEndTime = logSlowDispatch;
+ 
++
++        if(me.mMessageRecorder != null) {
++            me.mMessageRecorder.beginRecord(msg);
++        }
++        String traceHandleMsg = msg.target.getTraceName(msg);
+         if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
+             Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
++            Slog.v("TraceHandler","Dispatching to" + traceHandleMsg);
+         }
+ 
+         final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
+@@ -232,10 +247,16 @@ public final class Looper {
+             showSlowLog(slowDispatchThresholdMs, dispatchStart, dispatchEnd, "dispatch", msg);
+         }
+ 
++        if(me.mMessageRecorder != null) {
++            me.mMessageRecorder.endRecord();
++        }
++
+         if (logging != null) {
+             logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
++            Slog.v("TraceHandler","Finished Dispatching to" + traceHandleMsg);
+         }
+ 
++
+         // Make sure that during the course of dispatching the
+         // identity of the thread wasn't corrupted.
+         final long newIdent = Binder.clearCallingIdentity();
+@@ -422,6 +443,9 @@ public final class Looper {
+      * @param prefix A prefix to prepend to each line which is printed.
+      */
+     public void dump(@NonNull Printer pw, @NonNull String prefix) {
++        if(mMessageRecorder != null) {
++            pw.println(mMessageRecorder.toString());
++        }
+         pw.println(prefix + toString());
+         mQueue.dump(pw, prefix + "  ", null);
+     }
+diff --git a/frameworks/base/core/java/android/os/MessageDispatchRecorder.java b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
+new file mode 100644
+index 0000000000..b0177d4296
+--- /dev/null
++++ b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
+@@ -0,0 +1,68 @@
++package android.os;
++
++import android.os.Message;
++import android.os.SystemClock;
++
++import java.util.ArrayList;
++import java.util.Locale;
++
++class MessageDispatchRecorder {
++    private final ArrayList<Recorder> mRecorders;
++    public MessageDispatchRecorder(){
++        mRecorders = new ArrayList<>();
++    }
++
++    public void beginRecord(Message msg){
++        Recorder recorder = new Recorder();
++        recorder.expectStartWhen = msg.getWhen();
++        recorder.realStatWhen = SystemClock.uptimeMillis();
++        recorder.descrip = "\""+msg.toString()+"\"";
++        synchronized(this){
++            mRecorders.add(recorder);
++            if(mRecorders.size() > 1000){
++                mRecorders.remove(0);
++            }
++        }
++        mRecorders.add(recorder);
++        if(mRecorders.size() > 1000){
++            mRecorders.remove(0);
++        }
++    }
++
++    public void endRecord(){
++        mRecorders.get(mRecorders.size()-1).realEndWhen = SystemClock.uptimeMillis();
++    }
++
++    @Override
++    public String toString() {
++
++        long now = SystemClock.uptimeMillis();
++        StringBuilder builder = new StringBuilder();
++        builder.append("now time is ");
++        builder.append(now);
++        builder.append("\n");
++        synchronized(this){
++            for (Recorder recorder:mRecorders){
++            if(recorder.realEndWhen > recorder.expectStartWhen) {
++                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
++                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
++                        recorder.realEndWhen- recorder.realStatWhen,recorder.descrip));
++            } else {
++                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
++                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
++                        0,recorder.descrip));
++            }
++            builder.append("\n");
++        }
++        }
++
++        builder.append(String.format(Locale.CHINA,"there are %d history message\n",mRecorders.size()));
++        return builder.toString();
++    }
++    private static class Recorder{
++        long expectStartWhen;
++        long realStatWhen;
++        long realEndWhen;
++        String descrip;
++    }
++}
+\ No newline at end of file
+
+```
+
+大体做法就是，记录主线程Looper的消息分发记录，当触发ANR（或者接收到 Signal 3）的时候，将消息分发记录打印到trace文件里面，辅助分析。
+
+效果大概如下
+
+{% asset_img record.png %}
+
+注：上面的示范中，没有去移除分发记录，在实际的生产环境里面，需要为移除分发记录设定一定的条件，避免占用过多内存。]]></content>
+      <tags>
+        <tag>Android</tag>
+        <tag>ANR</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Minecraft专题</title>
     <url>/Minecraft/index.html</url>
     <content><![CDATA[## Minecraft 介绍

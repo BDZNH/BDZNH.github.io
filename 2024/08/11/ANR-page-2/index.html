@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在 今日头条 ANR 优化实践系列 - 监控工具与分析思路 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。本文来设计一种类似的消息监控的实现思路。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="消息监控工具的一种实现思路">
+<meta property="og:url" content="http://example.com/2024/08/11/ANR-page-2/index.html">
+<meta property="og:site_name" content="BDZNH">
+<meta property="og:description" content="在 今日头条 ANR 优化实践系列 - 监控工具与分析思路 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。本文来设计一种类似的消息监控的实现思路。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-11T05:51:30.000Z">
+<meta property="article:modified_time" content="2024-12-08T12:41:39.243Z">
+<meta property="article:author" content="SupperMary">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="ANR">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/08/11/ANR-page-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>消息监控工具的一种实现思路 | BDZNH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">BDZNH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-minecraft">
+
+    <a href="/Minecraft/" rel="section"><i class="fa fa-gamepad fa-fw"></i>Minecraft</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/app/" rel="section"><i class="fa fa-building fa-fw"></i>Projects</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/08/11/ANR-page-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="SupperMary">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BDZNH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          消息监控工具的一种实现思路
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-11 13:51:30" itemprop="dateCreated datePublished" datetime="2024-08-11T13:51:30+08:00">2024-08-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-08 20:41:39" itemprop="dateModified" datetime="2024-12-08T20:41:39+08:00">2024-12-08</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>990</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 <a href="#../ANR-page-1">今日头条 ANR 优化实践系列 - 监控工具与分析思路</a> 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。<br>本文来设计一种类似的消息监控的实现思路。</p>
+<span id="more"></span>
+
+<p>这里大概说一下思路。</p>
+<ol>
+<li>记录主线程Looper的消息分发记录</li>
+<li>当 Signal Catcher线程收到QUIT消息的时候，Jni回调到ActivityThread，获取记录好的消息分发记录</li>
+<li>写入 trace 文件。</li>
+</ol>
+<p>下面是一种参考实现方式</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br></pre></td><td class="code"><pre><span class="line">commit cd0214ccd7e58224723eb3d581ef67afc3d43161</span><br><span class="line">Author: BDZNH</span><br><span class="line">Date:   Mon Aug 19 22:34:37 2024 +0800</span><br><span class="line"></span><br><span class="line">    anr catch sample</span><br><span class="line"></span><br><span class="line"><span class="comment">diff --git a/art/runtime/signal_catcher.cc b/art/runtime/signal_catcher.cc</span></span><br><span class="line"><span class="comment">index f76a0d0b7b..c4414f1396 100644</span></span><br><span class="line"><span class="comment">--- a/art/runtime/signal_catcher.cc</span></span><br><span class="line"><span class="comment">+++ b/art/runtime/signal_catcher.cc</span></span><br><span class="line"><span class="meta">@@ -114,6 +114,36 @@</span> void SignalCatcher::Output(const std::string&amp; s) &#123;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+void testCallActivityThread(std::ostringstream&amp; os) &#123;</span></span><br><span class="line"><span class="addition">+  LOG(INFO) &lt;&lt; &quot;start testCallActivityThread&quot;;</span></span><br><span class="line"><span class="addition">+  Thread* self = Thread::Current();</span></span><br><span class="line"><span class="addition">+  JNIEnv* env = self-&gt;GetJniEnv();</span></span><br><span class="line"><span class="addition">+  jclass clazz = env-&gt;FindClass(&quot;android/app/ActivityThread&quot;);</span></span><br><span class="line"><span class="addition">+  if(clazz == nullptr) &#123;</span></span><br><span class="line"><span class="addition">+    LOG(ERROR) &lt;&lt; &quot;can&#x27;t find class android/app/ActivityThread&quot;;</span></span><br><span class="line"><span class="addition">+    return;</span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+  jmethodID onSignalQuitMethod = env-&gt;GetStaticMethodID(clazz,&quot;onSignalQuit&quot;,&quot;()Ljava/lang/String;&quot;);</span></span><br><span class="line"><span class="addition">+  if(onSignalQuitMethod == nullptr) &#123;</span></span><br><span class="line"><span class="addition">+    LOG(ERROR) &lt;&lt; &quot;can&#x27;t find method onSignalQuitMethod&quot;;</span></span><br><span class="line"><span class="addition">+    return;</span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+  LOG(INFO) &lt;&lt; &quot;call android.app.ActivityThread.onSignalQuit&quot;;</span></span><br><span class="line"><span class="addition">+  LOG(INFO) &lt;&lt; &quot;clazz: &quot; &lt;&lt; (void*)clazz &lt;&lt; &quot;  method: &quot; &lt;&lt; (void*)onSignalQuitMethod;</span></span><br><span class="line"><span class="addition">+  jstring retstring = (jstring)(env-&gt;CallStaticObjectMethod(clazz,onSignalQuitMethod));</span></span><br><span class="line"><span class="addition">+  if(retstring != nullptr) &#123;</span></span><br><span class="line"><span class="addition">+    const char* str = env-&gt;GetStringUTFChars(retstring,NULL);</span></span><br><span class="line"><span class="addition">+    if(str != nullptr) &#123;</span></span><br><span class="line"><span class="addition">+      // LOG(INFO) &lt;&lt; str ;</span></span><br><span class="line"><span class="addition">+      os &lt;&lt; str &lt;&lt; &quot;\n&quot;;</span></span><br><span class="line"><span class="addition">+    &#125; else &#123;</span></span><br><span class="line"><span class="addition">+      LOG(ERROR) &lt;&lt; &quot;Java api return null ptr&quot;;</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+  &#125; else &#123;</span></span><br><span class="line"><span class="addition">+    LOG(ERROR) &lt;&lt; &quot;Java api return null ptr&quot;;</span></span><br><span class="line"><span class="addition">+  &#125;</span></span><br><span class="line"><span class="addition">+&#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"> void SignalCatcher::HandleSigQuit() &#123;</span><br><span class="line">   Runtime* runtime = Runtime::Current();</span><br><span class="line">   std::ostringstream os;</span><br><span class="line"><span class="meta">@@ -130,6 +160,9 @@</span> void SignalCatcher::HandleSigQuit() &#123;</span><br><span class="line"> </span><br><span class="line">   os &lt;&lt; &quot;Build type: &quot; &lt;&lt; (kIsDebugBuild ? &quot;debug&quot; : &quot;optimized&quot;) &lt;&lt; &quot;\n&quot;;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+  os &lt;&lt; &quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Begin dump main thread handler history&quot; &lt;&lt; &quot;\n&quot;;</span></span><br><span class="line"><span class="addition">+  testCallActivityThread(os);</span></span><br><span class="line"><span class="addition">+  os &lt;&lt; &quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; finish dump main thread handler history&quot; &lt;&lt; &quot;\n&quot;;</span></span><br><span class="line">   runtime-&gt;DumpForSigQuit(os);</span><br><span class="line"> </span><br><span class="line">   if ((false)) &#123;</span><br><span class="line"><span class="comment">diff --git a/frameworks/base/core/java/android/app/ActivityThread.java b/frameworks/base/core/java/android/app/ActivityThread.java</span></span><br><span class="line"><span class="comment">index 8af74edb88..dfce7abfe2 100644</span></span><br><span class="line"><span class="comment">--- a/frameworks/base/core/java/android/app/ActivityThread.java</span></span><br><span class="line"><span class="comment">+++ b/frameworks/base/core/java/android/app/ActivityThread.java</span></span><br><span class="line"><span class="meta">@@ -7818,6 +7818,20 @@</span> public final class ActivityThread extends ClientTransactionHandler</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+    /**</span></span><br><span class="line"><span class="addition">+     * @hide</span></span><br><span class="line"><span class="addition">+     */</span></span><br><span class="line"><span class="addition">+    public static String onSignalQuit() &#123;</span></span><br><span class="line"><span class="addition">+        Log.i(&quot;HSP&quot;,&quot;onSignalQuit call begin&quot;);</span></span><br><span class="line"><span class="addition">+        StringBuilder sb = new StringBuilder();</span></span><br><span class="line"><span class="addition">+        Looper.getMainLooper().dump((str)-&gt;&#123;</span></span><br><span class="line"><span class="addition">+            sb.append(str);</span></span><br><span class="line"><span class="addition">+            sb.append(&quot;\n&quot;);</span></span><br><span class="line"><span class="addition">+        &#125;,&quot; &quot;);</span></span><br><span class="line"><span class="addition">+        Log.i(&quot;HSP&quot;,&quot;onSignalQuit call end&quot;);</span></span><br><span class="line"><span class="addition">+        return sb.toString();</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line">     public static void main(String[] args) &#123;</span><br><span class="line">         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;ActivityThreadMain&quot;);</span><br><span class="line"> </span><br><span class="line"><span class="meta">@@ -7860,11 +7874,17 @@</span> public final class ActivityThread extends ClientTransactionHandler</span><br><span class="line">             sMainThreadHandler = thread.getHandler();</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line"><span class="deletion">-        if (false) &#123;</span></span><br><span class="line"><span class="addition">+        if(SystemProperties.getBoolean(&quot;persist.sys.debug.looper.history&quot;,false)) &#123;</span></span><br><span class="line"><span class="addition">+            Looper.myLooper().enableDispatchHistory();</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+        if (SystemProperties.getBoolean(&quot;persist.sys.debug.handler&quot;,false)) &#123;</span></span><br><span class="line">             Looper.myLooper().setMessageLogging(new</span><br><span class="line">                     LogPrinter(Log.DEBUG, &quot;ActivityThread&quot;));</span><br><span class="line"><span class="addition">+            Looper.myLooper().setTraceTag(Trace.TRACE_TAG_ALWAYS);</span></span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+</span></span><br><span class="line">         // End of event ActivityThreadMain.</span><br><span class="line">         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</span><br><span class="line">         Looper.loop();</span><br><span class="line"><span class="comment">diff --git a/frameworks/base/core/java/android/os/Looper.java b/frameworks/base/core/java/android/os/Looper.java</span></span><br><span class="line"><span class="comment">index 8c98362fa9..8f6144d988 100644</span></span><br><span class="line"><span class="comment">--- a/frameworks/base/core/java/android/os/Looper.java</span></span><br><span class="line"><span class="comment">+++ b/frameworks/base/core/java/android/os/Looper.java</span></span><br><span class="line"><span class="meta">@@ -152,6 +152,15 @@</span> public final class Looper &#123;</span><br><span class="line">         sObserver = observer;</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+    MessageDispatchRecorder mMessageRecorder;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+    /**</span></span><br><span class="line"><span class="addition">+     * @hide</span></span><br><span class="line"><span class="addition">+     */</span></span><br><span class="line"><span class="addition">+    public void enableDispatchHistory()&#123;</span></span><br><span class="line"><span class="addition">+        mMessageRecorder = new MessageDispatchRecorder();</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line">     /**</span><br><span class="line">      * Poll and deliver single message, return true if the outer loop should continue.</span><br><span class="line">      */</span><br><span class="line"><span class="meta">@@ -186,8 +195,14 @@</span> public final class Looper &#123;</span><br><span class="line">         final boolean needStartTime = logSlowDelivery || logSlowDispatch;</span><br><span class="line">         final boolean needEndTime = logSlowDispatch;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+        if(me.mMessageRecorder != null) &#123;</span></span><br><span class="line"><span class="addition">+            me.mMessageRecorder.beginRecord(msg);</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+        String traceHandleMsg = msg.target.getTraceName(msg);</span></span><br><span class="line">         if (traceTag != 0 &amp;&amp; Trace.isTagEnabled(traceTag)) &#123;</span><br><span class="line">             Trace.traceBegin(traceTag, msg.target.getTraceName(msg));</span><br><span class="line"><span class="addition">+            Slog.v(&quot;TraceHandler&quot;,&quot;Dispatching to&quot; + traceHandleMsg);</span></span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">         final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;</span><br><span class="line"><span class="meta">@@ -232,10 +247,16 @@</span> public final class Looper &#123;</span><br><span class="line">             showSlowLog(slowDispatchThresholdMs, dispatchStart, dispatchEnd, &quot;dispatch&quot;, msg);</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+        if(me.mMessageRecorder != null) &#123;</span></span><br><span class="line"><span class="addition">+            me.mMessageRecorder.endRecord();</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line">         if (logging != null) &#123;</span><br><span class="line">             logging.println(&quot;&lt;&lt;&lt;&lt;&lt; Finished to &quot; + msg.target + &quot; &quot; + msg.callback);</span><br><span class="line"><span class="addition">+            Slog.v(&quot;TraceHandler&quot;,&quot;Finished Dispatching to&quot; + traceHandleMsg);</span></span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line"><span class="addition">+</span></span><br><span class="line">         // Make sure that during the course of dispatching the</span><br><span class="line">         // identity of the thread wasn&#x27;t corrupted.</span><br><span class="line">         final long newIdent = Binder.clearCallingIdentity();</span><br><span class="line"><span class="meta">@@ -422,6 +443,9 @@</span> public final class Looper &#123;</span><br><span class="line">      * @param prefix A prefix to prepend to each line which is printed.</span><br><span class="line">      */</span><br><span class="line">     public void dump(@NonNull Printer pw, @NonNull String prefix) &#123;</span><br><span class="line"><span class="addition">+        if(mMessageRecorder != null) &#123;</span></span><br><span class="line"><span class="addition">+            pw.println(mMessageRecorder.toString());</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line">         pw.println(prefix + toString());</span><br><span class="line">         mQueue.dump(pw, prefix + &quot;  &quot;, null);</span><br><span class="line">     &#125;</span><br><span class="line"><span class="comment">diff --git a/frameworks/base/core/java/android/os/MessageDispatchRecorder.java b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java</span></span><br><span class="line">new file mode 100644</span><br><span class="line"><span class="comment">index 0000000000..b0177d4296</span></span><br><span class="line"><span class="comment">--- /dev/null</span></span><br><span class="line"><span class="comment">+++ b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java</span></span><br><span class="line"><span class="meta">@@ -0,0 +1,68 @@</span></span><br><span class="line"><span class="addition">+package android.os;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+import android.os.Message;</span></span><br><span class="line"><span class="addition">+import android.os.SystemClock;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+import java.util.ArrayList;</span></span><br><span class="line"><span class="addition">+import java.util.Locale;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+class MessageDispatchRecorder &#123;</span></span><br><span class="line"><span class="addition">+    private final ArrayList&lt;Recorder&gt; mRecorders;</span></span><br><span class="line"><span class="addition">+    public MessageDispatchRecorder()&#123;</span></span><br><span class="line"><span class="addition">+        mRecorders = new ArrayList&lt;&gt;();</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+    public void beginRecord(Message msg)&#123;</span></span><br><span class="line"><span class="addition">+        Recorder recorder = new Recorder();</span></span><br><span class="line"><span class="addition">+        recorder.expectStartWhen = msg.getWhen();</span></span><br><span class="line"><span class="addition">+        recorder.realStatWhen = SystemClock.uptimeMillis();</span></span><br><span class="line"><span class="addition">+        recorder.descrip = &quot;\&quot;&quot;+msg.toString()+&quot;\&quot;&quot;;</span></span><br><span class="line"><span class="addition">+        synchronized(this)&#123;</span></span><br><span class="line"><span class="addition">+            mRecorders.add(recorder);</span></span><br><span class="line"><span class="addition">+            if(mRecorders.size() &gt; 1000)&#123;</span></span><br><span class="line"><span class="addition">+                mRecorders.remove(0);</span></span><br><span class="line"><span class="addition">+            &#125;</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+        mRecorders.add(recorder);</span></span><br><span class="line"><span class="addition">+        if(mRecorders.size() &gt; 1000)&#123;</span></span><br><span class="line"><span class="addition">+            mRecorders.remove(0);</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+    public void endRecord()&#123;</span></span><br><span class="line"><span class="addition">+        mRecorders.get(mRecorders.size()-1).realEndWhen = SystemClock.uptimeMillis();</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+    @Override</span></span><br><span class="line"><span class="addition">+    public String toString() &#123;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+        long now = SystemClock.uptimeMillis();</span></span><br><span class="line"><span class="addition">+        StringBuilder builder = new StringBuilder();</span></span><br><span class="line"><span class="addition">+        builder.append(&quot;now time is &quot;);</span></span><br><span class="line"><span class="addition">+        builder.append(now);</span></span><br><span class="line"><span class="addition">+        builder.append(&quot;\n&quot;);</span></span><br><span class="line"><span class="addition">+        synchronized(this)&#123;</span></span><br><span class="line"><span class="addition">+            for (Recorder recorder:mRecorders)&#123;</span></span><br><span class="line"><span class="addition">+            if(recorder.realEndWhen &gt; recorder.expectStartWhen) &#123;</span></span><br><span class="line"><span class="addition">+                builder.append(String.format(Locale.CHINA,&quot;when=%d realWhen=%d realEnd=%d duration=%d desc:%s&quot;,</span></span><br><span class="line"><span class="addition">+                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,</span></span><br><span class="line"><span class="addition">+                        recorder.realEndWhen- recorder.realStatWhen,recorder.descrip));</span></span><br><span class="line"><span class="addition">+            &#125; else &#123;</span></span><br><span class="line"><span class="addition">+                builder.append(String.format(Locale.CHINA,&quot;when=%d realWhen=%d realEnd=%d duration=%d desc:%s&quot;,</span></span><br><span class="line"><span class="addition">+                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,</span></span><br><span class="line"><span class="addition">+                        0,recorder.descrip));</span></span><br><span class="line"><span class="addition">+            &#125;</span></span><br><span class="line"><span class="addition">+            builder.append(&quot;\n&quot;);</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+        &#125;</span></span><br><span class="line"><span class="addition">+</span></span><br><span class="line"><span class="addition">+        builder.append(String.format(Locale.CHINA,&quot;there are %d history message\n&quot;,mRecorders.size()));</span></span><br><span class="line"><span class="addition">+        return builder.toString();</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+    private static class Recorder&#123;</span></span><br><span class="line"><span class="addition">+        long expectStartWhen;</span></span><br><span class="line"><span class="addition">+        long realStatWhen;</span></span><br><span class="line"><span class="addition">+        long realEndWhen;</span></span><br><span class="line"><span class="addition">+        String descrip;</span></span><br><span class="line"><span class="addition">+    &#125;</span></span><br><span class="line"><span class="addition">+&#125;</span></span><br><span class="line">\ No newline at end of file</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>大体做法就是，记录主线程Looper的消息分发记录，当触发ANR（或者接收到 Signal 3）的时候，将消息分发记录打印到trace文件里面，辅助分析。</p>
+<p>效果大概如下</p>
+
+
+<p>注：上面的示范中，没有去移除分发记录，在实际的生产环境里面，需要为移除分发记录设定一定的条件，避免占用过多内存。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/ANR/" rel="tag"># ANR</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/11/ANR-page-1/" rel="prev" title="今日头条 ANR 优化实践系列 - 监控工具与分析思路">
+      <i class="fa fa-chevron-left"></i> 今日头条 ANR 优化实践系列 - 监控工具与分析思路
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">SupperMary</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">97</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SupperMary</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">136k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">8:16</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
