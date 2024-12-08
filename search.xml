@@ -702,664 +702,273 @@ Checktime 逻辑很简单，用当前系统时间减去对比时间，如果超�
       </tags>
   </entry>
   <entry>
-    <title>Android Native Service 示例</title>
-    <url>/2024/07/31/Android-native-service-sample-1/</url>
-    <content><![CDATA[安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。
-由于运行在 SystemServer 进程或者运行在app进程，某些特殊操作就面临权限不足的问题，比如操作kernel的节点，这个时候就需要使用使用 root 权限运行的进程了。（当然严格来说，通过java实现的服务，同样可以以 root 权限运行，比如将相应的代码编译成 jar，开机之后通过 appprocess 运行）。
+    <title>消息监控工具的一种实现思路</title>
+    <url>/2024/08/11/ANR-page-2/</url>
+    <content><![CDATA[
+在 [今日头条 ANR 优化实践系列 - 监控工具与分析思路](#../ANR-page-1) 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。
+本文来设计一种类似的消息监控的实现思路。
 
-<!--more -->
+<!-- more -->
 
-native service 需要定义一个接口类，下面的示例作为参考
-```cpp
-// INativeServiceSample.h
-#ifndef _I_NATIVES_ERVICE_SAMPLE_H_
-#define _I_NATIVES_ERVICE_SAMPLE_H_
+这里大概说一下思路。
+1. 记录主线程Looper的消息分发记录
+2. 当 Signal Catcher线程收到QUIT消息的时候，Jni回调到ActivityThread，获取记录好的消息分发记录
+3. 写入 trace 文件。
 
-#include <binder/IPCThreadState.h>
-#include <binder/IServiceManager.h>
-#include <binder/MemoryBase.h>
-#include <binder/MemoryHeapBase.h>
-#include <binder/PermissionController.h>
-#include <binder/ProcessInfoService.h>
-#include <binder/IResultReceiver.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
-#include <android/log.h>
+下面是一种参考实现方式
+```diff
+commit cd0214ccd7e58224723eb3d581ef67afc3d43161
+Author: BDZNH
+Date:   Mon Aug 19 22:34:37 2024 +0800
 
-#ifdef TAG
-#undef TAG
-#endif
-#define TAG "NativeService"
-#define NATIVESERVICE_NAME "nativeservice"
+    anr catch sample
 
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE,TAG ,__VA_ARGS__)
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,TAG ,__VA_ARGS__)
-#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__)
+diff --git a/art/runtime/signal_catcher.cc b/art/runtime/signal_catcher.cc
+index f76a0d0b7b..c4414f1396 100644
+--- a/art/runtime/signal_catcher.cc
++++ b/art/runtime/signal_catcher.cc
+@@ -114,6 +114,36 @@ void SignalCatcher::Output(const std::string& s) {
+   }
+ }
+ 
++void testCallActivityThread(std::ostringstream& os) {
++  LOG(INFO) << "start testCallActivityThread";
++  Thread* self = Thread::Current();
++  JNIEnv* env = self->GetJniEnv();
++  jclass clazz = env->FindClass("android/app/ActivityThread");
++  if(clazz == nullptr) {
++    LOG(ERROR) << "can't find class android/app/ActivityThread";
++    return;
++  }
++  jmethodID onSignalQuitMethod = env->GetStaticMethodID(clazz,"onSignalQuit","()Ljava/lang/String;");
++  if(onSignalQuitMethod == nullptr) {
++    LOG(ERROR) << "can't find method onSignalQuitMethod";
++    return;
++  }
++  LOG(INFO) << "call android.app.ActivityThread.onSignalQuit";
++  LOG(INFO) << "clazz: " << (void*)clazz << "  method: " << (void*)onSignalQuitMethod;
++  jstring retstring = (jstring)(env->CallStaticObjectMethod(clazz,onSignalQuitMethod));
++  if(retstring != nullptr) {
++    const char* str = env->GetStringUTFChars(retstring,NULL);
++    if(str != nullptr) {
++      // LOG(INFO) << str ;
++      os << str << "\n";
++    } else {
++      LOG(ERROR) << "Java api return null ptr";
++    }
++  } else {
++    LOG(ERROR) << "Java api return null ptr";
++  }
++}
++
+ void SignalCatcher::HandleSigQuit() {
+   Runtime* runtime = Runtime::Current();
+   std::ostringstream os;
+@@ -130,6 +160,9 @@ void SignalCatcher::HandleSigQuit() {
+ 
+   os << "Build type: " << (kIsDebugBuild ? "debug" : "optimized") << "\n";
+ 
++  os << ">>>>>>>>>> Begin dump main thread handler history" << "\n";
++  testCallActivityThread(os);
++  os << ">>>>>>>>>> finish dump main thread handler history" << "\n";
+   runtime->DumpForSigQuit(os);
+ 
+   if ((false)) {
+diff --git a/frameworks/base/core/java/android/app/ActivityThread.java b/frameworks/base/core/java/android/app/ActivityThread.java
+index 8af74edb88..dfce7abfe2 100644
+--- a/frameworks/base/core/java/android/app/ActivityThread.java
++++ b/frameworks/base/core/java/android/app/ActivityThread.java
+@@ -7818,6 +7818,20 @@ public final class ActivityThread extends ClientTransactionHandler
+         }
+     }
+ 
++    /**
++     * @hide
++     */
++    public static String onSignalQuit() {
++        Log.i("HSP","onSignalQuit call begin");
++        StringBuilder sb = new StringBuilder();
++        Looper.getMainLooper().dump((str)->{
++            sb.append(str);
++            sb.append("\n");
++        }," ");
++        Log.i("HSP","onSignalQuit call end");
++        return sb.toString();
++    }
++
+     public static void main(String[] args) {
+         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
+ 
+@@ -7860,11 +7874,17 @@ public final class ActivityThread extends ClientTransactionHandler
+             sMainThreadHandler = thread.getHandler();
+         }
+ 
+-        if (false) {
++        if(SystemProperties.getBoolean("persist.sys.debug.looper.history",false)) {
++            Looper.myLooper().enableDispatchHistory();
++        }
++
++        if (SystemProperties.getBoolean("persist.sys.debug.handler",false)) {
+             Looper.myLooper().setMessageLogging(new
+                     LogPrinter(Log.DEBUG, "ActivityThread"));
++            Looper.myLooper().setTraceTag(Trace.TRACE_TAG_ALWAYS);
+         }
+ 
++
+         // End of event ActivityThreadMain.
+         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+         Looper.loop();
+diff --git a/frameworks/base/core/java/android/os/Looper.java b/frameworks/base/core/java/android/os/Looper.java
+index 8c98362fa9..8f6144d988 100644
+--- a/frameworks/base/core/java/android/os/Looper.java
++++ b/frameworks/base/core/java/android/os/Looper.java
+@@ -152,6 +152,15 @@ public final class Looper {
+         sObserver = observer;
+     }
+ 
++    MessageDispatchRecorder mMessageRecorder;
++
++    /**
++     * @hide
++     */
++    public void enableDispatchHistory(){
++        mMessageRecorder = new MessageDispatchRecorder();
++    }
++
+     /**
+      * Poll and deliver single message, return true if the outer loop should continue.
+      */
+@@ -186,8 +195,14 @@ public final class Looper {
+         final boolean needStartTime = logSlowDelivery || logSlowDispatch;
+         final boolean needEndTime = logSlowDispatch;
+ 
++
++        if(me.mMessageRecorder != null) {
++            me.mMessageRecorder.beginRecord(msg);
++        }
++        String traceHandleMsg = msg.target.getTraceName(msg);
+         if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
+             Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
++            Slog.v("TraceHandler","Dispatching to" + traceHandleMsg);
+         }
+ 
+         final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
+@@ -232,10 +247,16 @@ public final class Looper {
+             showSlowLog(slowDispatchThresholdMs, dispatchStart, dispatchEnd, "dispatch", msg);
+         }
+ 
++        if(me.mMessageRecorder != null) {
++            me.mMessageRecorder.endRecord();
++        }
++
+         if (logging != null) {
+             logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
++            Slog.v("TraceHandler","Finished Dispatching to" + traceHandleMsg);
+         }
+ 
++
+         // Make sure that during the course of dispatching the
+         // identity of the thread wasn't corrupted.
+         final long newIdent = Binder.clearCallingIdentity();
+@@ -422,6 +443,9 @@ public final class Looper {
+      * @param prefix A prefix to prepend to each line which is printed.
+      */
+     public void dump(@NonNull Printer pw, @NonNull String prefix) {
++        if(mMessageRecorder != null) {
++            pw.println(mMessageRecorder.toString());
++        }
+         pw.println(prefix + toString());
+         mQueue.dump(pw, prefix + "  ", null);
+     }
+diff --git a/frameworks/base/core/java/android/os/MessageDispatchRecorder.java b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
+new file mode 100644
+index 0000000000..b0177d4296
+--- /dev/null
++++ b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
+@@ -0,0 +1,68 @@
++package android.os;
++
++import android.os.Message;
++import android.os.SystemClock;
++
++import java.util.ArrayList;
++import java.util.Locale;
++
++class MessageDispatchRecorder {
++    private final ArrayList<Recorder> mRecorders;
++    public MessageDispatchRecorder(){
++        mRecorders = new ArrayList<>();
++    }
++
++    public void beginRecord(Message msg){
++        Recorder recorder = new Recorder();
++        recorder.expectStartWhen = msg.getWhen();
++        recorder.realStatWhen = SystemClock.uptimeMillis();
++        recorder.descrip = "\""+msg.toString()+"\"";
++        synchronized(this){
++            mRecorders.add(recorder);
++            if(mRecorders.size() > 1000){
++                mRecorders.remove(0);
++            }
++        }
++        mRecorders.add(recorder);
++        if(mRecorders.size() > 1000){
++            mRecorders.remove(0);
++        }
++    }
++
++    public void endRecord(){
++        mRecorders.get(mRecorders.size()-1).realEndWhen = SystemClock.uptimeMillis();
++    }
++
++    @Override
++    public String toString() {
++
++        long now = SystemClock.uptimeMillis();
++        StringBuilder builder = new StringBuilder();
++        builder.append("now time is ");
++        builder.append(now);
++        builder.append("\n");
++        synchronized(this){
++            for (Recorder recorder:mRecorders){
++            if(recorder.realEndWhen > recorder.expectStartWhen) {
++                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
++                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
++                        recorder.realEndWhen- recorder.realStatWhen,recorder.descrip));
++            } else {
++                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
++                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
++                        0,recorder.descrip));
++            }
++            builder.append("\n");
++        }
++        }
++
++        builder.append(String.format(Locale.CHINA,"there are %d history message\n",mRecorders.size()));
++        return builder.toString();
++    }
++    private static class Recorder{
++        long expectStartWhen;
++        long realStatWhen;
++        long realEndWhen;
++        String descrip;
++    }
++}
+\ No newline at end of file
 
-
-namespace android {
-
-    enum STATUS {
-        SUCCESS = NO_ERROR,
-        FAILED = UNKNOWN_TRANSACTION
-    };
-    class INativeServiceSample : public IInterface {
-        public:
-        virtual int invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) = 0;
-        DECLARE_META_INTERFACE(NativeServiceSample);
-    };
-
-    class BnNativeServiceSample : public BnInterface<INativeServiceSample>
-    {
-    public:
-        status_t onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags);
-        status_t dump(int fd, const Vector<String16> &args);
-        int onShellCommand(int in, int out, int err, const Vector<String16> &args);
-        virtual int invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) = 0;
-    private:
-        int shellCommand(int in, int out, int err, const Vector<String16> &args);
-        
-    };
-}
-
-#endif
 ```
 
-这里的主要工作是定义一个 server 端和 client 端都需要实现的函数， invoke ，以及 DECLARE_META_INTERFACE 这一行，DECLARE_META_INTERFACE 是一个宏定义，后面的小括号里面的 NativeServiceSample 则是当前类 INativeServiceSample 中的 NativeServiceSample 。之类会为这个类默认声明好相应的一个service需要是实现的函数。这里有严格的命名规范。
+大体做法就是，记录主线程Looper的消息分发记录，当触发ANR（或者接收到 Signal 3）的时候，将消息分发记录打印到trace文件里面，辅助分析。
 
-然后实现客户端和服务端，也即一个 Bp(客户端) 一个 Bn(服务端)
-下面是相应的定义
-```cpp
-//INativeServiceSample.cpp
-#include "INativeServiceSample.h"
-namespace android
-{
-        class BpNativeServiceSample : public BpInterface<INativeServiceSample>
-    {
-    public:
-        BpNativeServiceSample(const sp<IBinder> &impl) : BpInterface<INativeServiceSample>(impl) {}
-        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
-        {
-            Parcel send;
-            send.writeInterfaceToken(getInterfaceDescriptor());
-            send.appendFrom(&data, 0, data.dataSize());
-            return remote()->transact(code, send, reply);
-        }
-    };
+效果大概如下
 
-    IMPLEMENT_META_INTERFACE(NativeServiceSample, NATIVESERVICE_NAME);
+{% asset_img record.png %}
 
-    status_t BnNativeServiceSample::onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
-    {
-        if(code == SHELL_COMMAND_TRANSACTION)
-        {
-            int in = data.readFileDescriptor();
-            int out = data.readFileDescriptor();
-            int err = data.readFileDescriptor();
-            int argc = data.readInt32();
-            Vector<String16> args;
-            for (int i = 0; i < argc && data.dataAvail() > 0; i++)
-            {
-                args.add(data.readString16());
-            }
-            status_t result = 0;
-            sp<IBinder> unusedCallback;
-            sp<IResultReceiver> resultReceiver;
-            if ((result = data.readNullableStrongBinder(&unusedCallback)) != NO_ERROR)
-            {
-                return result;
-            }
-            if ((result = data.readNullableStrongBinder(&resultReceiver)) != NO_ERROR)
-            {
-                return result;
-            }
-            result = shellCommand(in, out, err, args);
-            if (resultReceiver != nullptr)
-            {
-                resultReceiver->send(result);
-            }
-            return result;
-        }
-        else if(IBinder::FIRST_CALL_TRANSACTION <= code && code <= IBinder::LAST_CALL_TRANSACTION)
-        {
-            CHECK_INTERFACE(INativeServiceSample, data, reply);
-            return invoke(code, data, reply, flags);
-        }
-        else
-        {
-            return BBinder::onTransact(code, data, reply, flags);
-        }
-    }
-
-    status_t BnNativeServiceSample::shellCommand(int in, int out, int err, const Vector<String16> &args)
-    {
-        return onShellCommand(in, out, err, args);
-    }
-
-    status_t BnNativeServiceSample::onShellCommand(int in, int out, int err, const Vector<String16> &args)
-    {
-        LOGI("onShellCommand not implementation yet");
-        write(out, "onShellCommand not implementation yet\n", 38);
-        size_t size = args.size();
-        for (size_t i = 0; i < size; i++)
-        {
-            LOGI("Received No.%zu arg: %s", i, String8(args[i]).string());
-        }
-        return SUCCESS;
-    }
-
-    status_t BnNativeServiceSample::dump(int fd, const Vector<String16> &args)
-    {
-        LOGI("dump not implementation yet");
-        write(fd, "dump not implementation yet\n", 28);
-        size_t size = args.size();
-        for (size_t i = 0; i < size; i++)
-        {
-            LOGI("Received No.%zu arg: %s", i, String8(args[i]).string());
-        }
-        return SUCCESS;
-    }
-}
-```
-`BpNativeServiceSample : public BpInterface<INativeServiceSample>` 是客户端的定义，它的构造函数是固定格式。
-`class BnNativeServiceSample : public BnInterface<INativeServiceSample>` 则是服务端的定义，它里面有一个用于与其他进程通信最重要的函数`onTransact`。
-而 dump 函数则是我们使用 `dumpsys servicename args...`这样的命令行方式去获取服务的信息时会被调用的函数，我们可以在这和函数里面接收命令行参数，解析命令以及输出内容，其中 fd 命令行传入的一个文件描述符，通常它是 stdout ，后面的 args则是命令行参数，安卓的命令参数是通过 String16 格式传入。
-对于客户端，我们对调用者提供的接口是 invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) 。客户端也可以直接使用 service 的 tract 接口来对服务端进行调用，为了隐藏 `getInterfaceDescriptor()` ，我将这部分操作预先包含在 invoke 里面，调用者提供 code，data，reply以及 flags 即可（flags这里我实际上没有使用到）
-这里由一个非常重要的 IMPLEMENT_META_INTERFACE ，这个宏会在这部分展开，将在接口类内声明的内容实现放在此处，同样的，这里也有严格的命名要求。
-服务端的 onTransact实现如下
-```cpp
-    status_t BnNativeServiceSample::onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
-    {
-        if(code == SHELL_COMMAND_TRANSACTION)
-        {
-            int in = data.readFileDescriptor();
-            int out = data.readFileDescriptor();
-            int err = data.readFileDescriptor();
-            int argc = data.readInt32();
-            Vector<String16> args;
-            for (int i = 0; i < argc && data.dataAvail() > 0; i++)
-            {
-                args.add(data.readString16());
-            }
-            status_t result = 0;
-            sp<IBinder> unusedCallback;
-            sp<IResultReceiver> resultReceiver;
-            if ((result = data.readNullableStrongBinder(&unusedCallback)) != NO_ERROR)
-            {
-                return result;
-            }
-            if ((result = data.readNullableStrongBinder(&resultReceiver)) != NO_ERROR)
-            {
-                return result;
-            }
-            result = shellCommand(in, out, err, args);
-            if (resultReceiver != nullptr)
-            {
-                resultReceiver->send(result);
-            }
-            return result;
-        }
-        else if(IBinder::FIRST_CALL_TRANSACTION <= code && code <= IBinder::LAST_CALL_TRANSACTION)
-        {
-            CHECK_INTERFACE(INativeServiceSample, data, reply);
-            return invoke(code, data, reply, flags);
-        }
-        else
-        {
-            return BBinder::onTransact(code, data, reply, flags);
-        }
-    }
-```
-这里进来之后，我们受限检查 code 是否是 SHELL_COMMAND_TRANSACTION,这个 code 表示本次IPC调用是通过 cmd servicename args... 的方式调用的，这里把 stdin,stdout,stderr,args 封装好传给新增的 shellCommand ，shellCommand 里面调用 onShellCommand 。
-然后判断是code是否是Binder为开发者预留的范围，如果是这个范围，就交给我们自己实现的 invoke 处理 ，首先是一个 CHECK_INTERFACE(INativeServiceSample, data, reply); 这里主要作用是检查调用 service 时，传递给服务端的 parcel 的 interface 是否正确。
-如果code不是以上几种情况，那么就交给父类处理。可以查看 aosp/frameworks/native/libs/binder/Binder.cpp
-```cpp
-// NOLINTNEXTLINE(google-default-arguments)
-status_t BBinder::onTransact(
-    uint32_t code, const Parcel& data, Parcel* reply, uint32_t /*flags*/)
-{
-    switch (code) {
-        case INTERFACE_TRANSACTION:
-            reply->writeString16(getInterfaceDescriptor());
-            return NO_ERROR;
-
-        case DUMP_TRANSACTION: {
-            int fd = data.readFileDescriptor();
-            int argc = data.readInt32();
-            Vector<String16> args;
-            for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
-               args.add(data.readString16());
-            }
-            return dump(fd, args);
-        }
-
-        case SHELL_COMMAND_TRANSACTION: {
-            int in = data.readFileDescriptor();
-            int out = data.readFileDescriptor();
-            int err = data.readFileDescriptor();
-            int argc = data.readInt32();
-            Vector<String16> args;
-            for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
-               args.add(data.readString16());
-            }
-            sp<IShellCallback> shellCallback = IShellCallback::asInterface(
-                    data.readStrongBinder());
-            sp<IResultReceiver> resultReceiver = IResultReceiver::asInterface(
-                    data.readStrongBinder());
-
-            // XXX can't add virtuals until binaries are updated.
-            //return shellCommand(in, out, err, args, resultReceiver);
-            (void)in;
-            (void)out;
-            (void)err;
-
-            if (resultReceiver != nullptr) {
-                resultReceiver->send(INVALID_OPERATION);
-            }
-
-            return NO_ERROR;
-        }
-
-        case SYSPROPS_TRANSACTION: {
-            report_sysprop_change();
-            return NO_ERROR;
-        }
-
-        default:
-            return UNKNOWN_TRANSACTION;
-    }
-}
-```
-在这里我们就知道 dump 其实也是一个特殊的 code 。
-
-p.s: 这里我们当然可以在接口定义的时候就生命客户端和服务端都共有的相同实现的接口，可是这样做每次新增接口都需要在双方一起增加实现，我用一个 invoke 来中转调用。
-p.s: code 是服务端用来区分客户端想调用哪个函数的。
-
-下面来看看真正的服务端的声明和实现
-```cpp
-// NativeServiceSampleService.h
-#ifndef _NATIVE_SERVICE_SAMPLE_SERVICE_H_
-#define _NATIVE_SERVICE_SAMPLE_SERVICE_H_
-#include "INativeServiceSample.h"
-#include <map>
-namespace android
-{
-    class NativeServiceSampleService : public BnNativeServiceSample
-    {
-    public:
-        typedef status_t (NativeServiceSampleService::*local_method)(const Parcel &data, Parcel *reply);
-        NativeServiceSampleService(){loadMethods();};
-        ~NativeServiceSampleService(){};
-        status_t sampleCallFunction(const Parcel &data, Parcel *reply);
-        status_t sampleGetFunction(const Parcel &data, Parcel *reply);
-        status_t getMacByInterfaceName(const Parcel &data, Parcel *reply);
-    private:
-        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags);
-        int getCallingUid();
-        int getCallingPid();
-        void loadMethods();
-        std::map<uint32_t,local_method> methods;
-    };
-};
-#endif
-```
-这里定义了三个功能函数，sampleCallFunction,sampleGetFunction,getMacByInterfaceName，我将这几个函数的输入参数统一了，然后用一个 map 去保存 code 和指向这几个函数的函数指针。
-```cpp
-//NativeServiceSampleService.cpp
-#include "NativeServiceSampleService.h"
-#include "Cmdid.h"
-#include <errno.h>
-#include <string.h>
-#include <binder/IPCThreadState.h>
-#include <hwbinder/IPCThreadState.h>
-
-namespace android {
-    void NativeServiceSampleService::loadMethods()
-    {
-        methods[SAMPLE_CALL] = &NativeServiceSampleService::sampleCallFunction;
-        methods[SAMPLE_GET] = &NativeServiceSampleService::sampleGetFunction;
-        methods[SAMPLE_GET_MAC] = &NativeServiceSampleService::getMacByInterfaceName;
-    }
-    int NativeServiceSampleService::invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags){
-        std::map<uint32_t, local_method>::iterator iter = methods.find(code);
-        LOGV("uid:%d pid:%d called method %u",getCallingUid(),getCallingPid(),code);
-        if (iter != methods.end())
-        {
-            return (this->*(iter->second))(data, reply);
-        }
-        else
-        {
-            LOGE("can't find such a method whose cmdid is %u", code);
-            return -1;
-        }
-    }
-    
-    status_t NativeServiceSampleService::sampleCallFunction(const Parcel&data, Parcel* reply){
-        String8 str = String8(data.readString16());
-        LOGD("call funcion with %s",str.string());
-        return SUCCESS;
-    }
-
-    status_t NativeServiceSampleService::sampleGetFunction(const Parcel&data, Parcel* reply){
-        LOGD("get function ");
-        String16 hello = String16("this is message from service");
-        reply->writeString16(hello);
-        return SUCCESS;
-    }
-
-    status_t NativeServiceSampleService::getMacByInterfaceName(const Parcel &data, Parcel *reply)
-    {
-        String16 ifname = data.readString16();
-        LOGV("get mac of ifname: %s",String8(ifname).string());
-        String8 path = String8("/sys/class/net/");
-        path += String8(ifname);
-        path += String8("/address");
-        FILE* fp = fopen(path.string(),"ro");
-        if(fp == NULL){
-            LOGE("open %s failed(%d): %s",path.string(),errno,strerror(errno));
-            return FAILED;
-        }
-
-        char mac[18] = {0};
-        size_t readsize = fread(mac,1,17,fp);
-        if(readsize != 17){
-            LOGE("read mac failed");
-            return FAILED;
-        }
-        String16 result = String16(mac);
-        reply->writeString16(result);
-        fclose(fp);
-        return SUCCESS;
-    }
-
-    int NativeServiceSampleService::getCallingPid()
-    {
-        if (IPCThreadState::self()->isServingCall()) {
-            return IPCThreadState::self()->getCallingPid();
-        }
-        return IPCThreadState::self()->getCallingPid();
-    }
-
-    int NativeServiceSampleService::getCallingUid()
-    {
-        if (IPCThreadState::self()->isServingCall()) {
-            return IPCThreadState::self()->getCallingUid();
-        }
-        return IPCThreadState::self()->getCallingUid();
-    }
-}
-```
-我在服务端初始化的时候将唯一的 code 和唯一的函数指针保存进 map ，在 invoke 里面判断如果有相应的 code 存在，则调用相应的函数，没有则直接返回。
-
-这里的 code 则是一个枚举，实际上是双方约定的相同的正整数就可以。
-
-```cpp
-//Cmdid.h
-#ifndef _CMDID_H_
-#define _CMDID_H_
-#include "INativeServiceSample.h"
-namespace android{
-    enum ENUME_CMD{
-        SAMPLE_CALL = IBinder::FIRST_CALL_TRANSACTION,
-        SAMPLE_GET,
-        SAMPLE_GET_MAC
-    };
-}
-
-#endif
-```
-
-# 开启服务
-```
-//server.cpp
-#include "NativeServiceSampleService.h"
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <binder/IPCThreadState.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
-
-int main(int argc, char **argv)
-{
-    LOGI("start DeviceMacService");
-    android::defaultServiceManager()->addService(android::String16(NATIVESERVICE_NAME), new android::NativeServiceSampleService());
-    android::ProcessState::self()->startThreadPool();
-    android::IPCThreadState::self()->joinThreadPool();
-}
-```
-
-# 客户端调用服务
-```
-//client.cpp
-#include "NativeServiceSampleService.h"
-#include "EnumeCmdid.h"
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <binder/IPCThreadState.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
-
-using namespace android;
-
-sp<INativeServiceSample> getService() {
-    sp<IServiceManager> sm = defaultServiceManager();
-    if (sm == NULL) {
-        LOGE("can not get service manager");
-    }
-    sp<IBinder> binder = sm->getService(String16(NATIVESERVICE_NAME));
-    if (binder == NULL) {
-        LOGE("can not get service");
-    }
-    sp<INativeServiceSample> service = interface_cast<INativeServiceSample>(binder);
-    if (service == NULL) {
-        LOGE("can not cast interface");
-    }
-    return service;
-    return nullptr;
-}
-
-int main(int argc,char** argv){
-    sp<INativeServiceSample> service = getService();
-
-    {
-        Parcel data, reply;
-        String16 str = String16("str from client");
-        data.writeString16(str);
-        int ret = service->invoke(android::SAMPLE_CALL, data, &reply,0);
-        if(ret == 0){
-            LOGI("invoke value 0");
-        }
-    }
-
-    {
-        Parcel data, reply;
-        int ret = service->invoke(android::SAMPLE_GET, data, &reply,0);
-        if(ret == 0){
-            LOGI("invoke value 0");
-        }
-        String8 str = String8(reply.readString16());
-        LOGI("from str %s",str.string());
-    }
-
-    {
-        if (argc >= 2)
-        {
-            Parcel data, reply;
-            data.writeString16(String16(argv[1]));
-            int ret = service->invoke(android::SAMPLE_GET_MAC, data, &reply, 0);
-            if (ret == 0)
-            {
-                LOGI("get mac %s's mac address is %s", argv[1], String8(reply.readString16()).string());
-            }
-            else
-            {
-                LOGE("call get mac function failed");
-            }
-        }
-    }
-    return 0;
-}
-```
-
-# 编译 
-使用下面的 Android.bp
-```
-cc_defaults{
-    name: "nativeservicesample_defaults",
-    srcs:[
-        "INativeServiceSample.cpp"
-    ],
-    shared_libs: [
-        "libutils",
-        "libcutils",
-        "libbinder",
-        "libhardware",
-        "liblog"
-    ],
-
-    include_dirs: [
-        "frameworks/native/include",
-        "system/core/include",
-        "system/libhwbinder/include"
-    ],
-    cflags: [
-        "-Wall",
-        "-Wextra",
-        "-Werror",
-        "-Wno-ignored-qualifiers",
-        "-Wno-unused-parameter",
-    ],
-}
-
-cc_binary{
-    name: "server",
-    defaults: [
-        "nativeservicesample_defaults",
-    ],
-    srcs: [
-        "NativeServiceSampleService.cpp",
-        "server.cpp",
-    ],
-}
-
-cc_binary{
-    name: "client",
-    defaults: [
-        "nativeservicesample_defaults",
-    ],
-    srcs: [
-        "client.cpp",
-    ]
-}
-```
-编译完成之后，将 out/xxxx/system/bin/ 里面的 server 和 client ，推到 Android 设备上（Android studio里面的虚拟机也可以），执行server，然后执行 client ，通过 logcat -s NativeService 就可以看见相应的打印了。
-
-# FAQ
-## 安卓 app 如何调用服务？
-由于native层定义的 invoke 交给 java 层调用有些麻烦，我们可以直接获取到 Binder 对象之后，调用 Binder 对象的 transcat 函数，将需要的参数传入即可。
-下面是一个示范
-```java
-// NativeService.java
-import android.os.IBinder;
-import android.os.Parcel;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.Log;
-
-public class NativeService {
-    private static final String SERVICE_NAME = "nativeservice";
-
-    public static boolean invoke(int code,Parcel data,Parcel reply) throws RemoteException {
-        IBinder service = ServiceManager.getService(SERVICE_NAME);
-        if(service != null){
-            Parcel send = Parcel.obtain();
-            send.writeInterfaceToken(SERVICE_NAME);
-            send.appendFrom(data,0,data.dataSize());
-            boolean result = service.transact(code,send,reply,0);
-            send.recycle();
-            return result;
-        }
-        Log.e("shell","service not running");
-        return false;
-    };
-}
-```
-code 的值与 native 层定义的 cmdid 一致，从 1 开始。
-
-## onTransact 的返回值有什么讲究吗，如果service仅仅由C++层的函数调用，例如示例里的 invoke
-```cpp
-        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
-        {
-            Parcel send;
-            send.writeInterfaceToken(getInterfaceDescriptor());
-            send.appendFrom(&data, 0, data.dataSize());
-            return remote()->transact(code, send, reply);
-        }
-```
-这样的话，我们可以直接拿到 onTransact 的返回值，返回值的意义取决于双方的约定，如果 service 还准备给 Java 层调用，则不可以随意返回，原因是通过 IBinder.transact(...) 的方式调用service，返回值已经被 BinderProxy处理过了，看下面这一段
-```cpp
-//frameworks/base/core/jni/android_util_Binder.cpp
-static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
-        jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
-{
-    ......
-
-    //printf("Transact from Java code to %p sending: ", target); data->print();
-    status_t err = target->transact(code, *data, reply, flags);
-    //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
-
-    if (kEnableBinderSample) {
-        if (time_binder_calls) {
-            conditionally_log_binder_call(start_millis, target, code);
-        }
-    }
-
-    if (err == NO_ERROR) {
-        return JNI_TRUE;
-    } else if (err == UNKNOWN_TRANSACTION) {
-        return JNI_FALSE;
-    }
-
-    signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/, data->dataSize());
-    return JNI_FALSE;
-}
-```
-在这里可以看到，为 NO_ERROR 时返回了 true，为 UNKNOWN_TRANSACTION 时返回了false，都不是时将走到 signalExceptionForError(...)
-```cpp
-void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
-        bool canThrowRemoteException, int parcelSize)
-{
-    switch (err) {
-        case UNKNOWN_ERROR:
-            jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
-            break;
-        case NO_MEMORY:
-            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-            break;
-        case INVALID_OPERATION:
-            jniThrowException(env, "java/lang/UnsupportedOperationException", NULL);
-            break;
-        case BAD_VALUE:
-            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-            break;
-        case BAD_INDEX:
-            jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
-            break;
-        case BAD_TYPE:
-            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-            break;
-        case NAME_NOT_FOUND:
-            jniThrowException(env, "java/util/NoSuchElementException", NULL);
-            break;
-        case PERMISSION_DENIED:
-            jniThrowException(env, "java/lang/SecurityException", NULL);
-```
-走到这里来之后，调用service的app将发生异常。当然 service 可以根据调用方的不同的参数来返回相应的值来让调用方进入不同的状态。
-
-一个肥肠完整的示例： https://www.jianshu.com/p/46dfce294a4f]]></content>
+注：上面的示范中，没有去移除分发记录，在实际的生产环境里面，需要为移除分发记录设定一定的条件，避免占用过多内存。]]></content>
+      <tags>
+        <tag>Android</tag>
+        <tag>ANR</tag>
+      </tags>
   </entry>
   <entry>
     <title>Android Native Service 示例 第二篇</title>
@@ -2192,6 +1801,666 @@ p.s: 此方式需要应用为系统应用或反射 ServiceManager 或在源码�
       </tags>
   </entry>
   <entry>
+    <title>Android Native Service 示例</title>
+    <url>/2024/07/31/Android-native-service-sample-1/</url>
+    <content><![CDATA[安卓系统上添加系统服务，可以通过 android.os.ServiceManager 来添加使用 java 实现的系统服务，放在 SytemServer 进程（内置在源码编译）或者放在 app 进程（需要是系统签名的系统应用）。
+由于运行在 SystemServer 进程或者运行在app进程，某些特殊操作就面临权限不足的问题，比如操作kernel的节点，这个时候就需要使用使用 root 权限运行的进程了。（当然严格来说，通过java实现的服务，同样可以以 root 权限运行，比如将相应的代码编译成 jar，开机之后通过 appprocess 运行）。
+
+<!--more -->
+
+native service 需要定义一个接口类，下面的示例作为参考
+```cpp
+// INativeServiceSample.h
+#ifndef _I_NATIVES_ERVICE_SAMPLE_H_
+#define _I_NATIVES_ERVICE_SAMPLE_H_
+
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/PermissionController.h>
+#include <binder/ProcessInfoService.h>
+#include <binder/IResultReceiver.h>
+#include <utils/String8.h>
+#include <utils/String16.h>
+#include <android/log.h>
+
+#ifdef TAG
+#undef TAG
+#endif
+#define TAG "NativeService"
+#define NATIVESERVICE_NAME "nativeservice"
+
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE,TAG ,__VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,TAG ,__VA_ARGS__)
+#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__)
+
+
+namespace android {
+
+    enum STATUS {
+        SUCCESS = NO_ERROR,
+        FAILED = UNKNOWN_TRANSACTION
+    };
+    class INativeServiceSample : public IInterface {
+        public:
+        virtual int invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) = 0;
+        DECLARE_META_INTERFACE(NativeServiceSample);
+    };
+
+    class BnNativeServiceSample : public BnInterface<INativeServiceSample>
+    {
+    public:
+        status_t onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags);
+        status_t dump(int fd, const Vector<String16> &args);
+        int onShellCommand(int in, int out, int err, const Vector<String16> &args);
+        virtual int invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) = 0;
+    private:
+        int shellCommand(int in, int out, int err, const Vector<String16> &args);
+        
+    };
+}
+
+#endif
+```
+
+这里的主要工作是定义一个 server 端和 client 端都需要实现的函数， invoke ，以及 DECLARE_META_INTERFACE 这一行，DECLARE_META_INTERFACE 是一个宏定义，后面的小括号里面的 NativeServiceSample 则是当前类 INativeServiceSample 中的 NativeServiceSample 。之类会为这个类默认声明好相应的一个service需要是实现的函数。这里有严格的命名规范。
+
+然后实现客户端和服务端，也即一个 Bp(客户端) 一个 Bn(服务端)
+下面是相应的定义
+```cpp
+//INativeServiceSample.cpp
+#include "INativeServiceSample.h"
+namespace android
+{
+        class BpNativeServiceSample : public BpInterface<INativeServiceSample>
+    {
+    public:
+        BpNativeServiceSample(const sp<IBinder> &impl) : BpInterface<INativeServiceSample>(impl) {}
+        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
+        {
+            Parcel send;
+            send.writeInterfaceToken(getInterfaceDescriptor());
+            send.appendFrom(&data, 0, data.dataSize());
+            return remote()->transact(code, send, reply);
+        }
+    };
+
+    IMPLEMENT_META_INTERFACE(NativeServiceSample, NATIVESERVICE_NAME);
+
+    status_t BnNativeServiceSample::onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
+    {
+        if(code == SHELL_COMMAND_TRANSACTION)
+        {
+            int in = data.readFileDescriptor();
+            int out = data.readFileDescriptor();
+            int err = data.readFileDescriptor();
+            int argc = data.readInt32();
+            Vector<String16> args;
+            for (int i = 0; i < argc && data.dataAvail() > 0; i++)
+            {
+                args.add(data.readString16());
+            }
+            status_t result = 0;
+            sp<IBinder> unusedCallback;
+            sp<IResultReceiver> resultReceiver;
+            if ((result = data.readNullableStrongBinder(&unusedCallback)) != NO_ERROR)
+            {
+                return result;
+            }
+            if ((result = data.readNullableStrongBinder(&resultReceiver)) != NO_ERROR)
+            {
+                return result;
+            }
+            result = shellCommand(in, out, err, args);
+            if (resultReceiver != nullptr)
+            {
+                resultReceiver->send(result);
+            }
+            return result;
+        }
+        else if(IBinder::FIRST_CALL_TRANSACTION <= code && code <= IBinder::LAST_CALL_TRANSACTION)
+        {
+            CHECK_INTERFACE(INativeServiceSample, data, reply);
+            return invoke(code, data, reply, flags);
+        }
+        else
+        {
+            return BBinder::onTransact(code, data, reply, flags);
+        }
+    }
+
+    status_t BnNativeServiceSample::shellCommand(int in, int out, int err, const Vector<String16> &args)
+    {
+        return onShellCommand(in, out, err, args);
+    }
+
+    status_t BnNativeServiceSample::onShellCommand(int in, int out, int err, const Vector<String16> &args)
+    {
+        LOGI("onShellCommand not implementation yet");
+        write(out, "onShellCommand not implementation yet\n", 38);
+        size_t size = args.size();
+        for (size_t i = 0; i < size; i++)
+        {
+            LOGI("Received No.%zu arg: %s", i, String8(args[i]).string());
+        }
+        return SUCCESS;
+    }
+
+    status_t BnNativeServiceSample::dump(int fd, const Vector<String16> &args)
+    {
+        LOGI("dump not implementation yet");
+        write(fd, "dump not implementation yet\n", 28);
+        size_t size = args.size();
+        for (size_t i = 0; i < size; i++)
+        {
+            LOGI("Received No.%zu arg: %s", i, String8(args[i]).string());
+        }
+        return SUCCESS;
+    }
+}
+```
+`BpNativeServiceSample : public BpInterface<INativeServiceSample>` 是客户端的定义，它的构造函数是固定格式。
+`class BnNativeServiceSample : public BnInterface<INativeServiceSample>` 则是服务端的定义，它里面有一个用于与其他进程通信最重要的函数`onTransact`。
+而 dump 函数则是我们使用 `dumpsys servicename args...`这样的命令行方式去获取服务的信息时会被调用的函数，我们可以在这和函数里面接收命令行参数，解析命令以及输出内容，其中 fd 命令行传入的一个文件描述符，通常它是 stdout ，后面的 args则是命令行参数，安卓的命令参数是通过 String16 格式传入。
+对于客户端，我们对调用者提供的接口是 invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) 。客户端也可以直接使用 service 的 tract 接口来对服务端进行调用，为了隐藏 `getInterfaceDescriptor()` ，我将这部分操作预先包含在 invoke 里面，调用者提供 code，data，reply以及 flags 即可（flags这里我实际上没有使用到）
+这里由一个非常重要的 IMPLEMENT_META_INTERFACE ，这个宏会在这部分展开，将在接口类内声明的内容实现放在此处，同样的，这里也有严格的命名要求。
+服务端的 onTransact实现如下
+```cpp
+    status_t BnNativeServiceSample::onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
+    {
+        if(code == SHELL_COMMAND_TRANSACTION)
+        {
+            int in = data.readFileDescriptor();
+            int out = data.readFileDescriptor();
+            int err = data.readFileDescriptor();
+            int argc = data.readInt32();
+            Vector<String16> args;
+            for (int i = 0; i < argc && data.dataAvail() > 0; i++)
+            {
+                args.add(data.readString16());
+            }
+            status_t result = 0;
+            sp<IBinder> unusedCallback;
+            sp<IResultReceiver> resultReceiver;
+            if ((result = data.readNullableStrongBinder(&unusedCallback)) != NO_ERROR)
+            {
+                return result;
+            }
+            if ((result = data.readNullableStrongBinder(&resultReceiver)) != NO_ERROR)
+            {
+                return result;
+            }
+            result = shellCommand(in, out, err, args);
+            if (resultReceiver != nullptr)
+            {
+                resultReceiver->send(result);
+            }
+            return result;
+        }
+        else if(IBinder::FIRST_CALL_TRANSACTION <= code && code <= IBinder::LAST_CALL_TRANSACTION)
+        {
+            CHECK_INTERFACE(INativeServiceSample, data, reply);
+            return invoke(code, data, reply, flags);
+        }
+        else
+        {
+            return BBinder::onTransact(code, data, reply, flags);
+        }
+    }
+```
+这里进来之后，我们受限检查 code 是否是 SHELL_COMMAND_TRANSACTION,这个 code 表示本次IPC调用是通过 cmd servicename args... 的方式调用的，这里把 stdin,stdout,stderr,args 封装好传给新增的 shellCommand ，shellCommand 里面调用 onShellCommand 。
+然后判断是code是否是Binder为开发者预留的范围，如果是这个范围，就交给我们自己实现的 invoke 处理 ，首先是一个 CHECK_INTERFACE(INativeServiceSample, data, reply); 这里主要作用是检查调用 service 时，传递给服务端的 parcel 的 interface 是否正确。
+如果code不是以上几种情况，那么就交给父类处理。可以查看 aosp/frameworks/native/libs/binder/Binder.cpp
+```cpp
+// NOLINTNEXTLINE(google-default-arguments)
+status_t BBinder::onTransact(
+    uint32_t code, const Parcel& data, Parcel* reply, uint32_t /*flags*/)
+{
+    switch (code) {
+        case INTERFACE_TRANSACTION:
+            reply->writeString16(getInterfaceDescriptor());
+            return NO_ERROR;
+
+        case DUMP_TRANSACTION: {
+            int fd = data.readFileDescriptor();
+            int argc = data.readInt32();
+            Vector<String16> args;
+            for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
+               args.add(data.readString16());
+            }
+            return dump(fd, args);
+        }
+
+        case SHELL_COMMAND_TRANSACTION: {
+            int in = data.readFileDescriptor();
+            int out = data.readFileDescriptor();
+            int err = data.readFileDescriptor();
+            int argc = data.readInt32();
+            Vector<String16> args;
+            for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
+               args.add(data.readString16());
+            }
+            sp<IShellCallback> shellCallback = IShellCallback::asInterface(
+                    data.readStrongBinder());
+            sp<IResultReceiver> resultReceiver = IResultReceiver::asInterface(
+                    data.readStrongBinder());
+
+            // XXX can't add virtuals until binaries are updated.
+            //return shellCommand(in, out, err, args, resultReceiver);
+            (void)in;
+            (void)out;
+            (void)err;
+
+            if (resultReceiver != nullptr) {
+                resultReceiver->send(INVALID_OPERATION);
+            }
+
+            return NO_ERROR;
+        }
+
+        case SYSPROPS_TRANSACTION: {
+            report_sysprop_change();
+            return NO_ERROR;
+        }
+
+        default:
+            return UNKNOWN_TRANSACTION;
+    }
+}
+```
+在这里我们就知道 dump 其实也是一个特殊的 code 。
+
+p.s: 这里我们当然可以在接口定义的时候就生命客户端和服务端都共有的相同实现的接口，可是这样做每次新增接口都需要在双方一起增加实现，我用一个 invoke 来中转调用。
+p.s: code 是服务端用来区分客户端想调用哪个函数的。
+
+下面来看看真正的服务端的声明和实现
+```cpp
+// NativeServiceSampleService.h
+#ifndef _NATIVE_SERVICE_SAMPLE_SERVICE_H_
+#define _NATIVE_SERVICE_SAMPLE_SERVICE_H_
+#include "INativeServiceSample.h"
+#include <map>
+namespace android
+{
+    class NativeServiceSampleService : public BnNativeServiceSample
+    {
+    public:
+        typedef status_t (NativeServiceSampleService::*local_method)(const Parcel &data, Parcel *reply);
+        NativeServiceSampleService(){loadMethods();};
+        ~NativeServiceSampleService(){};
+        status_t sampleCallFunction(const Parcel &data, Parcel *reply);
+        status_t sampleGetFunction(const Parcel &data, Parcel *reply);
+        status_t getMacByInterfaceName(const Parcel &data, Parcel *reply);
+    private:
+        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags);
+        int getCallingUid();
+        int getCallingPid();
+        void loadMethods();
+        std::map<uint32_t,local_method> methods;
+    };
+};
+#endif
+```
+这里定义了三个功能函数，sampleCallFunction,sampleGetFunction,getMacByInterfaceName，我将这几个函数的输入参数统一了，然后用一个 map 去保存 code 和指向这几个函数的函数指针。
+```cpp
+//NativeServiceSampleService.cpp
+#include "NativeServiceSampleService.h"
+#include "Cmdid.h"
+#include <errno.h>
+#include <string.h>
+#include <binder/IPCThreadState.h>
+#include <hwbinder/IPCThreadState.h>
+
+namespace android {
+    void NativeServiceSampleService::loadMethods()
+    {
+        methods[SAMPLE_CALL] = &NativeServiceSampleService::sampleCallFunction;
+        methods[SAMPLE_GET] = &NativeServiceSampleService::sampleGetFunction;
+        methods[SAMPLE_GET_MAC] = &NativeServiceSampleService::getMacByInterfaceName;
+    }
+    int NativeServiceSampleService::invoke(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags){
+        std::map<uint32_t, local_method>::iterator iter = methods.find(code);
+        LOGV("uid:%d pid:%d called method %u",getCallingUid(),getCallingPid(),code);
+        if (iter != methods.end())
+        {
+            return (this->*(iter->second))(data, reply);
+        }
+        else
+        {
+            LOGE("can't find such a method whose cmdid is %u", code);
+            return -1;
+        }
+    }
+    
+    status_t NativeServiceSampleService::sampleCallFunction(const Parcel&data, Parcel* reply){
+        String8 str = String8(data.readString16());
+        LOGD("call funcion with %s",str.string());
+        return SUCCESS;
+    }
+
+    status_t NativeServiceSampleService::sampleGetFunction(const Parcel&data, Parcel* reply){
+        LOGD("get function ");
+        String16 hello = String16("this is message from service");
+        reply->writeString16(hello);
+        return SUCCESS;
+    }
+
+    status_t NativeServiceSampleService::getMacByInterfaceName(const Parcel &data, Parcel *reply)
+    {
+        String16 ifname = data.readString16();
+        LOGV("get mac of ifname: %s",String8(ifname).string());
+        String8 path = String8("/sys/class/net/");
+        path += String8(ifname);
+        path += String8("/address");
+        FILE* fp = fopen(path.string(),"ro");
+        if(fp == NULL){
+            LOGE("open %s failed(%d): %s",path.string(),errno,strerror(errno));
+            return FAILED;
+        }
+
+        char mac[18] = {0};
+        size_t readsize = fread(mac,1,17,fp);
+        if(readsize != 17){
+            LOGE("read mac failed");
+            return FAILED;
+        }
+        String16 result = String16(mac);
+        reply->writeString16(result);
+        fclose(fp);
+        return SUCCESS;
+    }
+
+    int NativeServiceSampleService::getCallingPid()
+    {
+        if (IPCThreadState::self()->isServingCall()) {
+            return IPCThreadState::self()->getCallingPid();
+        }
+        return IPCThreadState::self()->getCallingPid();
+    }
+
+    int NativeServiceSampleService::getCallingUid()
+    {
+        if (IPCThreadState::self()->isServingCall()) {
+            return IPCThreadState::self()->getCallingUid();
+        }
+        return IPCThreadState::self()->getCallingUid();
+    }
+}
+```
+我在服务端初始化的时候将唯一的 code 和唯一的函数指针保存进 map ，在 invoke 里面判断如果有相应的 code 存在，则调用相应的函数，没有则直接返回。
+
+这里的 code 则是一个枚举，实际上是双方约定的相同的正整数就可以。
+
+```cpp
+//Cmdid.h
+#ifndef _CMDID_H_
+#define _CMDID_H_
+#include "INativeServiceSample.h"
+namespace android{
+    enum ENUME_CMD{
+        SAMPLE_CALL = IBinder::FIRST_CALL_TRANSACTION,
+        SAMPLE_GET,
+        SAMPLE_GET_MAC
+    };
+}
+
+#endif
+```
+
+# 开启服务
+```
+//server.cpp
+#include "NativeServiceSampleService.h"
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <utils/String8.h>
+#include <utils/String16.h>
+
+int main(int argc, char **argv)
+{
+    LOGI("start DeviceMacService");
+    android::defaultServiceManager()->addService(android::String16(NATIVESERVICE_NAME), new android::NativeServiceSampleService());
+    android::ProcessState::self()->startThreadPool();
+    android::IPCThreadState::self()->joinThreadPool();
+}
+```
+
+# 客户端调用服务
+```
+//client.cpp
+#include "NativeServiceSampleService.h"
+#include "EnumeCmdid.h"
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <utils/String8.h>
+#include <utils/String16.h>
+
+using namespace android;
+
+sp<INativeServiceSample> getService() {
+    sp<IServiceManager> sm = defaultServiceManager();
+    if (sm == NULL) {
+        LOGE("can not get service manager");
+    }
+    sp<IBinder> binder = sm->getService(String16(NATIVESERVICE_NAME));
+    if (binder == NULL) {
+        LOGE("can not get service");
+    }
+    sp<INativeServiceSample> service = interface_cast<INativeServiceSample>(binder);
+    if (service == NULL) {
+        LOGE("can not cast interface");
+    }
+    return service;
+    return nullptr;
+}
+
+int main(int argc,char** argv){
+    sp<INativeServiceSample> service = getService();
+
+    {
+        Parcel data, reply;
+        String16 str = String16("str from client");
+        data.writeString16(str);
+        int ret = service->invoke(android::SAMPLE_CALL, data, &reply,0);
+        if(ret == 0){
+            LOGI("invoke value 0");
+        }
+    }
+
+    {
+        Parcel data, reply;
+        int ret = service->invoke(android::SAMPLE_GET, data, &reply,0);
+        if(ret == 0){
+            LOGI("invoke value 0");
+        }
+        String8 str = String8(reply.readString16());
+        LOGI("from str %s",str.string());
+    }
+
+    {
+        if (argc >= 2)
+        {
+            Parcel data, reply;
+            data.writeString16(String16(argv[1]));
+            int ret = service->invoke(android::SAMPLE_GET_MAC, data, &reply, 0);
+            if (ret == 0)
+            {
+                LOGI("get mac %s's mac address is %s", argv[1], String8(reply.readString16()).string());
+            }
+            else
+            {
+                LOGE("call get mac function failed");
+            }
+        }
+    }
+    return 0;
+}
+```
+
+# 编译 
+使用下面的 Android.bp
+```
+cc_defaults{
+    name: "nativeservicesample_defaults",
+    srcs:[
+        "INativeServiceSample.cpp"
+    ],
+    shared_libs: [
+        "libutils",
+        "libcutils",
+        "libbinder",
+        "libhardware",
+        "liblog"
+    ],
+
+    include_dirs: [
+        "frameworks/native/include",
+        "system/core/include",
+        "system/libhwbinder/include"
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-ignored-qualifiers",
+        "-Wno-unused-parameter",
+    ],
+}
+
+cc_binary{
+    name: "server",
+    defaults: [
+        "nativeservicesample_defaults",
+    ],
+    srcs: [
+        "NativeServiceSampleService.cpp",
+        "server.cpp",
+    ],
+}
+
+cc_binary{
+    name: "client",
+    defaults: [
+        "nativeservicesample_defaults",
+    ],
+    srcs: [
+        "client.cpp",
+    ]
+}
+```
+编译完成之后，将 out/xxxx/system/bin/ 里面的 server 和 client ，推到 Android 设备上（Android studio里面的虚拟机也可以），执行server，然后执行 client ，通过 logcat -s NativeService 就可以看见相应的打印了。
+
+# FAQ
+## 安卓 app 如何调用服务？
+由于native层定义的 invoke 交给 java 层调用有些麻烦，我们可以直接获取到 Binder 对象之后，调用 Binder 对象的 transcat 函数，将需要的参数传入即可。
+下面是一个示范
+```java
+// NativeService.java
+import android.os.IBinder;
+import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.Log;
+
+public class NativeService {
+    private static final String SERVICE_NAME = "nativeservice";
+
+    public static boolean invoke(int code,Parcel data,Parcel reply) throws RemoteException {
+        IBinder service = ServiceManager.getService(SERVICE_NAME);
+        if(service != null){
+            Parcel send = Parcel.obtain();
+            send.writeInterfaceToken(SERVICE_NAME);
+            send.appendFrom(data,0,data.dataSize());
+            boolean result = service.transact(code,send,reply,0);
+            send.recycle();
+            return result;
+        }
+        Log.e("shell","service not running");
+        return false;
+    };
+}
+```
+code 的值与 native 层定义的 cmdid 一致，从 1 开始。
+
+## onTransact 的返回值有什么讲究吗，如果service仅仅由C++层的函数调用，例如示例里的 invoke
+```cpp
+        int invoke(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
+        {
+            Parcel send;
+            send.writeInterfaceToken(getInterfaceDescriptor());
+            send.appendFrom(&data, 0, data.dataSize());
+            return remote()->transact(code, send, reply);
+        }
+```
+这样的话，我们可以直接拿到 onTransact 的返回值，返回值的意义取决于双方的约定，如果 service 还准备给 Java 层调用，则不可以随意返回，原因是通过 IBinder.transact(...) 的方式调用service，返回值已经被 BinderProxy处理过了，看下面这一段
+```cpp
+//frameworks/base/core/jni/android_util_Binder.cpp
+static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
+        jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
+{
+    ......
+
+    //printf("Transact from Java code to %p sending: ", target); data->print();
+    status_t err = target->transact(code, *data, reply, flags);
+    //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
+
+    if (kEnableBinderSample) {
+        if (time_binder_calls) {
+            conditionally_log_binder_call(start_millis, target, code);
+        }
+    }
+
+    if (err == NO_ERROR) {
+        return JNI_TRUE;
+    } else if (err == UNKNOWN_TRANSACTION) {
+        return JNI_FALSE;
+    }
+
+    signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/, data->dataSize());
+    return JNI_FALSE;
+}
+```
+在这里可以看到，为 NO_ERROR 时返回了 true，为 UNKNOWN_TRANSACTION 时返回了false，都不是时将走到 signalExceptionForError(...)
+```cpp
+void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
+        bool canThrowRemoteException, int parcelSize)
+{
+    switch (err) {
+        case UNKNOWN_ERROR:
+            jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+            break;
+        case NO_MEMORY:
+            jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+            break;
+        case INVALID_OPERATION:
+            jniThrowException(env, "java/lang/UnsupportedOperationException", NULL);
+            break;
+        case BAD_VALUE:
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            break;
+        case BAD_INDEX:
+            jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
+            break;
+        case BAD_TYPE:
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            break;
+        case NAME_NOT_FOUND:
+            jniThrowException(env, "java/util/NoSuchElementException", NULL);
+            break;
+        case PERMISSION_DENIED:
+            jniThrowException(env, "java/lang/SecurityException", NULL);
+```
+走到这里来之后，调用service的app将发生异常。当然 service 可以根据调用方的不同的参数来返回相应的值来让调用方进入不同的状态。
+
+一个肥肠完整的示例： https://www.jianshu.com/p/46dfce294a4f]]></content>
+  </entry>
+  <entry>
     <title>树莓派自动温控风扇</title>
     <url>/2018/04/19/Auto-Control-Raspberry-Fan/</url>
     <content><![CDATA[某天忘记把树莓派的电源断掉，然后第二天早上被它的风扇声音吵醒！！
@@ -2522,6 +2791,24 @@ sysctl net.ipv4.tcp_available_congestion_control
 sysctl net.ipv4.tcp_congestion_control
 ```
 每条命令输入之后，提示信息里面都有`bbr`，则表示bbr已经开启。]]></content>
+  </entry>
+  <entry>
+    <title>Build sandboxing disabled due to nsjail error</title>
+    <url>/2024/12/08/Build-sandboxing-disabled-due-to-nsjail-error/</url>
+    <content><![CDATA[
+最近把Ubuntu升级到 24.04，编译AOSP遇到一些问题，这里做一下记录。
+遇到的警告是标题名“Build sandboxing disabled due to nsjail error”
+
+<!-- more -->
+
+这个警告我遇到两种情况：
+1. 在 Ubuntu 24.04 编译
+根据链接 [https://groups.google.com/g/android-building/c/DbDKuaIik3M](https://groups.google.com/g/android-building/c/DbDKuaIik3M) 所说，ubuntu24.04上的一些修改，会导致编译时遇到这个错误。
+{% asset_img image.png %}
+临时解法是执行这个命令`sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`
+如果想持久化生效的话，可以编辑文件`/usr/lib/sysctl.d/10-apparmor.conf`，将上面的key value添加进去，使用`sysctl -p /usr/lib/sysctl.d/10-apparmor.conf` 或者重启生效。
+2. 使用 Docker 编译
+在Docker里面编译可能会遇到这个错误，解决办法是创建容器时，添加一个 `--privileged` 参数。]]></content>
   </entry>
   <entry>
     <title>从组合数讲起</title>
@@ -5879,18 +6166,6 @@ BiliBili的up主[神游八方](https://space.bilibili.com/614801#/)的作品，�
 但有时夜深人静，也有人讲述不是故事的故事，那是对露珠公主和长帆经历的想象。每个人的想象都不一样，但人们都认为他俩到过无数神奇的国度，还到过像大海一样广阔的陆地，他们永远在航行和旅途中，不管走到哪里，他们总是幸福地生活在一起。]]></content>
   </entry>
   <entry>
-    <title>Visual Code</title>
-    <url>/2017/05/14/Visual-Code/</url>
-    <content><![CDATA[
-{% asset_img 1.jpg 帮巨硬打个广告%}
-<!-- more -->
-Visual Code，一个优秀的编辑器。
-当然了，编辑器很多，从Windows内置的nodepad，到Atom，再到notepad++，都是不错的，但是，我觉得Visual Code好看啊。
-来张照骗
-{% asset_img visual_code.jpg 实时渲染Markdown %}
-当然了，好事做到底，丢一个编辑器的[快捷键表](http://suppermary.cc/src/visual%20code/keyboard-shortcuts-visual-code.pdf)，丢掉鼠标，啪啪啪敲键盘吧！]]></content>
-  </entry>
-  <entry>
     <title>UWP简单教程</title>
     <url>/2021/06/29/UWP-beginner/</url>
     <content><![CDATA[
@@ -6075,6 +6350,18 @@ private void OnSuspending(object sender, SuspendingEventArgs e)
 }
 ```
 已经提示了开发者，UWP应用暂停或者关闭时，都会收到这个 OnSuspending 事件，虽然时间很短，但是足够保存一些设置项了。如果你的应用有大量数据要保存，建议应用运行时就定时保存，或者申请受限权限。]]></content>
+  </entry>
+  <entry>
+    <title>Visual Code</title>
+    <url>/2017/05/14/Visual-Code/</url>
+    <content><![CDATA[
+{% asset_img 1.jpg 帮巨硬打个广告%}
+<!-- more -->
+Visual Code，一个优秀的编辑器。
+当然了，编辑器很多，从Windows内置的nodepad，到Atom，再到notepad++，都是不错的，但是，我觉得Visual Code好看啊。
+来张照骗
+{% asset_img visual_code.jpg 实时渲染Markdown %}
+当然了，好事做到底，丢一个编辑器的[快捷键表](http://suppermary.cc/src/visual%20code/keyboard-shortcuts-visual-code.pdf)，丢掉鼠标，啪啪啪敲键盘吧！]]></content>
   </entry>
   <entry>
     <title>微信小程序码隐私政策</title>
@@ -9110,774 +9397,6 @@ dist
 {% asset_img 6.png %}]]></content>
   </entry>
   <entry>
-    <title>C++ ini 实现</title>
-    <url>/2024/07/31/ini-impl-in-cpp/</url>
-    <content><![CDATA[首先是从 https://github.com/benhoyt/inih 取用的 ini 读取类头文件
-
-<!-- more -->
-
-```cpp
-//file ini.h
-/* inih -- simple .INI file parser
-
-SPDX-License-Identifier: BSD-3-Clause
-
-Copyright (C) 2009-2020, Ben Hoyt
-
-inih is released under the New BSD license (see LICENSE.txt). Go to the project
-home page for more info:
-
-https://github.com/benhoyt/inih
-
-*/
-
-#ifndef INI_H
-#define INI_H
-
-/* Make this header file easier to include in C++ code */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdio.h>
-
-    /* Nonzero if ini_handler callback should accept lineno parameter. */
-#ifndef INI_HANDLER_LINENO
-#define INI_HANDLER_LINENO 0
-#endif
-
-/* Visibility symbols, required for Windows DLLs */
-#ifndef INI_API
-#if defined _WIN32 || defined __CYGWIN__
-#	ifdef INI_SHARED_LIB
-#		ifdef INI_SHARED_LIB_BUILDING
-#			define INI_API __declspec(dllexport)
-#		else
-#			define INI_API __declspec(dllimport)
-#		endif
-#	else
-#		define INI_API
-#	endif
-#else
-#	if defined(__GNUC__) && __GNUC__ >= 4
-#		define INI_API __attribute__ ((visibility ("default")))
-#	else
-#		define INI_API
-#	endif
-#endif
-#endif
-
-/* Typedef for prototype of handler function. */
-#if INI_HANDLER_LINENO
-    typedef int (*ini_handler)(void* user, const char* section,
-        const char* name, const char* value,
-        int lineno);
-#else
-    typedef int (*ini_handler)(void* user, const char* section,
-        const char* name, const char* value);
-#endif
-
-    /* Typedef for prototype of fgets-style reader function. */
-    typedef char* (*ini_reader)(char* str, int num, void* stream);
-
-    /* Parse given INI-style file. May have [section]s, name=value pairs
-       (whitespace stripped), and comments starting with ';' (semicolon). Section
-       is "" if name=value pair parsed before any section heading. name:value
-       pairs are also supported as a concession to Python's configparser.
-
-       For each name=value pair parsed, call handler function with given user
-       pointer as well as section, name, and value (data only valid for duration
-       of handler call). Handler should return nonzero on success, zero on error.
-
-       Returns 0 on success, line number of first error on parse error (doesn't
-       stop on first error), -1 on file open error, or -2 on memory allocation
-       error (only when INI_USE_STACK is zero).
-    */
-    INI_API int ini_parse(const char* filename, ini_handler handler, void* user);
-
-    /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
-       close the file when it's finished -- the caller must do that. */
-    INI_API int ini_parse_file(FILE* file, ini_handler handler, void* user);
-
-    /* Same as ini_parse(), but takes an ini_reader function pointer instead of
-       filename. Used for implementing custom or string-based I/O (see also
-       ini_parse_string). */
-    INI_API int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-        void* user);
-
-    /* Same as ini_parse(), but takes a zero-terminated string with the INI data
-    instead of a file. Useful for parsing INI data from a network socket or
-    already in memory. */
-    INI_API int ini_parse_string(const char* string, ini_handler handler, void* user);
-
-    /* Nonzero to allow multi-line value parsing, in the style of Python's
-       configparser. If allowed, ini_parse() will call the handler with the same
-       name for each subsequent line parsed. */
-#ifndef INI_ALLOW_MULTILINE
-#define INI_ALLOW_MULTILINE 1
-#endif
-
-       /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
-          the file. See https://github.com/benhoyt/inih/issues/21 */
-#ifndef INI_ALLOW_BOM
-#define INI_ALLOW_BOM 1
-#endif
-
-          /* Chars that begin a start-of-line comment. Per Python configparser, allow
-             both ; and # comments at the start of a line by default. */
-#ifndef INI_START_COMMENT_PREFIXES
-#define INI_START_COMMENT_PREFIXES ";#"
-#endif
-
-             /* Nonzero to allow inline comments (with valid inline comment characters
-                specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
-                Python 3.2+ configparser behaviour. */
-#ifndef INI_ALLOW_INLINE_COMMENTS
-#define INI_ALLOW_INLINE_COMMENTS 1
-#endif
-#ifndef INI_INLINE_COMMENT_PREFIXES
-#define INI_INLINE_COMMENT_PREFIXES ";"
-#endif
-
-                /* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
-#ifndef INI_USE_STACK
-#define INI_USE_STACK 1
-#endif
-
-/* Maximum line length for any line in INI file (stack or heap). Note that
-   this must be 3 more than the longest line (due to '\r', '\n', and '\0'). */
-#ifndef INI_MAX_LINE
-#define INI_MAX_LINE 200
-#endif
-
-   /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
-      fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
-      zero. */
-#ifndef INI_ALLOW_REALLOC
-#define INI_ALLOW_REALLOC 0
-#endif
-
-      /* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
-         is zero. */
-#ifndef INI_INITIAL_ALLOC
-#define INI_INITIAL_ALLOC 200
-#endif
-
-         /* Stop parsing on first error (default is to keep parsing). */
-#ifndef INI_STOP_ON_FIRST_ERROR
-#define INI_STOP_ON_FIRST_ERROR 0
-#endif
-
-/* Nonzero to call the handler at the start of each new section (with
-   name and value NULL). Default is to only call the handler on
-   each name=value pair. */
-#ifndef INI_CALL_HANDLER_ON_NEW_SECTION
-#define INI_CALL_HANDLER_ON_NEW_SECTION 0
-#endif
-
-   /* Nonzero to allow a name without a value (no '=' or ':' on the line) and
-      call the handler with value NULL in this case. Default is to treat
-      no-value lines as an error. */
-#ifndef INI_ALLOW_NO_VALUE
-#define INI_ALLOW_NO_VALUE 0
-#endif
-
-      /* Nonzero to use custom ini_malloc, ini_free, and ini_realloc memory
-         allocation functions (INI_USE_STACK must also be 0). These functions must
-         have the same signatures as malloc/free/realloc and behave in a similar
-         way. ini_realloc is only needed if INI_ALLOW_REALLOC is set. */
-#ifndef INI_CUSTOM_ALLOCATOR
-#define INI_CUSTOM_ALLOCATOR 0
-#endif
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* INI_H */
-```
-
-和对应的 ini 读取实现
-
-```cpp
-//file ini.c
-/* inih -- simple .INI file parser
-
-SPDX-License-Identifier: BSD-3-Clause
-
-Copyright (C) 2009-2020, Ben Hoyt
-
-inih is released under the New BSD license (see LICENSE.txt). Go to the project
-home page for more info:
-
-https://github.com/benhoyt/inih
-
-*/
-
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-
-#include "ini.h"
-
-#if !INI_USE_STACK
-#if INI_CUSTOM_ALLOCATOR
-#include <stddef.h>
-void* ini_malloc(size_t size);
-void ini_free(void* ptr);
-void* ini_realloc(void* ptr, size_t size);
-#else
-#include <stdlib.h>
-#define ini_malloc malloc
-#define ini_free free
-#define ini_realloc realloc
-#endif
-#endif
-
-#define MAX_SECTION 50
-#define MAX_NAME 50
-
-/* Used by ini_parse_string() to keep track of string parsing state. */
-typedef struct {
-    const char* ptr;
-    size_t num_left;
-} ini_parse_string_ctx;
-
-/* Strip whitespace chars off end of given string, in place. Return s. */
-static char* rstrip(char* s)
-{
-    char* p = s + strlen(s);
-    while (p > s && isspace((unsigned char)(*--p)))
-        *p = '\0';
-    return s;
-}
-
-/* Return pointer to first non-whitespace char in given string. */
-static char* lskip(const char* s)
-{
-    while (*s && isspace((unsigned char)(*s)))
-        s++;
-    return (char*)s;
-}
-
-/* Return pointer to first char (of chars) or inline comment in given string,
-   or pointer to NUL at end of string if neither found. Inline comment must
-   be prefixed by a whitespace character to register as a comment. */
-static char* find_chars_or_comment(const char* s, const char* chars)
-{
-#if INI_ALLOW_INLINE_COMMENTS
-    int was_space = 0;
-    while (*s && (!chars || !strchr(chars, *s)) &&
-        !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
-        was_space = isspace((unsigned char)(*s));
-        s++;
-    }
-#else
-    while (*s && (!chars || !strchr(chars, *s))) {
-        s++;
-    }
-#endif
-    return (char*)s;
-}
-
-/* Similar to strncpy, but ensures dest (size bytes) is
-   NUL-terminated, and doesn't pad with NULs. */
-static char* strncpy0(char* dest, const char* src, size_t size)
-{
-    /* Could use strncpy internally, but it causes gcc warnings (see issue #91) */
-    size_t i;
-    for (i = 0; i < size - 1 && src[i]; i++)
-        dest[i] = src[i];
-    dest[i] = '\0';
-    return dest;
-}
-
-/* See documentation in header file. */
-int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-    void* user)
-{
-    /* Uses a fair bit of stack (use heap instead if you need to) */
-#if INI_USE_STACK
-    char line[INI_MAX_LINE];
-    size_t max_line = INI_MAX_LINE;
-#else
-    char* line;
-    size_t max_line = INI_INITIAL_ALLOC;
-#endif
-#if INI_ALLOW_REALLOC && !INI_USE_STACK
-    char* new_line;
-    size_t offset;
-#endif
-    char section[MAX_SECTION] = "";
-    char prev_name[MAX_NAME] = "";
-
-    char* start;
-    char* end;
-    char* name;
-    char* value;
-    int lineno = 0;
-    int error = 0;
-
-#if !INI_USE_STACK
-    line = (char*)ini_malloc(INI_INITIAL_ALLOC);
-    if (!line) {
-        return -2;
-    }
-#endif
-
-#if INI_HANDLER_LINENO
-#define HANDLER(u, s, n, v) handler(u, s, n, v, lineno)
-#else
-#define HANDLER(u, s, n, v) handler(u, s, n, v)
-#endif
-
-    /* Scan through stream line by line */
-    while (reader(line, (int)max_line, stream) != NULL) {
-#if INI_ALLOW_REALLOC && !INI_USE_STACK
-        offset = strlen(line);
-        while (offset == max_line - 1 && line[offset - 1] != '\n') {
-            max_line *= 2;
-            if (max_line > INI_MAX_LINE)
-                max_line = INI_MAX_LINE;
-            new_line = ini_realloc(line, max_line);
-            if (!new_line) {
-                ini_free(line);
-                return -2;
-            }
-            line = new_line;
-            if (reader(line + offset, (int)(max_line - offset), stream) == NULL)
-                break;
-            if (max_line >= INI_MAX_LINE)
-                break;
-            offset += strlen(line + offset);
-        }
-#endif
-
-        lineno++;
-
-        start = line;
-#if INI_ALLOW_BOM
-        if (lineno == 1 && (unsigned char)start[0] == 0xEF &&
-            (unsigned char)start[1] == 0xBB &&
-            (unsigned char)start[2] == 0xBF) {
-            start += 3;
-        }
-#endif
-        start = lskip(rstrip(start));
-
-        if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
-            /* Start-of-line comment */
-        }
-#if INI_ALLOW_MULTILINE
-        else if (*prev_name && *start && start > line) {
-#if INI_ALLOW_INLINE_COMMENTS
-            end = find_chars_or_comment(start, NULL);
-            if (*end)
-                *end = '\0';
-            rstrip(start);
-#endif
-            /* Non-blank line with leading whitespace, treat as continuation
-               of previous name's value (as per Python configparser). */
-            if (!HANDLER(user, section, prev_name, start) && !error)
-                error = lineno;
-        }
-#endif
-        else if (*start == '[') {
-            /* A "[section]" line */
-            end = find_chars_or_comment(start + 1, "]");
-            if (*end == ']') {
-                *end = '\0';
-                strncpy0(section, start + 1, sizeof(section));
-                *prev_name = '\0';
-#if INI_CALL_HANDLER_ON_NEW_SECTION
-                if (!HANDLER(user, section, NULL, NULL) && !error)
-                    error = lineno;
-#endif
-            }
-            else if (!error) {
-                /* No ']' found on section line */
-                error = lineno;
-            }
-        }
-        else if (*start) {
-            /* Not a comment, must be a name[=:]value pair */
-            end = find_chars_or_comment(start, "=:");
-            if (*end == '=' || *end == ':') {
-                *end = '\0';
-                name = rstrip(start);
-                value = end + 1;
-#if INI_ALLOW_INLINE_COMMENTS
-                end = find_chars_or_comment(value, NULL);
-                if (*end)
-                    *end = '\0';
-#endif
-                value = lskip(value);
-                rstrip(value);
-
-                /* Valid name[=:]value pair found, call handler */
-                strncpy0(prev_name, name, sizeof(prev_name));
-                if (!HANDLER(user, section, name, value) && !error)
-                    error = lineno;
-            }
-            else if (!error) {
-                /* No '=' or ':' found on name[=:]value line */
-#if INI_ALLOW_NO_VALUE
-                * end = '\0';
-                name = rstrip(start);
-                if (!HANDLER(user, section, name, NULL) && !error)
-                    error = lineno;
-#else
-                error = lineno;
-#endif
-            }
-        }
-
-#if INI_STOP_ON_FIRST_ERROR
-        if (error)
-            break;
-#endif
-    }
-
-#if !INI_USE_STACK
-    ini_free(line);
-#endif
-
-    return error;
-}
-
-/* See documentation in header file. */
-int ini_parse_file(FILE* file, ini_handler handler, void* user)
-{
-    return ini_parse_stream((ini_reader)fgets, file, handler, user);
-}
-
-/* See documentation in header file. */
-int ini_parse(const char* filename, ini_handler handler, void* user)
-{
-    FILE* file;
-    int error;
-
-    file = fopen(filename, "r");
-    if (!file)
-        return -1;
-    error = ini_parse_file(file, handler, user);
-    fclose(file);
-    return error;
-}
-
-/* An ini_reader function to read the next line from a string buffer. This
-   is the fgets() equivalent used by ini_parse_string(). */
-static char* ini_reader_string(char* str, int num, void* stream) {
-    ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;
-    const char* ctx_ptr = ctx->ptr;
-    size_t ctx_num_left = ctx->num_left;
-    char* strp = str;
-    char c;
-
-    if (ctx_num_left == 0 || num < 2)
-        return NULL;
-
-    while (num > 1 && ctx_num_left != 0) {
-        c = *ctx_ptr++;
-        ctx_num_left--;
-        *strp++ = c;
-        if (c == '\n')
-            break;
-        num--;
-    }
-
-    *strp = '\0';
-    ctx->ptr = ctx_ptr;
-    ctx->num_left = ctx_num_left;
-    return str;
-}
-
-/* See documentation in header file. */
-int ini_parse_string(const char* string, ini_handler handler, void* user) {
-    ini_parse_string_ctx ctx;
-
-    ctx.ptr = string;
-    ctx.num_left = strlen(string);
-    return ini_parse_stream((ini_reader)ini_reader_string, &ctx, handler,
-        user);
-}
-```
-用CPP封装一下
-```cpp
-//file IniParser.h
-#pragma once
-#include<unordered_map>
-#include<string>
-#include<iostream>
-#include<vector>
-static std::string __EMPTY_STRING = "";
-class IniParser
-{
-public:
-    IniParser(const char* inifile);
-    ~IniParser();
-    std::string GetString(const std::string& section, const std::string& key, const std::string& def = __EMPTY_STRING);
-    double GetDouble(const std::string& section, const std::string& key, double def);
-    bool GetBoolean(const std::string& section, const std::string& key, bool def);
-    std::vector<std::string> GetSections();
-    std::vector<std::string> GetKeysOfSection(const std::string& section);
-    friend int iniHandler(void* user, const char* section, const char* name, const char* value);
-    friend std::ostream& operator<<(std::ostream& out, const IniParser& obj);
-private:
-    void addNewRecord(const char* section, const char* key, const char* value);
-
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mCaches;
-};
-```
-加上对应的实现
-```cpp
-#include "IniParser.h"
-#include "ini.h"
-#include <stdlib.h>
-#include <string.h>
-
-static int iniHandler(void* user, const char* section, const char* name, const char* value)
-{
-    IniParser* parser = (IniParser*)(user);
-    parser->addNewRecord(section, name, value);
-    return 1;
-}
-
-std::ostream& operator<<(std::ostream& out, const IniParser& obj)
-{
-    for (auto& sec : obj.mCaches)
-    {
-        out << "[" << sec.first << "]\n";
-        for (auto& keyValue : sec.second)
-        {
-            out << keyValue.first << " = " << keyValue.second << "\n";
-        }
-    }
-    out << std::flush;
-    return out;
-}
-
-IniParser::IniParser(const char* inifile)
-{
-    int ret = ini_parse(inifile, iniHandler, this);
-}
-
-IniParser::~IniParser()
-{
-}
-
-std::string IniParser::GetString(const std::string& section, const std::string& key, const std::string& def)
-{
-    auto sec = mCaches.find(section);
-    if (sec != mCaches.end())
-    {
-        auto keyValue = sec->second.find(key);
-        if (keyValue != sec->second.end())
-        {
-            return keyValue->second;
-        }
-    }
-    return def;
-}
-
-double IniParser::GetDouble(const std::string& section, const std::string& key, double def)
-{
-    auto ret = GetString(section, key);
-    if (ret.empty())
-    {
-        return def;
-    }
-    try {
-        double result = std::stod(ret);
-        return result;
-    }
-    catch (std::exception& e) {
-        return def;
-    }
-}
-
-bool IniParser::GetBoolean(const std::string& section, const std::string& key, bool def)
-{
-    auto ret = GetString(section, key);
-    if (ret.empty())
-    {
-        return def;
-    }
-    char firstChar = ret.at(0);
-    return firstChar == 'T' || firstChar == 'Y' || firstChar == 'y' || firstChar == '1' || firstChar == 't';
-}
-
-std::vector<std::string> IniParser::GetSections()
-{
-    std::vector<std::string> ret;
-    for (auto& sec : mCaches)
-    {
-        ret.emplace_back(sec.first);
-    }
-    return ret;
-}
-
-std::vector<std::string> IniParser::GetKeysOfSection(const std::string& section)
-{
-    std::vector<std::string> ret;
-    auto sec = mCaches.find(section);
-    if (sec != mCaches.end())
-    {
-        for (auto& keyValues : sec->second)
-        {
-            ret.emplace_back(keyValues.first);
-        }
-    }
-    return ret;
-}
-
-void IniParser::addNewRecord(const char* section, const char* key, const char* value)
-{
-    if (section == nullptr || key == nullptr || value == nullptr) 
-    {
-        return;
-    }
-#define EMPTY(s) (strlen(s) == 0)
-    if (EMPTY(section) || EMPTY(key) || EMPTY(value)) {
-        return;
-    }
-    auto sec = mCaches.find(section);
-    if (sec == mCaches.end())
-    {
-        std::unordered_map<std::string, std::string> tmpMap;
-        tmpMap.emplace(key, value);
-        mCaches.emplace(section, std::move(tmpMap));
-    }
-    else
-    {
-        auto ret = sec->second.try_emplace(key, value);
-        if (!ret.second)
-        {
-            sec->second[key] = value;
-        }
-    }
-}
-```]]></content>
-  </entry>
-  <entry>
-    <title>在 Centos 7.4 上安装Gcc 7.3</title>
-    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
-    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
-下面记录一下安装过程。
-
-<!--more -->
-
-## 描述
-
-系统为Cent OS7.4，全新安装，更新全部软件至最新版。
-
-## 安装准备
-
-```bash
-yum update -y
-yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
-```
-
-安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
-
-```bash
-configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
-```
-
-网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
-
-## 动手
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
-tar -zxf gcc-7.3.0.tar.gz
-cd gcc-7.3.0
-./contrib/download_prerequisites
-mkdir builddir && cd builddir
-../configure
-make && sudo make install
-```
-
-编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
-需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
-
-```bash
-2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
-2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
-2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
-2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
-gmp-6.1.0.tar.bz2: OK
-mpfr-3.1.4.tar.bz2: OK
-mpc-1.0.3.tar.gz: OK
-isl-0.16.1.tar.bz2: OK
-All prerequisites downloaded successfully.
-```
-
-这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
-
-另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
-
-```bash
-../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
-```
-
-选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
-
-## 安装gdb
-
-在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
-
-```
-wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
-tar -zxf gdb-8.1.tar.gz
-cd gdb-8.1
-mkdir builddir && cd builddir
-../configure
-make && make install
-```
-
-## 碎碎念
-
-有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
-
-```bash
-WARNING: 'makeinfo' is missing on your system.
-         You should only need it if you modified a '.texi' file, or
-         any other file indirectly affecting the aspect of the manual.
-         You might want to install the Texinfo package:
-         <http://www.gnu.org/software/texinfo/>
-         The spurious makeinfo call might also be the consequence of
-         using a buggy 'make' (AIX, DU, IRIX), in which case you might
-         want to install GNU make:
-         <http://www.gnu.org/software/make/>
-make[5]: *** [gdb.info] Error 127
-make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
-make[4]: *** [subdir_do] Error 1
-make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[3]: *** [install-only] Error 2
-make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[2]: *** [install] Error 2
-make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
-make[1]: *** [install-gdb] Error 2
-make[1]: Leaving directory `/root/gdb-8.1/build'
-make: *** [install] Error 2
-```
-
-需要`yum install texinfo`，然后再执行`make install`。
-至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
-安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
-自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
-建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
-Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
-{% asset_img 1.jpg 来张合影 %}
-]]></content>
-  </entry>
-  <entry>
     <title>如何下载AOSP的单个仓库</title>
     <url>/2024/07/30/how-to-down-load-simple-aosp-project/</url>
     <content><![CDATA[AOSP 使用 repo 来组织代码的，有时候我们只需要下载其中一部分代码。下面是具体的操作方式
@@ -11080,6 +10599,774 @@ Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动�
   <project path="tools/apksig" name="platform/tools/apksig" groups="pdk,tradefed" />
 ```
 把这里的 name 取出来，拼上`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/`得到一个链接`https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`，用`git clone https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/tools/apksig`的形式就可以下载到对应的代码了。]]></content>
+  </entry>
+  <entry>
+    <title>C++ ini 实现</title>
+    <url>/2024/07/31/ini-impl-in-cpp/</url>
+    <content><![CDATA[首先是从 https://github.com/benhoyt/inih 取用的 ini 读取类头文件
+
+<!-- more -->
+
+```cpp
+//file ini.h
+/* inih -- simple .INI file parser
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Copyright (C) 2009-2020, Ben Hoyt
+
+inih is released under the New BSD license (see LICENSE.txt). Go to the project
+home page for more info:
+
+https://github.com/benhoyt/inih
+
+*/
+
+#ifndef INI_H
+#define INI_H
+
+/* Make this header file easier to include in C++ code */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+
+    /* Nonzero if ini_handler callback should accept lineno parameter. */
+#ifndef INI_HANDLER_LINENO
+#define INI_HANDLER_LINENO 0
+#endif
+
+/* Visibility symbols, required for Windows DLLs */
+#ifndef INI_API
+#if defined _WIN32 || defined __CYGWIN__
+#	ifdef INI_SHARED_LIB
+#		ifdef INI_SHARED_LIB_BUILDING
+#			define INI_API __declspec(dllexport)
+#		else
+#			define INI_API __declspec(dllimport)
+#		endif
+#	else
+#		define INI_API
+#	endif
+#else
+#	if defined(__GNUC__) && __GNUC__ >= 4
+#		define INI_API __attribute__ ((visibility ("default")))
+#	else
+#		define INI_API
+#	endif
+#endif
+#endif
+
+/* Typedef for prototype of handler function. */
+#if INI_HANDLER_LINENO
+    typedef int (*ini_handler)(void* user, const char* section,
+        const char* name, const char* value,
+        int lineno);
+#else
+    typedef int (*ini_handler)(void* user, const char* section,
+        const char* name, const char* value);
+#endif
+
+    /* Typedef for prototype of fgets-style reader function. */
+    typedef char* (*ini_reader)(char* str, int num, void* stream);
+
+    /* Parse given INI-style file. May have [section]s, name=value pairs
+       (whitespace stripped), and comments starting with ';' (semicolon). Section
+       is "" if name=value pair parsed before any section heading. name:value
+       pairs are also supported as a concession to Python's configparser.
+
+       For each name=value pair parsed, call handler function with given user
+       pointer as well as section, name, and value (data only valid for duration
+       of handler call). Handler should return nonzero on success, zero on error.
+
+       Returns 0 on success, line number of first error on parse error (doesn't
+       stop on first error), -1 on file open error, or -2 on memory allocation
+       error (only when INI_USE_STACK is zero).
+    */
+    INI_API int ini_parse(const char* filename, ini_handler handler, void* user);
+
+    /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
+       close the file when it's finished -- the caller must do that. */
+    INI_API int ini_parse_file(FILE* file, ini_handler handler, void* user);
+
+    /* Same as ini_parse(), but takes an ini_reader function pointer instead of
+       filename. Used for implementing custom or string-based I/O (see also
+       ini_parse_string). */
+    INI_API int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+        void* user);
+
+    /* Same as ini_parse(), but takes a zero-terminated string with the INI data
+    instead of a file. Useful for parsing INI data from a network socket or
+    already in memory. */
+    INI_API int ini_parse_string(const char* string, ini_handler handler, void* user);
+
+    /* Nonzero to allow multi-line value parsing, in the style of Python's
+       configparser. If allowed, ini_parse() will call the handler with the same
+       name for each subsequent line parsed. */
+#ifndef INI_ALLOW_MULTILINE
+#define INI_ALLOW_MULTILINE 1
+#endif
+
+       /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
+          the file. See https://github.com/benhoyt/inih/issues/21 */
+#ifndef INI_ALLOW_BOM
+#define INI_ALLOW_BOM 1
+#endif
+
+          /* Chars that begin a start-of-line comment. Per Python configparser, allow
+             both ; and # comments at the start of a line by default. */
+#ifndef INI_START_COMMENT_PREFIXES
+#define INI_START_COMMENT_PREFIXES ";#"
+#endif
+
+             /* Nonzero to allow inline comments (with valid inline comment characters
+                specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
+                Python 3.2+ configparser behaviour. */
+#ifndef INI_ALLOW_INLINE_COMMENTS
+#define INI_ALLOW_INLINE_COMMENTS 1
+#endif
+#ifndef INI_INLINE_COMMENT_PREFIXES
+#define INI_INLINE_COMMENT_PREFIXES ";"
+#endif
+
+                /* Nonzero to use stack for line buffer, zero to use heap (malloc/free). */
+#ifndef INI_USE_STACK
+#define INI_USE_STACK 1
+#endif
+
+/* Maximum line length for any line in INI file (stack or heap). Note that
+   this must be 3 more than the longest line (due to '\r', '\n', and '\0'). */
+#ifndef INI_MAX_LINE
+#define INI_MAX_LINE 200
+#endif
+
+   /* Nonzero to allow heap line buffer to grow via realloc(), zero for a
+      fixed-size buffer of INI_MAX_LINE bytes. Only applies if INI_USE_STACK is
+      zero. */
+#ifndef INI_ALLOW_REALLOC
+#define INI_ALLOW_REALLOC 0
+#endif
+
+      /* Initial size in bytes for heap line buffer. Only applies if INI_USE_STACK
+         is zero. */
+#ifndef INI_INITIAL_ALLOC
+#define INI_INITIAL_ALLOC 200
+#endif
+
+         /* Stop parsing on first error (default is to keep parsing). */
+#ifndef INI_STOP_ON_FIRST_ERROR
+#define INI_STOP_ON_FIRST_ERROR 0
+#endif
+
+/* Nonzero to call the handler at the start of each new section (with
+   name and value NULL). Default is to only call the handler on
+   each name=value pair. */
+#ifndef INI_CALL_HANDLER_ON_NEW_SECTION
+#define INI_CALL_HANDLER_ON_NEW_SECTION 0
+#endif
+
+   /* Nonzero to allow a name without a value (no '=' or ':' on the line) and
+      call the handler with value NULL in this case. Default is to treat
+      no-value lines as an error. */
+#ifndef INI_ALLOW_NO_VALUE
+#define INI_ALLOW_NO_VALUE 0
+#endif
+
+      /* Nonzero to use custom ini_malloc, ini_free, and ini_realloc memory
+         allocation functions (INI_USE_STACK must also be 0). These functions must
+         have the same signatures as malloc/free/realloc and behave in a similar
+         way. ini_realloc is only needed if INI_ALLOW_REALLOC is set. */
+#ifndef INI_CUSTOM_ALLOCATOR
+#define INI_CUSTOM_ALLOCATOR 0
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* INI_H */
+```
+
+和对应的 ini 读取实现
+
+```cpp
+//file ini.c
+/* inih -- simple .INI file parser
+
+SPDX-License-Identifier: BSD-3-Clause
+
+Copyright (C) 2009-2020, Ben Hoyt
+
+inih is released under the New BSD license (see LICENSE.txt). Go to the project
+home page for more info:
+
+https://github.com/benhoyt/inih
+
+*/
+
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#include "ini.h"
+
+#if !INI_USE_STACK
+#if INI_CUSTOM_ALLOCATOR
+#include <stddef.h>
+void* ini_malloc(size_t size);
+void ini_free(void* ptr);
+void* ini_realloc(void* ptr, size_t size);
+#else
+#include <stdlib.h>
+#define ini_malloc malloc
+#define ini_free free
+#define ini_realloc realloc
+#endif
+#endif
+
+#define MAX_SECTION 50
+#define MAX_NAME 50
+
+/* Used by ini_parse_string() to keep track of string parsing state. */
+typedef struct {
+    const char* ptr;
+    size_t num_left;
+} ini_parse_string_ctx;
+
+/* Strip whitespace chars off end of given string, in place. Return s. */
+static char* rstrip(char* s)
+{
+    char* p = s + strlen(s);
+    while (p > s && isspace((unsigned char)(*--p)))
+        *p = '\0';
+    return s;
+}
+
+/* Return pointer to first non-whitespace char in given string. */
+static char* lskip(const char* s)
+{
+    while (*s && isspace((unsigned char)(*s)))
+        s++;
+    return (char*)s;
+}
+
+/* Return pointer to first char (of chars) or inline comment in given string,
+   or pointer to NUL at end of string if neither found. Inline comment must
+   be prefixed by a whitespace character to register as a comment. */
+static char* find_chars_or_comment(const char* s, const char* chars)
+{
+#if INI_ALLOW_INLINE_COMMENTS
+    int was_space = 0;
+    while (*s && (!chars || !strchr(chars, *s)) &&
+        !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
+        was_space = isspace((unsigned char)(*s));
+        s++;
+    }
+#else
+    while (*s && (!chars || !strchr(chars, *s))) {
+        s++;
+    }
+#endif
+    return (char*)s;
+}
+
+/* Similar to strncpy, but ensures dest (size bytes) is
+   NUL-terminated, and doesn't pad with NULs. */
+static char* strncpy0(char* dest, const char* src, size_t size)
+{
+    /* Could use strncpy internally, but it causes gcc warnings (see issue #91) */
+    size_t i;
+    for (i = 0; i < size - 1 && src[i]; i++)
+        dest[i] = src[i];
+    dest[i] = '\0';
+    return dest;
+}
+
+/* See documentation in header file. */
+int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+    void* user)
+{
+    /* Uses a fair bit of stack (use heap instead if you need to) */
+#if INI_USE_STACK
+    char line[INI_MAX_LINE];
+    size_t max_line = INI_MAX_LINE;
+#else
+    char* line;
+    size_t max_line = INI_INITIAL_ALLOC;
+#endif
+#if INI_ALLOW_REALLOC && !INI_USE_STACK
+    char* new_line;
+    size_t offset;
+#endif
+    char section[MAX_SECTION] = "";
+    char prev_name[MAX_NAME] = "";
+
+    char* start;
+    char* end;
+    char* name;
+    char* value;
+    int lineno = 0;
+    int error = 0;
+
+#if !INI_USE_STACK
+    line = (char*)ini_malloc(INI_INITIAL_ALLOC);
+    if (!line) {
+        return -2;
+    }
+#endif
+
+#if INI_HANDLER_LINENO
+#define HANDLER(u, s, n, v) handler(u, s, n, v, lineno)
+#else
+#define HANDLER(u, s, n, v) handler(u, s, n, v)
+#endif
+
+    /* Scan through stream line by line */
+    while (reader(line, (int)max_line, stream) != NULL) {
+#if INI_ALLOW_REALLOC && !INI_USE_STACK
+        offset = strlen(line);
+        while (offset == max_line - 1 && line[offset - 1] != '\n') {
+            max_line *= 2;
+            if (max_line > INI_MAX_LINE)
+                max_line = INI_MAX_LINE;
+            new_line = ini_realloc(line, max_line);
+            if (!new_line) {
+                ini_free(line);
+                return -2;
+            }
+            line = new_line;
+            if (reader(line + offset, (int)(max_line - offset), stream) == NULL)
+                break;
+            if (max_line >= INI_MAX_LINE)
+                break;
+            offset += strlen(line + offset);
+        }
+#endif
+
+        lineno++;
+
+        start = line;
+#if INI_ALLOW_BOM
+        if (lineno == 1 && (unsigned char)start[0] == 0xEF &&
+            (unsigned char)start[1] == 0xBB &&
+            (unsigned char)start[2] == 0xBF) {
+            start += 3;
+        }
+#endif
+        start = lskip(rstrip(start));
+
+        if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
+            /* Start-of-line comment */
+        }
+#if INI_ALLOW_MULTILINE
+        else if (*prev_name && *start && start > line) {
+#if INI_ALLOW_INLINE_COMMENTS
+            end = find_chars_or_comment(start, NULL);
+            if (*end)
+                *end = '\0';
+            rstrip(start);
+#endif
+            /* Non-blank line with leading whitespace, treat as continuation
+               of previous name's value (as per Python configparser). */
+            if (!HANDLER(user, section, prev_name, start) && !error)
+                error = lineno;
+        }
+#endif
+        else if (*start == '[') {
+            /* A "[section]" line */
+            end = find_chars_or_comment(start + 1, "]");
+            if (*end == ']') {
+                *end = '\0';
+                strncpy0(section, start + 1, sizeof(section));
+                *prev_name = '\0';
+#if INI_CALL_HANDLER_ON_NEW_SECTION
+                if (!HANDLER(user, section, NULL, NULL) && !error)
+                    error = lineno;
+#endif
+            }
+            else if (!error) {
+                /* No ']' found on section line */
+                error = lineno;
+            }
+        }
+        else if (*start) {
+            /* Not a comment, must be a name[=:]value pair */
+            end = find_chars_or_comment(start, "=:");
+            if (*end == '=' || *end == ':') {
+                *end = '\0';
+                name = rstrip(start);
+                value = end + 1;
+#if INI_ALLOW_INLINE_COMMENTS
+                end = find_chars_or_comment(value, NULL);
+                if (*end)
+                    *end = '\0';
+#endif
+                value = lskip(value);
+                rstrip(value);
+
+                /* Valid name[=:]value pair found, call handler */
+                strncpy0(prev_name, name, sizeof(prev_name));
+                if (!HANDLER(user, section, name, value) && !error)
+                    error = lineno;
+            }
+            else if (!error) {
+                /* No '=' or ':' found on name[=:]value line */
+#if INI_ALLOW_NO_VALUE
+                * end = '\0';
+                name = rstrip(start);
+                if (!HANDLER(user, section, name, NULL) && !error)
+                    error = lineno;
+#else
+                error = lineno;
+#endif
+            }
+        }
+
+#if INI_STOP_ON_FIRST_ERROR
+        if (error)
+            break;
+#endif
+    }
+
+#if !INI_USE_STACK
+    ini_free(line);
+#endif
+
+    return error;
+}
+
+/* See documentation in header file. */
+int ini_parse_file(FILE* file, ini_handler handler, void* user)
+{
+    return ini_parse_stream((ini_reader)fgets, file, handler, user);
+}
+
+/* See documentation in header file. */
+int ini_parse(const char* filename, ini_handler handler, void* user)
+{
+    FILE* file;
+    int error;
+
+    file = fopen(filename, "r");
+    if (!file)
+        return -1;
+    error = ini_parse_file(file, handler, user);
+    fclose(file);
+    return error;
+}
+
+/* An ini_reader function to read the next line from a string buffer. This
+   is the fgets() equivalent used by ini_parse_string(). */
+static char* ini_reader_string(char* str, int num, void* stream) {
+    ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;
+    const char* ctx_ptr = ctx->ptr;
+    size_t ctx_num_left = ctx->num_left;
+    char* strp = str;
+    char c;
+
+    if (ctx_num_left == 0 || num < 2)
+        return NULL;
+
+    while (num > 1 && ctx_num_left != 0) {
+        c = *ctx_ptr++;
+        ctx_num_left--;
+        *strp++ = c;
+        if (c == '\n')
+            break;
+        num--;
+    }
+
+    *strp = '\0';
+    ctx->ptr = ctx_ptr;
+    ctx->num_left = ctx_num_left;
+    return str;
+}
+
+/* See documentation in header file. */
+int ini_parse_string(const char* string, ini_handler handler, void* user) {
+    ini_parse_string_ctx ctx;
+
+    ctx.ptr = string;
+    ctx.num_left = strlen(string);
+    return ini_parse_stream((ini_reader)ini_reader_string, &ctx, handler,
+        user);
+}
+```
+用CPP封装一下
+```cpp
+//file IniParser.h
+#pragma once
+#include<unordered_map>
+#include<string>
+#include<iostream>
+#include<vector>
+static std::string __EMPTY_STRING = "";
+class IniParser
+{
+public:
+    IniParser(const char* inifile);
+    ~IniParser();
+    std::string GetString(const std::string& section, const std::string& key, const std::string& def = __EMPTY_STRING);
+    double GetDouble(const std::string& section, const std::string& key, double def);
+    bool GetBoolean(const std::string& section, const std::string& key, bool def);
+    std::vector<std::string> GetSections();
+    std::vector<std::string> GetKeysOfSection(const std::string& section);
+    friend int iniHandler(void* user, const char* section, const char* name, const char* value);
+    friend std::ostream& operator<<(std::ostream& out, const IniParser& obj);
+private:
+    void addNewRecord(const char* section, const char* key, const char* value);
+
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mCaches;
+};
+```
+加上对应的实现
+```cpp
+#include "IniParser.h"
+#include "ini.h"
+#include <stdlib.h>
+#include <string.h>
+
+static int iniHandler(void* user, const char* section, const char* name, const char* value)
+{
+    IniParser* parser = (IniParser*)(user);
+    parser->addNewRecord(section, name, value);
+    return 1;
+}
+
+std::ostream& operator<<(std::ostream& out, const IniParser& obj)
+{
+    for (auto& sec : obj.mCaches)
+    {
+        out << "[" << sec.first << "]\n";
+        for (auto& keyValue : sec.second)
+        {
+            out << keyValue.first << " = " << keyValue.second << "\n";
+        }
+    }
+    out << std::flush;
+    return out;
+}
+
+IniParser::IniParser(const char* inifile)
+{
+    int ret = ini_parse(inifile, iniHandler, this);
+}
+
+IniParser::~IniParser()
+{
+}
+
+std::string IniParser::GetString(const std::string& section, const std::string& key, const std::string& def)
+{
+    auto sec = mCaches.find(section);
+    if (sec != mCaches.end())
+    {
+        auto keyValue = sec->second.find(key);
+        if (keyValue != sec->second.end())
+        {
+            return keyValue->second;
+        }
+    }
+    return def;
+}
+
+double IniParser::GetDouble(const std::string& section, const std::string& key, double def)
+{
+    auto ret = GetString(section, key);
+    if (ret.empty())
+    {
+        return def;
+    }
+    try {
+        double result = std::stod(ret);
+        return result;
+    }
+    catch (std::exception& e) {
+        return def;
+    }
+}
+
+bool IniParser::GetBoolean(const std::string& section, const std::string& key, bool def)
+{
+    auto ret = GetString(section, key);
+    if (ret.empty())
+    {
+        return def;
+    }
+    char firstChar = ret.at(0);
+    return firstChar == 'T' || firstChar == 'Y' || firstChar == 'y' || firstChar == '1' || firstChar == 't';
+}
+
+std::vector<std::string> IniParser::GetSections()
+{
+    std::vector<std::string> ret;
+    for (auto& sec : mCaches)
+    {
+        ret.emplace_back(sec.first);
+    }
+    return ret;
+}
+
+std::vector<std::string> IniParser::GetKeysOfSection(const std::string& section)
+{
+    std::vector<std::string> ret;
+    auto sec = mCaches.find(section);
+    if (sec != mCaches.end())
+    {
+        for (auto& keyValues : sec->second)
+        {
+            ret.emplace_back(keyValues.first);
+        }
+    }
+    return ret;
+}
+
+void IniParser::addNewRecord(const char* section, const char* key, const char* value)
+{
+    if (section == nullptr || key == nullptr || value == nullptr) 
+    {
+        return;
+    }
+#define EMPTY(s) (strlen(s) == 0)
+    if (EMPTY(section) || EMPTY(key) || EMPTY(value)) {
+        return;
+    }
+    auto sec = mCaches.find(section);
+    if (sec == mCaches.end())
+    {
+        std::unordered_map<std::string, std::string> tmpMap;
+        tmpMap.emplace(key, value);
+        mCaches.emplace(section, std::move(tmpMap));
+    }
+    else
+    {
+        auto ret = sec->second.try_emplace(key, value);
+        if (!ret.second)
+        {
+            sec->second[key] = value;
+        }
+    }
+}
+```]]></content>
+  </entry>
+  <entry>
+    <title>在 Centos 7.4 上安装Gcc 7.3</title>
+    <url>/2018/04/16/install-gcc-7-3-on-centos-7-4/</url>
+    <content><![CDATA[依旧是那个老生常谈的问题，Cent OS上的软件包大都很老，比如常用的Gcc，在最新的Cent OS 7.4上，gcc的版本才到4.8.5，虽说一味追求新版并无大用，但是有些特性老版本不支持啊，很坑的有木有。
+下面记录一下安装过程。
+
+<!--more -->
+
+## 描述
+
+系统为Cent OS7.4，全新安装，更新全部软件至最新版。
+
+## 安装准备
+
+```bash
+yum update -y
+yum install gcc gcc-c++ gcc-gnat zlib-devel glibc-devel glibc-devel.i686 libgcc libgcc.i686 -y
+```
+
+安装 glibc-devel.i686 是为了安装32位的头文件和库，否则在配置的时候就会出现下面的错误
+
+```bash
+configure: error: I suspect your system does not have 32-bit developement libraries (libc and headers). If you have them, rerun configure with --enable-multilib. If you do not have them, and want to build a 64-bit-only compiler, rerun configure with --disable-multilib.
+```
+
+网络上清一色的叫你加入参数`--disable-multilib`，然而，这样的话就少了32位的支持了。
+
+## 动手
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
+tar -zxf gcc-7.3.0.tar.gz
+cd gcc-7.3.0
+./contrib/download_prerequisites
+mkdir builddir && cd builddir
+../configure
+make && sudo make install
+```
+
+编译过程长达数个小时，具体要多长时间得看RP了，可以用tmux把它放在后台。
+需要配置的地方非常少，安装过程也没什么特殊的，但是以前安装gcc的时候随便报个错就一脸懵逼，需要注意的是在`./contrib/download_prerequisites`之后，会有执行成功的提示，log如下
+
+```bash
+2018-04-16 16:37:22 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 [2383840] -> "./gmp-6.1.0.tar.bz2" [1]
+2018-04-16 16:37:28 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2 [1279284] -> "./mpfr-3.1.4.tar.bz2" [1]
+2018-04-16 16:37:33 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz [669925] -> "./mpc-1.0.3.tar.gz" [1]
+2018-04-16 16:37:39 URL: ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2 [1626446] -> "./isl-0.16.1.tar.bz2" [1]
+gmp-6.1.0.tar.bz2: OK
+mpfr-3.1.4.tar.bz2: OK
+mpc-1.0.3.tar.gz: OK
+isl-0.16.1.tar.bz2: OK
+All prerequisites downloaded successfully.
+```
+
+这个步骤是有可能因为网络原因出问题的，这个步骤可以把安装gcc需要的四个依赖包弄好，网络上的某些教程是让你手动安装依赖，比如这个[https://www.cnblogs.com/freeweb/p/5990860.html](https://www.cnblogs.com/freeweb/p/5990860.html)，操作越多越容易出错。
+
+另外，配置同样是需要考虑的地方，大多数时候直接执行`./configure`就过去了，我用了下面的配置参数
+
+```bash
+../configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --enable-plugin --enable-initfini-array --disable-libgcj --enable-gnu-indirect-function --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+```
+
+选择这个参数并没有什么非常实在的原因，里面很多参数我并不清楚是干嘛的，使用这个参数纯粹是因为Cent OS用yum安装的gcc的配置参数是这个。
+
+## 安装gdb
+
+在某些情况下，升级了gcc是需要同步升级gdb的，虽然不清楚是否有具体的版本对应关系，但是傻fufu的安装最新版就是了
+
+```
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gdb/gdb-8.1.tar.gz
+tar -zxf gdb-8.1.tar.gz
+cd gdb-8.1
+mkdir builddir && cd builddir
+../configure
+make && make install
+```
+
+## 碎碎念
+
+有可能在执行`make install`的时候报错（内心PS，都已经编译好了，你给我在安装的时候报错(ノ｀Д)ノ）报错信息如下:
+
+```bash
+WARNING: 'makeinfo' is missing on your system.
+         You should only need it if you modified a '.texi' file, or
+         any other file indirectly affecting the aspect of the manual.
+         You might want to install the Texinfo package:
+         <http://www.gnu.org/software/texinfo/>
+         The spurious makeinfo call might also be the consequence of
+         using a buggy 'make' (AIX, DU, IRIX), in which case you might
+         want to install GNU make:
+         <http://www.gnu.org/software/make/>
+make[5]: *** [gdb.info] Error 127
+make[5]: Leaving directory `/root/gdb-8.1/build/gdb/doc'
+make[4]: *** [subdir_do] Error 1
+make[4]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[3]: *** [install-only] Error 2
+make[3]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[2]: *** [install] Error 2
+make[2]: Leaving directory `/root/gdb-8.1/build/gdb'
+make[1]: *** [install-gdb] Error 2
+make[1]: Leaving directory `/root/gdb-8.1/build'
+make: *** [install] Error 2
+```
+
+需要`yum install texinfo`，然后再执行`make install`。
+至于原本安装好的gcc的话，应该是没了吧，我是找不到它了。
+安装软件的推荐性是这样的`官方源>知名第三方源>手动编译>不知名第三方源`，很多时候，手动编译需要自己安装依赖，很多时候，自己安装依赖还会需要安装依赖的依赖，某些极端情况下，还会遇到依赖循环，令人十分的窒息。
+自行编译安装并不是很推荐的操作，并且很多时候新版并不一定就更好，Cent OS一直用着老版本的软件并不是没有道理的。
+建立`builddir`的目的，只是为了让编译产生的文件集中在一个地方，免得主目录一大堆文件看起来不方便。
+Ubuntu/Debia的软件版本一般都比较新，不值得花大量时间手动编译。
+{% asset_img 1.jpg 来张合影 %}
+]]></content>
   </entry>
   <entry>
     <title>在Linux上安装node.js</title>
@@ -16341,275 +16628,6 @@ This is a list of shortcuts provided by the Code::Blocks' editor component. Thes
 -----
 内容来自官方wiki:[http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts](http://wiki.codeblocks.org/index.php?title=Keyboard_Shortcuts) ，看来得抽空翻译一下d=====(￣▽￣*)b
 ]]></content>
-  </entry>
-  <entry>
-    <title>消息监控工具的一种实现思路</title>
-    <url>/2024/08/11/ANR-page-2/</url>
-    <content><![CDATA[
-在 [今日头条 ANR 优化实践系列 - 监控工具与分析思路](#../ANR-page-1) 文中描述到使用了一种名为“Raster”的工具来做消息监控，对于ANR比较有用。但是在网络上没有搜到这个工具的具体实现方案。
-本文来设计一种类似的消息监控的实现思路。
-
-<!-- more -->
-
-这里大概说一下思路。
-1. 记录主线程Looper的消息分发记录
-2. 当 Signal Catcher线程收到QUIT消息的时候，Jni回调到ActivityThread，获取记录好的消息分发记录
-3. 写入 trace 文件。
-
-下面是一种参考实现方式
-```diff
-commit cd0214ccd7e58224723eb3d581ef67afc3d43161
-Author: BDZNH
-Date:   Mon Aug 19 22:34:37 2024 +0800
-
-    anr catch sample
-
-diff --git a/art/runtime/signal_catcher.cc b/art/runtime/signal_catcher.cc
-index f76a0d0b7b..c4414f1396 100644
---- a/art/runtime/signal_catcher.cc
-+++ b/art/runtime/signal_catcher.cc
-@@ -114,6 +114,36 @@ void SignalCatcher::Output(const std::string& s) {
-   }
- }
- 
-+void testCallActivityThread(std::ostringstream& os) {
-+  LOG(INFO) << "start testCallActivityThread";
-+  Thread* self = Thread::Current();
-+  JNIEnv* env = self->GetJniEnv();
-+  jclass clazz = env->FindClass("android/app/ActivityThread");
-+  if(clazz == nullptr) {
-+    LOG(ERROR) << "can't find class android/app/ActivityThread";
-+    return;
-+  }
-+  jmethodID onSignalQuitMethod = env->GetStaticMethodID(clazz,"onSignalQuit","()Ljava/lang/String;");
-+  if(onSignalQuitMethod == nullptr) {
-+    LOG(ERROR) << "can't find method onSignalQuitMethod";
-+    return;
-+  }
-+  LOG(INFO) << "call android.app.ActivityThread.onSignalQuit";
-+  LOG(INFO) << "clazz: " << (void*)clazz << "  method: " << (void*)onSignalQuitMethod;
-+  jstring retstring = (jstring)(env->CallStaticObjectMethod(clazz,onSignalQuitMethod));
-+  if(retstring != nullptr) {
-+    const char* str = env->GetStringUTFChars(retstring,NULL);
-+    if(str != nullptr) {
-+      // LOG(INFO) << str ;
-+      os << str << "\n";
-+    } else {
-+      LOG(ERROR) << "Java api return null ptr";
-+    }
-+  } else {
-+    LOG(ERROR) << "Java api return null ptr";
-+  }
-+}
-+
- void SignalCatcher::HandleSigQuit() {
-   Runtime* runtime = Runtime::Current();
-   std::ostringstream os;
-@@ -130,6 +160,9 @@ void SignalCatcher::HandleSigQuit() {
- 
-   os << "Build type: " << (kIsDebugBuild ? "debug" : "optimized") << "\n";
- 
-+  os << ">>>>>>>>>> Begin dump main thread handler history" << "\n";
-+  testCallActivityThread(os);
-+  os << ">>>>>>>>>> finish dump main thread handler history" << "\n";
-   runtime->DumpForSigQuit(os);
- 
-   if ((false)) {
-diff --git a/frameworks/base/core/java/android/app/ActivityThread.java b/frameworks/base/core/java/android/app/ActivityThread.java
-index 8af74edb88..dfce7abfe2 100644
---- a/frameworks/base/core/java/android/app/ActivityThread.java
-+++ b/frameworks/base/core/java/android/app/ActivityThread.java
-@@ -7818,6 +7818,20 @@ public final class ActivityThread extends ClientTransactionHandler
-         }
-     }
- 
-+    /**
-+     * @hide
-+     */
-+    public static String onSignalQuit() {
-+        Log.i("HSP","onSignalQuit call begin");
-+        StringBuilder sb = new StringBuilder();
-+        Looper.getMainLooper().dump((str)->{
-+            sb.append(str);
-+            sb.append("\n");
-+        }," ");
-+        Log.i("HSP","onSignalQuit call end");
-+        return sb.toString();
-+    }
-+
-     public static void main(String[] args) {
-         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
- 
-@@ -7860,11 +7874,17 @@ public final class ActivityThread extends ClientTransactionHandler
-             sMainThreadHandler = thread.getHandler();
-         }
- 
--        if (false) {
-+        if(SystemProperties.getBoolean("persist.sys.debug.looper.history",false)) {
-+            Looper.myLooper().enableDispatchHistory();
-+        }
-+
-+        if (SystemProperties.getBoolean("persist.sys.debug.handler",false)) {
-             Looper.myLooper().setMessageLogging(new
-                     LogPrinter(Log.DEBUG, "ActivityThread"));
-+            Looper.myLooper().setTraceTag(Trace.TRACE_TAG_ALWAYS);
-         }
- 
-+
-         // End of event ActivityThreadMain.
-         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-         Looper.loop();
-diff --git a/frameworks/base/core/java/android/os/Looper.java b/frameworks/base/core/java/android/os/Looper.java
-index 8c98362fa9..8f6144d988 100644
---- a/frameworks/base/core/java/android/os/Looper.java
-+++ b/frameworks/base/core/java/android/os/Looper.java
-@@ -152,6 +152,15 @@ public final class Looper {
-         sObserver = observer;
-     }
- 
-+    MessageDispatchRecorder mMessageRecorder;
-+
-+    /**
-+     * @hide
-+     */
-+    public void enableDispatchHistory(){
-+        mMessageRecorder = new MessageDispatchRecorder();
-+    }
-+
-     /**
-      * Poll and deliver single message, return true if the outer loop should continue.
-      */
-@@ -186,8 +195,14 @@ public final class Looper {
-         final boolean needStartTime = logSlowDelivery || logSlowDispatch;
-         final boolean needEndTime = logSlowDispatch;
- 
-+
-+        if(me.mMessageRecorder != null) {
-+            me.mMessageRecorder.beginRecord(msg);
-+        }
-+        String traceHandleMsg = msg.target.getTraceName(msg);
-         if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
-             Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
-+            Slog.v("TraceHandler","Dispatching to" + traceHandleMsg);
-         }
- 
-         final long dispatchStart = needStartTime ? SystemClock.uptimeMillis() : 0;
-@@ -232,10 +247,16 @@ public final class Looper {
-             showSlowLog(slowDispatchThresholdMs, dispatchStart, dispatchEnd, "dispatch", msg);
-         }
- 
-+        if(me.mMessageRecorder != null) {
-+            me.mMessageRecorder.endRecord();
-+        }
-+
-         if (logging != null) {
-             logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
-+            Slog.v("TraceHandler","Finished Dispatching to" + traceHandleMsg);
-         }
- 
-+
-         // Make sure that during the course of dispatching the
-         // identity of the thread wasn't corrupted.
-         final long newIdent = Binder.clearCallingIdentity();
-@@ -422,6 +443,9 @@ public final class Looper {
-      * @param prefix A prefix to prepend to each line which is printed.
-      */
-     public void dump(@NonNull Printer pw, @NonNull String prefix) {
-+        if(mMessageRecorder != null) {
-+            pw.println(mMessageRecorder.toString());
-+        }
-         pw.println(prefix + toString());
-         mQueue.dump(pw, prefix + "  ", null);
-     }
-diff --git a/frameworks/base/core/java/android/os/MessageDispatchRecorder.java b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
-new file mode 100644
-index 0000000000..b0177d4296
---- /dev/null
-+++ b/frameworks/base/core/java/android/os/MessageDispatchRecorder.java
-@@ -0,0 +1,68 @@
-+package android.os;
-+
-+import android.os.Message;
-+import android.os.SystemClock;
-+
-+import java.util.ArrayList;
-+import java.util.Locale;
-+
-+class MessageDispatchRecorder {
-+    private final ArrayList<Recorder> mRecorders;
-+    public MessageDispatchRecorder(){
-+        mRecorders = new ArrayList<>();
-+    }
-+
-+    public void beginRecord(Message msg){
-+        Recorder recorder = new Recorder();
-+        recorder.expectStartWhen = msg.getWhen();
-+        recorder.realStatWhen = SystemClock.uptimeMillis();
-+        recorder.descrip = "\""+msg.toString()+"\"";
-+        synchronized(this){
-+            mRecorders.add(recorder);
-+            if(mRecorders.size() > 1000){
-+                mRecorders.remove(0);
-+            }
-+        }
-+        mRecorders.add(recorder);
-+        if(mRecorders.size() > 1000){
-+            mRecorders.remove(0);
-+        }
-+    }
-+
-+    public void endRecord(){
-+        mRecorders.get(mRecorders.size()-1).realEndWhen = SystemClock.uptimeMillis();
-+    }
-+
-+    @Override
-+    public String toString() {
-+
-+        long now = SystemClock.uptimeMillis();
-+        StringBuilder builder = new StringBuilder();
-+        builder.append("now time is ");
-+        builder.append(now);
-+        builder.append("\n");
-+        synchronized(this){
-+            for (Recorder recorder:mRecorders){
-+            if(recorder.realEndWhen > recorder.expectStartWhen) {
-+                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
-+                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
-+                        recorder.realEndWhen- recorder.realStatWhen,recorder.descrip));
-+            } else {
-+                builder.append(String.format(Locale.CHINA,"when=%d realWhen=%d realEnd=%d duration=%d desc:%s",
-+                        recorder.expectStartWhen,recorder.realStatWhen,recorder.realEndWhen,
-+                        0,recorder.descrip));
-+            }
-+            builder.append("\n");
-+        }
-+        }
-+
-+        builder.append(String.format(Locale.CHINA,"there are %d history message\n",mRecorders.size()));
-+        return builder.toString();
-+    }
-+    private static class Recorder{
-+        long expectStartWhen;
-+        long realStatWhen;
-+        long realEndWhen;
-+        String descrip;
-+    }
-+}
-\ No newline at end of file
-
-```
-
-大体做法就是，记录主线程Looper的消息分发记录，当触发ANR（或者接收到 Signal 3）的时候，将消息分发记录打印到trace文件里面，辅助分析。
-
-效果大概如下
-
-{% asset_img record.png %}
-
-注：上面的示范中，没有去移除分发记录，在实际的生产环境里面，需要为移除分发记录设定一定的条件，避免占用过多内存。]]></content>
-      <tags>
-        <tag>Android</tag>
-        <tag>ANR</tag>
-      </tags>
   </entry>
   <entry>
     <title>Minecraft专题</title>
